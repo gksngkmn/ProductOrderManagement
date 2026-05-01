@@ -1,0 +1,443 @@
+/* =========================================================
+   CUSTOMER PAGE CSS
+   Theme: Blue / White Dashboard Layout
+========================================================= */
+
+
+/* =========================================================
+   1. TOPBAR
+========================================================= */
+
+.customer-topbar {
+  min-height: 88px;
+  padding: 20px 32px;
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+  color: white;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+
+  box-shadow: var(--shadow-md);
+}
+
+.customer-title-area h1 {
+  color: white;
+  margin-bottom: 4px;
+}
+
+.customer-title-area p {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.customer-top-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   2. MAIN LAYOUT
+========================================================= */
+
+.customer-layout {
+  width: min(97%, 1600px);
+  margin: 20px auto 32px;
+
+  display: grid;
+  grid-template-columns: minmax(280px, 24%) 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.customer-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  position: sticky;
+  top: 18px;
+
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.customer-content {
+  min-width: 0;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 18px;
+}
+
+
+/* =========================================================
+   3. SIDEBAR SCROLLBAR
+========================================================= */
+
+.customer-sidebar::-webkit-scrollbar {
+  width: 7px;
+}
+
+.customer-sidebar::-webkit-scrollbar-thumb {
+  background: #bfdbfe;
+  border-radius: 999px;
+}
+
+.customer-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+/* =========================================================
+   4. SIDEBAR SECTIONS
+========================================================= */
+
+.sidebar-section {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 15px;
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar-section h2 {
+  font-size: 16px;
+  color: #1d4ed8;
+  margin-bottom: 12px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sidebar-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+
+/* =========================================================
+   5. FILTERS
+========================================================= */
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.filter-group label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-soft);
+}
+
+.filter-group input {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+
+/* =========================================================
+   6. CURRENT ORDER SUMMARY
+========================================================= */
+
+.order-summary {
+  background: #f8fbff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  margin-top: 12px;
+}
+
+.order-summary h3 {
+  font-size: 15px;
+  color: #1d4ed8;
+  margin-bottom: 10px;
+}
+
+.order-item-row {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  margin-bottom: 8px;
+}
+
+.order-item-row p {
+  font-size: 13px;
+  margin-bottom: 3px;
+}
+
+.order-total-box {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   7. CONTENT HEADER
+========================================================= */
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.content-header h2 {
+  color: #1d4ed8;
+}
+
+.content-header p {
+  margin-top: 4px;
+}
+
+
+/* =========================================================
+   8. TABLE WRAPPER
+========================================================= */
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: hidden;
+
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+
+/* =========================================================
+   9. CUSTOMER PRODUCT TABLE BASE
+========================================================= */
+
+.customer-product-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.customer-product-table th,
+.customer-product-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--color-border);
+
+  text-align: left;
+  font-size: 12px;
+  line-height: 1.3;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.customer-product-table th {
+  background: #eff6ff;
+  color: #1e40af;
+  font-weight: 800;
+
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.customer-product-table tbody tr:hover {
+  background: #f8fbff;
+}
+
+.table-empty {
+  text-align: center !important;
+  color: var(--color-text-soft);
+  padding: 26px !important;
+}
+
+
+/* =========================================================
+   10. TABLE COLUMN WIDTHS
+   Total = 100%
+========================================================= */
+
+.customer-product-table th:nth-child(1),
+.customer-product-table td:nth-child(1) {
+  width: 10%; /* Material */
+}
+
+.customer-product-table th:nth-child(2),
+.customer-product-table td:nth-child(2) {
+  width: 9%; /* Type */
+}
+
+.customer-product-table th:nth-child(3),
+.customer-product-table td:nth-child(3) {
+  width: 12%; /* Model */
+}
+
+.customer-product-table th:nth-child(4),
+.customer-product-table td:nth-child(4) {
+  width: 7%; /* Angle */
+}
+
+.customer-product-table th:nth-child(5),
+.customer-product-table td:nth-child(5) {
+  width: 12%; /* Nodal Length */
+}
+
+.customer-product-table th:nth-child(6),
+.customer-product-table td:nth-child(6) {
+  width: 8%; /* Width */
+}
+
+.customer-product-table th:nth-child(7),
+.customer-product-table td:nth-child(7) {
+  width: 7%; /* Teeth */
+}
+
+.customer-product-table th:nth-child(8),
+.customer-product-table td:nth-child(8) {
+  width: 10%; /* Unit Price */
+}
+
+.customer-product-table th:nth-child(9),
+.customer-product-table td:nth-child(9) {
+  width: 8%; /* Qty */
+}
+
+.customer-product-table th:nth-child(10),
+.customer-product-table td:nth-child(10) {
+  width: 17%; /* Action */
+}
+
+
+/* =========================================================
+   11. QUANTITY + ACTION
+========================================================= */
+
+.quantity-input {
+  max-width: 64px;
+  padding: 6px 7px;
+  font-size: 12px;
+}
+
+.customer-product-table td.action-cell {
+  overflow: visible;
+  white-space: nowrap;
+}
+
+.customer-product-table td.action-cell button {
+  min-width: 52px;
+  padding: 6px 8px;
+  font-size: 11px;
+  border-radius: 8px;
+}
+
+
+/* =========================================================
+   12. PAGINATION
+========================================================= */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 8px;
+  flex-wrap: wrap;
+
+  margin-top: 18px;
+}
+
+.pagination button {
+  min-width: 34px;
+  padding: 7px 10px;
+  font-size: 13px;
+
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.pagination button:hover {
+  background: #bfdbfe;
+}
+
+.pagination button.active-page {
+  background: var(--color-primary);
+  color: white;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination .pagination-dots {
+  padding: 0 6px;
+  color: var(--color-text-soft);
+  font-weight: 700;
+}
+
+.pagination .pagination-info {
+  width: 100%;
+  text-align: center;
+
+  color: var(--color-text-soft);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+
+/* =========================================================
+   13. RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+  .customer-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .customer-sidebar {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  .customer-product-table {
+    min-width: 950px;
+  }
+}
+
+@media (max-width: 760px) {
+  .customer-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .customer-top-actions {
+    width: 100%;
+  }
+
+  .customer-top-actions button {
+    flex: 1;
+  }
+}

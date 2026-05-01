@@ -4,25 +4,153 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Manager Panel</title>
+
+  <link rel="stylesheet" href="./css/base.css" />
+  <link rel="stylesheet" href="./css/layout.css" />
+  <link rel="stylesheet" href="./css/components.css" />
+  <link rel="stylesheet" href="./css/pages/manager.css" />
 </head>
 <body>
-  <h1>Manager Panel</h1>
+  <!-- TOP HEADER -->
+  <header class="manager-topbar">
+    <div class="manager-title-area">
+      <h1>Manager Panel</h1>
+      <p id="managerInfo">Manager information</p>
+    </div>
 
-  <p id="managerInfo"></p>
+    <div class="manager-top-actions">
+      <button id="editManagerBtn" class="light" type="button">Edit Manager</button>
+      <button id="customerListPageBtn" type="button">Customer List</button>
+      <button id="logoutBtn" class="secondary" type="button">Logout</button>
+    </div>
+  </header>
 
-  <button id="logoutBtn">Logout</button>
+  <!-- MAIN LAYOUT -->
+  <main class="manager-layout">
+    <!-- LEFT SIDEBAR -->
+    <aside class="manager-sidebar">
+      <section class="sidebar-section compact-dashboard">
+        <h2>Dashboard</h2>
 
-  <hr />
+        <div id="statsContainer" class="stats-list compact-stats">
+          <div class="empty-message">Loading dashboard...</div>
+        </div>
+      </section>
 
-  <h2>Customers</h2>
-  <button id="loadCustomersBtn">Load Customers</button>
-  <div id="customersContainer"></div>
+      <section class="sidebar-section">
+        <h2>Product Filters</h2>
 
-  <hr />
+        <div class="filter-group">
+          <label for="productSearchInput">Search</label>
+          <input type="text" id="productSearchInput" placeholder="Search model, material, type..." />
+        </div>
 
-  <h2>Products</h2>
-  <button id="loadProductsBtn">Load Products</button>
-  <div id="productsContainer"></div>
+        <div class="filter-group">
+          <label for="materialFilter">Material</label>
+          <input type="text" id="materialFilter" placeholder="Material" />
+        </div>
+
+        <div class="filter-group">
+          <label for="typeFilter">Type</label>
+          <input type="text" id="typeFilter" placeholder="Type" />
+        </div>
+
+        <div class="sidebar-actions">
+          <button id="applyProductFiltersBtn" type="button">Apply</button>
+          <button id="clearProductFiltersBtn" class="secondary" type="button">Clear</button>
+        </div>
+      </section>
+
+      <section class="sidebar-section">
+        <h2>Add / Edit Product</h2>
+
+        <form id="productForm" class="product-form">
+          <input type="hidden" id="productId" />
+
+          <div class="filter-group">
+            <label for="material">Material</label>
+            <input type="text" id="material" placeholder="Material" required />
+          </div>
+
+          <div class="filter-group">
+            <label for="type">Type</label>
+            <input type="text" id="type" placeholder="Type" required />
+          </div>
+
+          <div class="filter-group">
+            <label for="model">Model</label>
+            <input type="text" id="model" placeholder="Model" required />
+          </div>
+
+          <div class="filter-group">
+            <label for="angle">Angle</label>
+            <input type="number" id="angle" placeholder="Angle" required />
+          </div>
+
+          <div class="filter-group">
+            <label for="nodalLength">Nodal Length</label>
+            <input type="number" id="nodalLength" placeholder="Nodal Length" required />
+          </div>
+
+          <div class="filter-group">
+            <label for="width">Width</label>
+            <input type="number" id="width" placeholder="Width" required />
+          </div>
+
+          <div class="filter-group">
+            <label for="numberOfTeeth">Number of Teeth</label>
+            <input type="number" id="numberOfTeeth" placeholder="Number of Teeth" required />
+          </div>
+
+          <div class="filter-group">
+            <label for="unitPrice">Unit Price</label>
+            <input type="number" id="unitPrice" placeholder="Unit Price" required />
+          </div>
+
+          <div class="sidebar-actions">
+            <button type="submit" id="saveProductBtn">Add Product</button>
+            <button type="button" id="cancelEditBtn" class="secondary" style="display:none;">Cancel</button>
+          </div>
+        </form>
+      </section>
+    </aside>
+
+    <!-- RIGHT CONTENT -->
+    <section class="manager-content">
+      <div class="content-header">
+        <div>
+          <h2>Products</h2>
+          <p id="productCountInfo" class="info-text">Loading products...</p>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="product-table">
+          <thead>
+            <tr>
+              <th>Material</th>
+              <th>Type</th>
+              <th>Model</th>
+              <th>Angle</th>
+              <th>Nodal Length</th>
+              <th>Width</th>
+              <th>Teeth</th>
+              <th>Unit Price</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody id="productsTableBody">
+            <tr>
+              <td colspan="9" class="table-empty">Loading products...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="paginationContainer" class="pagination"></div>
+    </section>
+  </main>
 
   <script type="module" src="./js/pages/ManagerPage.js"></script>
 </body>

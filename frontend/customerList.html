@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer List</title>
+
+  <link rel="stylesheet" href="./css/base.css" />
+  <link rel="stylesheet" href="./css/layout.css" />
+  <link rel="stylesheet" href="./css/components.css" />
+  <link rel="stylesheet" href="./css/pages/customerList.css" />
+</head>
+<body>
+  <header class="customer-list-topbar">
+    <div class="customer-list-title-area">
+      <h1>Customer List</h1>
+      <p id="managerInfo">Manager information</p>
+    </div>
+
+    <div class="customer-list-top-actions">
+      <button id="backToManagerBtn" class="light" type="button">Back to Manager Panel</button>
+      <button id="logoutBtn" class="secondary" type="button">Logout</button>
+    </div>
+  </header>
+
+  <main class="customer-list-layout">
+    <aside class="customer-list-sidebar">
+      <section class="sidebar-section">
+        <h2>Customer Filters</h2>
+
+        <div class="filter-group">
+          <label for="customerSearchInput">Search</label>
+          <input type="text" id="customerSearchInput" placeholder="Search company, name, email..." />
+        </div>
+
+        <div class="filter-group">
+          <label for="cityFilter">City</label>
+          <input type="text" id="cityFilter" placeholder="City" />
+        </div>
+
+        <div class="filter-group">
+          <label for="countryFilter">Country</label>
+          <input type="text" id="countryFilter" placeholder="Country" />
+        </div>
+
+        <div class="sidebar-actions">
+          <button id="applyCustomerFiltersBtn" type="button">Apply</button>
+          <button id="clearCustomerFiltersBtn" class="secondary" type="button">Clear</button>
+        </div>
+      </section>
+
+      <section class="sidebar-section compact-dashboard">
+        <h2>Summary</h2>
+
+        <div id="customerStatsContainer" class="stats-list compact-stats">
+          <div class="empty-message">Loading summary...</div>
+        </div>
+      </section>
+    </aside>
+
+    <section class="customer-list-content">
+      <div class="content-header">
+        <div>
+          <h2>Customers</h2>
+          <p id="customerCountInfo" class="info-text">Loading customers...</p>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="customer-table">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Country</th>
+              <th>City</th>
+              <th>Username</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody id="customersTableBody">
+            <tr>
+              <td colspan="8" class="table-empty">Loading customers...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="paginationContainer" class="pagination"></div>
+    </section>
+  </main>
+
+  <script type="module" src="./js/pages/CustomerListPage.js?v=10"></script>
+</body>
+</html>

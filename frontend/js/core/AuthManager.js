@@ -28,7 +28,7 @@ class AuthManager {
 
   static logout() {
     StorageManager.clear();
-    window.location.href = "/frontend/index.html";
+    window.location.href = "/index.html";
   }
 }
 

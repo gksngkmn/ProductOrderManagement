@@ -1,0 +1,365 @@
+/* =========================================================
+   CUSTOMER ORDERS PAGE CSS
+   Theme: Blue / White Dashboard Layout
+========================================================= */
+
+
+/* =========================================================
+   1. TOPBAR
+========================================================= */
+
+.customer-orders-topbar {
+  min-height: 88px;
+  padding: 20px 32px;
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+  color: white;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+
+  box-shadow: var(--shadow-md);
+}
+
+.customer-orders-title-area h1 {
+  color: white;
+  margin-bottom: 4px;
+}
+
+.customer-orders-title-area p {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.customer-orders-top-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   2. MAIN LAYOUT
+========================================================= */
+
+.customer-orders-layout {
+  width: min(97%, 1600px);
+  margin: 20px auto 32px;
+
+  display: grid;
+  grid-template-columns: minmax(280px, 24%) 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.customer-orders-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  position: sticky;
+  top: 18px;
+
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.customer-orders-content {
+  min-width: 0;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 18px;
+}
+
+
+/* =========================================================
+   3. SIDEBAR
+========================================================= */
+
+.customer-orders-sidebar::-webkit-scrollbar {
+  width: 7px;
+}
+
+.customer-orders-sidebar::-webkit-scrollbar-thumb {
+  background: #bfdbfe;
+  border-radius: 999px;
+}
+
+.customer-orders-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-section {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 15px;
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar-section h2 {
+  font-size: 16px;
+  color: #1d4ed8;
+  margin-bottom: 12px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sidebar-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.filter-group label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-soft);
+}
+
+.filter-group input,
+.filter-group select {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+
+/* =========================================================
+   4. SUMMARY STATS
+========================================================= */
+
+.stats-list {
+  display: grid;
+  gap: 8px;
+}
+
+.compact-stats {
+  grid-template-columns: 1fr;
+}
+
+.stat-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
+.stat-number {
+  font-size: 22px;
+  line-height: 1.1;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--color-text-soft);
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   5. CONTENT HEADER
+========================================================= */
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.content-header h2 {
+  color: #1d4ed8;
+}
+
+.content-header p {
+  margin-top: 4px;
+}
+
+
+/* =========================================================
+   6. ORDER CARDS
+========================================================= */
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.order-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.order-card-header h3 {
+  color: #1d4ed8;
+  font-size: 17px;
+}
+
+.order-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.order-items {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.order-item-row {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 0.6fr 0.8fr 0.8fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.order-item-row p {
+  font-size: 13px;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.order-total-box {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 800;
+  text-align: right;
+}
+
+
+/* =========================================================
+   7. PAGINATION
+========================================================= */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 8px;
+  flex-wrap: wrap;
+
+  margin-top: 18px;
+}
+
+.pagination button {
+  min-width: 34px;
+  padding: 7px 10px;
+  font-size: 13px;
+
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.pagination button:hover {
+  background: #bfdbfe;
+}
+
+.pagination button.active-page {
+  background: var(--color-primary);
+  color: white;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination .pagination-dots {
+  padding: 0 6px;
+  color: var(--color-text-soft);
+  font-weight: 700;
+}
+
+.pagination .pagination-info {
+  width: 100%;
+  text-align: center;
+
+  color: var(--color-text-soft);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+
+/* =========================================================
+   8. RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+  .customer-orders-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .customer-orders-sidebar {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .order-item-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .customer-orders-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .customer-orders-top-actions {
+    width: 100%;
+  }
+
+  .customer-orders-top-actions button {
+    flex: 1;
+  }
+
+  .order-card-header {
+    flex-direction: column;
+  }
+
+  .order-item-row {
+    grid-template-columns: 1fr;
+  }
+}

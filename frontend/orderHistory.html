@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order History</title>
+
+  <link rel="stylesheet" href="./css/base.css" />
+  <link rel="stylesheet" href="./css/layout.css" />
+  <link rel="stylesheet" href="./css/components.css" />
+  <link rel="stylesheet" href="./css/pages/orderHistory.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="history-header-info">
+      <h1>Order History</h1>
+      <p>Detailed customer order records</p>
+    </div>
+
+    <div class="history-actions">
+      <button id="backBtn" class="light" type="button">Back to Manager Panel</button>
+      <button id="logoutBtn" class="secondary" type="button">Logout</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card section">
+      <h2 class="section-title">Orders</h2>
+
+      <div id="ordersContainer" class="list-stack">
+        <div class="empty-message">Loading orders...</div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="./js/pages/OrderHistoryPage.js?v=10"></script>
+</body>
+</html>

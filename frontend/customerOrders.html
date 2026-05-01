@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Order History</title>
+
+  <link rel="stylesheet" href="./css/base.css" />
+  <link rel="stylesheet" href="./css/layout.css" />
+  <link rel="stylesheet" href="./css/components.css" />
+  <link rel="stylesheet" href="./css/pages/customerOrders.css" />
+</head>
+<body>
+  <!-- TOP HEADER -->
+  <header class="customer-orders-topbar">
+    <div class="customer-orders-title-area">
+      <h1>My Order History</h1>
+      <p id="customerInfo">Customer information</p>
+    </div>
+
+    <div class="customer-orders-top-actions">
+      <button id="backToCustomerBtn" class="light" type="button">Back to Customer Panel</button>
+      <button id="logoutBtn" class="secondary" type="button">Logout</button>
+    </div>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <main class="customer-orders-layout">
+    <aside class="customer-orders-sidebar">
+      <section class="sidebar-section compact-dashboard">
+        <h2>Summary</h2>
+
+        <div id="orderStatsContainer" class="stats-list compact-stats">
+          <div class="empty-message">Loading summary...</div>
+        </div>
+      </section>
+
+      <section class="sidebar-section">
+        <h2>Order Filters</h2>
+
+        <div class="filter-group">
+          <label for="orderSearchInput">Search</label>
+          <input type="text" id="orderSearchInput" placeholder="Search order code or product..." />
+        </div>
+
+        <div class="filter-group">
+          <label for="statusFilter">Status</label>
+          <select id="statusFilter">
+            <option value="">All</option>
+            <option value="Current">Current</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+
+        <div class="sidebar-actions">
+          <button id="applyOrderFiltersBtn" type="button">Apply</button>
+          <button id="clearOrderFiltersBtn" class="secondary" type="button">Clear</button>
+        </div>
+      </section>
+    </aside>
+
+    <section class="customer-orders-content">
+      <div class="content-header">
+        <div>
+          <h2>Orders</h2>
+          <p id="orderCountInfo" class="info-text">Loading orders...</p>
+        </div>
+      </div>
+
+      <div id="ordersContainer" class="orders-list">
+        <div class="empty-message">Loading orders...</div>
+      </div>
+
+      <div id="paginationContainer" class="pagination"></div>
+    </section>
+  </main>
+
+  <script type="module" src="./js/pages/CustomerOrdersPage.js"></script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Panel</title>
+
+  <link rel="stylesheet" href="./css/base.css" />
+  <link rel="stylesheet" href="./css/layout.css" />
+  <link rel="stylesheet" href="./css/components.css" />
+  <link rel="stylesheet" href="./css/pages/customer.css" />
+</head>
+<body>
+  <!-- TOP HEADER -->
+  <header class="customer-topbar">
+    <div class="customer-title-area">
+      <h1>Customer Panel</h1>
+      <p id="customerInfo">Customer information</p>
+    </div>
+
+    <div class="customer-top-actions">
+      <button id="myOrdersBtn" class="light" type="button">My Order History</button>
+      <button id="logoutBtn" class="secondary" type="button">Logout</button>
+    </div>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <main class="customer-layout">
+    <!-- LEFT SIDEBAR -->
+    <aside class="customer-sidebar">
+      <section class="sidebar-section">
+        <h2>Current Order</h2>
+
+        <p id="currentOrderInfo" class="info-text">No active order loaded.</p>
+
+        <div class="sidebar-actions">
+          <button id="createOrderBtn" type="button">Create / Load</button>
+          <button id="completeOrderBtn" class="danger" type="button" disabled>Complete</button>
+        </div>
+
+        <div id="currentOrderItems" class="order-summary">
+          <div class="empty-message">No current order items.</div>
+        </div>
+      </section>
+
+      <section class="sidebar-section">
+        <h2>Product Filters</h2>
+
+        <div class="filter-group">
+          <label for="productSearchInput">Search</label>
+          <input type="text" id="productSearchInput" placeholder="Search model, material, type..." />
+        </div>
+
+        <div class="filter-group">
+          <label for="materialFilter">Material</label>
+          <input type="text" id="materialFilter" placeholder="Material" />
+        </div>
+
+        <div class="filter-group">
+          <label for="typeFilter">Type</label>
+          <input type="text" id="typeFilter" placeholder="Type" />
+        </div>
+
+        <div class="sidebar-actions">
+          <button id="applyProductFiltersBtn" type="button">Apply</button>
+          <button id="clearProductFiltersBtn" class="secondary" type="button">Clear</button>
+        </div>
+      </section>
+    </aside>
+
+    <!-- RIGHT CONTENT -->
+    <section class="customer-content">
+      <div class="content-header">
+        <div>
+          <h2>Products</h2>
+          <p id="productCountInfo" class="info-text">Loading products...</p>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="customer-product-table">
+          <thead>
+            <tr>
+              <th>Material</th>
+              <th>Type</th>
+              <th>Model</th>
+              <th>Angle</th>
+              <th>Nodal Length</th>
+              <th>Width</th>
+              <th>Teeth</th>
+              <th>Unit Price</th>
+              <th>Qty</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody id="productsTableBody">
+            <tr>
+              <td colspan="10" class="table-empty">Loading products...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="paginationContainer" class="pagination"></div>
+    </section>
+  </main>
+
+  <script type="module" src="./js/pages/CustomerPage.js"></script>
+</body>
+</html>

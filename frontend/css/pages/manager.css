@@ -1,0 +1,445 @@
+/* =========================================================
+   MANAGER PAGE CSS
+   Theme: Blue / White Dashboard Layout
+========================================================= */
+
+
+/* =========================================================
+   1. TOPBAR
+========================================================= */
+
+.manager-topbar {
+  min-height: 88px;
+  padding: 20px 32px;
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+  color: white;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+
+  box-shadow: var(--shadow-md);
+}
+
+.manager-title-area h1 {
+  color: white;
+  margin-bottom: 4px;
+}
+
+.manager-title-area p {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.manager-top-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   2. MAIN LAYOUT
+========================================================= */
+
+.manager-layout {
+  width: min(97%, 1600px);
+  margin: 20px auto 32px;
+
+  display: grid;
+  grid-template-columns: minmax(280px, 24%) 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.manager-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  position: sticky;
+  top: 18px;
+
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.manager-content {
+  min-width: 0;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 18px;
+}
+
+
+/* =========================================================
+   3. SIDEBAR SCROLLBAR
+========================================================= */
+
+.manager-sidebar::-webkit-scrollbar {
+  width: 7px;
+}
+
+.manager-sidebar::-webkit-scrollbar-thumb {
+  background: #bfdbfe;
+  border-radius: 999px;
+}
+
+.manager-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+/* =========================================================
+   4. SIDEBAR SECTIONS
+========================================================= */
+
+.sidebar-section {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 15px;
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar-section h2 {
+  font-size: 16px;
+  color: #1d4ed8;
+  margin-bottom: 12px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.compact-dashboard {
+  padding: 14px;
+}
+
+.sidebar-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+
+/* =========================================================
+   5. DASHBOARD STATS
+========================================================= */
+
+.stats-list {
+  display: grid;
+  gap: 8px;
+}
+
+.compact-stats {
+  grid-template-columns: 1fr;
+}
+
+.stat-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
+.stat-number {
+  font-size: 22px;
+  line-height: 1.1;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--color-text-soft);
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   6. FILTERS / FORM INPUT GROUPS
+========================================================= */
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.filter-group label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-soft);
+}
+
+.filter-group input {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+
+/* =========================================================
+   7. PRODUCT FORM
+========================================================= */
+
+.product-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+
+/* =========================================================
+   8. CONTENT HEADER
+========================================================= */
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.content-header h2 {
+  color: #1d4ed8;
+}
+
+.content-header p {
+  margin-top: 4px;
+}
+
+
+/* =========================================================
+   9. TABLE WRAPPER
+========================================================= */
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: hidden;
+
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+
+/* =========================================================
+   10. PRODUCT TABLE BASE
+========================================================= */
+
+.product-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.product-table th,
+.product-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--color-border);
+
+  text-align: left;
+  font-size: 12px;
+  line-height: 1.3;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-table th {
+  background: #eff6ff;
+  color: #1e40af;
+  font-weight: 800;
+
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.product-table tbody tr:hover {
+  background: #f8fbff;
+}
+
+.table-empty {
+  text-align: center !important;
+  color: var(--color-text-soft);
+  padding: 26px !important;
+}
+
+
+/* =========================================================
+   11. PRODUCT TABLE COLUMN WIDTHS
+   Total = 100%
+========================================================= */
+
+.product-table th:nth-child(1),
+.product-table td:nth-child(1) {
+  width: 11%; /* Material */
+}
+
+.product-table th:nth-child(2),
+.product-table td:nth-child(2) {
+  width: 10%; /* Type */
+}
+
+.product-table th:nth-child(3),
+.product-table td:nth-child(3) {
+  width: 12%; /* Model */
+}
+
+.product-table th:nth-child(4),
+.product-table td:nth-child(4) {
+  width: 7%; /* Angle */
+}
+
+.product-table th:nth-child(5),
+.product-table td:nth-child(5) {
+  width: 12%; /* Nodal Length */
+}
+
+.product-table th:nth-child(6),
+.product-table td:nth-child(6) {
+  width: 8%; /* Width */
+}
+
+.product-table th:nth-child(7),
+.product-table td:nth-child(7) {
+  width: 7%; /* Teeth */
+}
+
+.product-table th:nth-child(8),
+.product-table td:nth-child(8) {
+  width: 10%; /* Unit Price */
+}
+
+.product-table th:nth-child(9),
+.product-table td:nth-child(9) {
+  width: 23%; /* Actions */
+}
+
+
+/* =========================================================
+   12. TABLE ACTION BUTTONS
+========================================================= */
+
+.product-table td.actions-cell {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  justify-content: flex-start;
+
+  overflow: visible;
+  white-space: nowrap;
+}
+
+.product-table td.actions-cell button {
+  min-width: 50px;
+  padding: 6px 7px;
+  font-size: 11px;
+  border-radius: 8px;
+}
+
+
+/* =========================================================
+   13. PAGINATION
+========================================================= */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 8px;
+  flex-wrap: wrap;
+
+  margin-top: 18px;
+}
+
+.pagination button {
+  min-width: 34px;
+  padding: 7px 10px;
+  font-size: 13px;
+
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.pagination button:hover {
+  background: #bfdbfe;
+}
+
+.pagination button.active-page {
+  background: var(--color-primary);
+  color: white;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination .pagination-dots {
+  padding: 0 6px;
+  color: var(--color-text-soft);
+  font-weight: 700;
+}
+
+.pagination .pagination-info {
+  width: 100%;
+  text-align: center;
+
+  color: var(--color-text-soft);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+
+/* =========================================================
+   14. RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+  .manager-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .manager-sidebar {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  .product-table {
+    min-width: 900px;
+  }
+}
+
+@media (max-width: 760px) {
+  .manager-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .manager-top-actions {
+    width: 100%;
+  }
+
+  .manager-top-actions button {
+    flex: 1;
+  }
+}
