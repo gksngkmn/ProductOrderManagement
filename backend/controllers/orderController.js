@@ -46,6 +46,40 @@ async function addItemToOrder(req, res) {
   }
 }
 
+
+async function updateOrderItem(req, res) {
+  try {
+    const { orderId, itemId } = req.params;
+
+    const item = await OrderService.updateOrderItem(
+      req.user,
+      orderId,
+      itemId,
+      req.body
+    );
+
+    return res.json(item);
+  } catch (error) {
+    return handleError(res, error, "Update item error:");
+  }
+}
+
+async function deleteOrderItem(req, res) {
+  try {
+    const { orderId, itemId } = req.params;
+
+    const result = await OrderService.deleteOrderItem(
+      req.user,
+      orderId,
+      itemId
+    );
+
+    return res.json(result);
+  } catch (error) {
+    return handleError(res, error, "Delete item error:");
+  }
+}
+
 async function completeOrder(req, res) {
   try {
     const { orderId } = req.params;
@@ -65,5 +99,7 @@ module.exports = {
   getOrdersByCompany,
   createOrder,
   addItemToOrder,
+  updateOrderItem,
+  deleteOrderItem,
   completeOrder
 };

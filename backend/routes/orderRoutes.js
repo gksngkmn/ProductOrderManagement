@@ -8,8 +8,11 @@ const {
   getOrdersByCompany,
   createOrder,
   addItemToOrder,
+  updateOrderItem,
+  deleteOrderItem,
   completeOrder
 } = require("../controllers/orderController");
+
 
 // Customer kendi siparişlerini görür
 router.get("/my", authMiddleware, requireRole("customer"), getOrdersByCompany);
@@ -31,6 +34,20 @@ router.post(
   authMiddleware,
   requireRole("customer"),
   addItemToOrder
+);
+
+router.put(
+  "/:orderId/items/:itemId",
+  authMiddleware,
+  requireRole("customer"),
+  updateOrderItem
+);
+
+router.delete(
+  "/:orderId/items/:itemId",
+  authMiddleware,
+  requireRole("customer"),
+  deleteOrderItem
 );
 
 // Customer siparişi tamamlar

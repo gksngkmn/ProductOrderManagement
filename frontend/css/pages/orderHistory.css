@@ -1,7 +1,41 @@
+/* =========================================================
+   ORDER HISTORY PAGE CSS
+   Theme: Blue / White Dashboard Layout
+   Layout: Half Orders + Half Order Details
+========================================================= */
+
+
+/* =========================================================
+   1. TOPBAR
+========================================================= */
+
+.order-history-topbar {
+  min-height: 88px;
+  padding: 20px 32px;
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+  color: white;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+
+  box-shadow: var(--shadow-md);
+}
+
 .history-header-info {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.history-header-info h1 {
+  color: white;
+  margin-bottom: 4px;
+}
+
+.history-header-info p {
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .history-actions {
@@ -10,30 +44,350 @@
   flex-wrap: wrap;
 }
 
-.order-card {
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+
+/* =========================================================
+   2. MAIN SPLIT LAYOUT
+========================================================= */
+
+.order-history-layout {
+  width: min(98%, 1750px);
+  margin: 20px auto 32px;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.orders-list-panel,
+.order-detail-panel {
+  min-width: 0;
+  background: white;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
   padding: 18px;
-  box-shadow: var(--shadow-sm);
 }
 
-.order-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 16px;
-  margin: 12px 0;
+.order-detail-panel {
+  position: sticky;
+  top: 18px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
 }
 
-.order-items {
+
+/* =========================================================
+   3. HEADER AREAS
+========================================================= */
+
+.content-header,
+.detail-panel-header {
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.content-header h2,
+.detail-panel-header h2 {
+  color: #1d4ed8;
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.content-header p,
+.detail-panel-header p {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--color-text-soft);
+}
+
+
+/* =========================================================
+   4. EXCEL TABLE BASE
+========================================================= */
+
+.order-table-wrapper,
+.detail-table-wrapper {
+  width: 100%;
+  overflow-x: hidden;
+
+  background: white;
+  border: 1px solid #b6c2d1;
+  border-radius: 4px;
+  box-shadow: none;
+}
+
+.orders-table,
+.detail-items-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+  border-collapse: collapse;
+  background: white;
+}
+
+.orders-table th,
+.orders-table td,
+.detail-items-table th,
+.detail-items-table td {
+  padding: 5px 5px;
+  border: 1px solid #cbd5e1;
+
+  text-align: left;
+  font-size: 10px;
+  line-height: 1.15;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.orders-table th,
+.detail-items-table th {
+  background: #eaf2ff;
+  color: #1e40af;
+  font-weight: 900;
+  text-align: center;
+}
+
+.orders-table td,
+.detail-items-table td {
+  color: var(--color-text);
+  background: white;
+}
+
+.orders-table tbody tr:nth-child(even) td,
+.detail-items-table tbody tr:nth-child(even) td {
+  background: #f8fbff;
+}
+
+.orders-table tbody tr:hover td,
+.detail-items-table tbody tr:hover td {
+  background: #dbeafe;
+}
+
+.orders-table tbody tr.selected-row td {
+  background: #dbeafe;
+}
+
+
+/* =========================================================
+   5. ORDERS TABLE WIDTHS
+========================================================= */
+
+.orders-table th:nth-child(1),
+.orders-table td:nth-child(1) {
+  width: 13%;
+  text-align: center;
+}
+
+.orders-table th:nth-child(2),
+.orders-table td:nth-child(2) {
+  width: 25%;
+  font-weight: 700;
+  color: #1e40af;
+}
+
+.orders-table th:nth-child(3),
+.orders-table td:nth-child(3) {
+  width: 13%;
+  text-align: center;
+}
+
+.orders-table th:nth-child(4),
+.orders-table td:nth-child(4) {
+  width: 17%;
+}
+
+.orders-table th:nth-child(5),
+.orders-table td:nth-child(5) {
+  width: 17%;
+}
+
+.orders-table th:nth-child(6),
+.orders-table td:nth-child(6) {
+  width: 6%;
+  text-align: center;
+}
+
+.orders-table th:nth-child(7),
+.orders-table td:nth-child(7) {
+  width: 9%;
+  text-align: right;
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   6. DETAIL TABLE WIDTHS
+========================================================= */
+
+.detail-items-table th:nth-child(1),
+.detail-items-table td:nth-child(1) {
+  width: 12%;
+}
+
+.detail-items-table th:nth-child(2),
+.detail-items-table td:nth-child(2) {
+  width: 9%;
+}
+
+.detail-items-table th:nth-child(3),
+.detail-items-table td:nth-child(3) {
+  width: 11%;
+  font-weight: 700;
+  color: #1e40af;
+}
+
+.detail-items-table th:nth-child(4),
+.detail-items-table td:nth-child(4) {
+  width: 7%;
+  text-align: center;
+}
+
+.detail-items-table th:nth-child(5),
+.detail-items-table td:nth-child(5) {
+  width: 10%;
+  text-align: right;
+}
+
+.detail-items-table th:nth-child(6),
+.detail-items-table td:nth-child(6) {
+  width: 8%;
+  text-align: right;
+}
+
+.detail-items-table th:nth-child(7),
+.detail-items-table td:nth-child(7) {
+  width: 7%;
+  text-align: center;
+}
+
+.detail-items-table th:nth-child(8),
+.detail-items-table td:nth-child(8) {
+  width: 6%;
+  text-align: center;
+}
+
+.detail-items-table th:nth-child(9),
+.detail-items-table td:nth-child(9) {
+  width: 13%;
+  text-align: right;
+}
+
+.detail-items-table th:nth-child(10),
+.detail-items-table td:nth-child(10) {
+  width: 17%;
+  text-align: right;
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   7. BUTTONS + DETAIL SUMMARY
+========================================================= */
+
+.details-cell {
+  text-align: center;
+  overflow: visible !important;
+}
+
+.detailsBtn {
+  min-width: 52px;
+  padding: 4px 6px;
+  font-size: 9px;
+  border-radius: 5px;
+  background: #2563eb;
+  color: white;
+}
+
+.detailsBtn:hover {
+  background: #1d4ed8;
+}
+
+.detail-summary {
   display: grid;
-  gap: 10px;
-  margin-top: 12px;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 10px;
+  margin-bottom: 12px;
+
+  padding: 10px;
+  background: #f8fbff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
 }
 
-.order-item-row {
-  background: var(--color-surface-soft);
-  border: 1px solid var(--color-border);
+.detail-summary p {
+  font-size: 12px;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.order-total-box {
+  margin-top: 10px;
+  padding: 10px 14px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #eaf2ff;
+  color: #1e40af;
+
+  font-weight: 900;
+  text-align: right;
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   8. EMPTY MESSAGE
+========================================================= */
+
+.empty-message {
+  text-align: center;
+  color: var(--color-text-soft);
+  padding: 30px 14px;
+
+  background: #f8fbff;
+  border: 1px dashed #bfdbfe;
   border-radius: var(--radius-md);
-  padding: 12px;
+}
+
+
+/* =========================================================
+   9. RESPONSIVE
+========================================================= */
+
+@media (max-width: 1200px) {
+  .order-history-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 1fr);
+  }
+
+  .order-detail-panel {
+    position: sticky;
+    top: 18px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .order-history-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .history-actions {
+    width: 100%;
+  }
+
+  .history-actions button {
+    flex: 1;
+  }
+
+  .detail-summary {
+    grid-template-columns: 1fr;
+  }
 }

@@ -229,6 +229,102 @@ class OrderService {
     return result.rows[0];
   }
 
+  static async updateOrderItem(user, orderId, itemId, data) {
+  const { quantity } = data;
+  const companyId = user.id;
+
+  if (!quantity || Number(quantity) <= 0) {
+    const error = new Error("Valid quantity is required.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const orderCheck = await pool.query(
+    `
+    SELECT *
+    FROM orders
+    WHERE id = $1 AND company_id = $2 AND status = 'Current'
+    `,
+    [orderId, companyId]
+  );
+
+  if (orderCheck.rows.length === 0) {
+    const error = new Error("Order not found or not allowed.");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  const itemCheck = await pool.query(
+    `
+    SELECT *
+    FROM order_items
+    WHERE id = $1 AND order_id = $2
+    `,
+    [itemId, orderId]
+  );
+
+  if (itemCheck.rows.length === 0) {
+    const error = new Error("Order item not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const item = itemCheck.rows[0];
+  const newQuantity = Number(quantity);
+  const newTotal = newQuantity * Number(item.unit_price);
+
+  const updated = await pool.query(
+    `
+    UPDATE order_items
+    SET quantity = $1,
+        total_price = $2
+    WHERE id = $3 AND order_id = $4
+    RETURNING *
+    `,
+    [newQuantity, newTotal, itemId, orderId]
+  );
+
+  return updated.rows[0];
+}
+
+static async deleteOrderItem(user, orderId, itemId) {
+  const companyId = user.id;
+
+  const orderCheck = await pool.query(
+    `
+    SELECT *
+    FROM orders
+    WHERE id = $1 AND company_id = $2 AND status = 'Current'
+    `,
+    [orderId, companyId]
+  );
+
+  if (orderCheck.rows.length === 0) {
+    const error = new Error("Order not found or not allowed.");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  const deleted = await pool.query(
+    `
+    DELETE FROM order_items
+    WHERE id = $1 AND order_id = $2
+    RETURNING *
+    `,
+    [itemId, orderId]
+  );
+
+  if (deleted.rows.length === 0) {
+    const error = new Error("Order item not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  return {
+    message: "Order item deleted successfully."
+  };
+}
+
   static async completeOrder(user, orderId) {
     const companyId = user.id;
 

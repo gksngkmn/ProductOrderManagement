@@ -1,6 +1,7 @@
 /* =========================================================
    CUSTOMER LIST PAGE CSS
    Theme: Blue / White Dashboard Layout
+   Customer Table: Excel Style
 ========================================================= */
 
 
@@ -43,11 +44,11 @@
 ========================================================= */
 
 .customer-list-layout {
-  width: min(97%, 1600px);
+  width: min(98%, 1700px);
   margin: 20px auto 32px;
 
   display: grid;
-  grid-template-columns: minmax(280px, 24%) 1fr;
+  grid-template-columns: minmax(280px, 320px) 1fr;
   gap: 20px;
   align-items: start;
 }
@@ -115,6 +116,10 @@
   margin-top: 10px;
 }
 
+.sidebar-actions button {
+  flex: 1;
+}
+
 .filter-group {
   display: flex;
   flex-direction: column;
@@ -126,6 +131,13 @@
   font-size: 12px;
   font-weight: 700;
   color: var(--color-text-soft);
+}
+
+.filter-group input {
+  width: 100%;
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
 }
 
 
@@ -180,15 +192,19 @@
 
 .content-header h2 {
   color: #1d4ed8;
+  font-size: 28px;
+  margin-bottom: 4px;
 }
 
 .content-header p {
   margin-top: 4px;
+  font-size: 14px;
+  color: var(--color-text-soft);
 }
 
 
 /* =========================================================
-   6. TABLE
+   6. CUSTOMER TABLE WRAPPER
 ========================================================= */
 
 .table-wrapper {
@@ -196,25 +212,32 @@
   overflow-x: hidden;
 
   background: white;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border: 1px solid #b6c2d1;
+  border-radius: 4px;
+  box-shadow: none;
 }
+
+
+/* =========================================================
+   7. CUSTOMER TABLE - EXCEL STYLE
+========================================================= */
 
 .customer-table {
   width: 100%;
   min-width: 0;
   table-layout: fixed;
   border-collapse: collapse;
+  background: white;
 }
 
 .customer-table th,
 .customer-table td {
-  padding: 8px 6px;
-  border-bottom: 1px solid var(--color-border);
+  padding: 5px 5px;
+  border: 1px solid #cbd5e1;
 
   text-align: left;
-  font-size: 12px;
-  line-height: 1.3;
+  font-size: 10px;
+  line-height: 1.15;
 
   white-space: nowrap;
   overflow: hidden;
@@ -222,16 +245,27 @@
 }
 
 .customer-table th {
-  background: #eff6ff;
+  background: #eaf2ff;
   color: #1e40af;
-  font-weight: 800;
+  font-weight: 900;
+  text-align: center;
+
   position: sticky;
   top: 0;
   z-index: 1;
 }
 
-.customer-table tbody tr:hover {
+.customer-table td {
+  color: var(--color-text);
+  background: white;
+}
+
+.customer-table tbody tr:nth-child(even) td {
   background: #f8fbff;
+}
+
+.customer-table tbody tr:hover td {
+  background: #dbeafe;
 }
 
 .table-empty {
@@ -242,74 +276,94 @@
 
 
 /* =========================================================
-   7. TABLE COLUMN WIDTHS
+   8. CUSTOMER TABLE COLUMN WIDTHS
+   Total = 100%
+   Columns: Company, Name, Email, Phone, Country, City, Username, Actions
 ========================================================= */
 
 .customer-table th:nth-child(1),
 .customer-table td:nth-child(1) {
-  width: 16%;
+  width: 15%; /* Company */
+  font-weight: 700;
+  color: #1e40af;
 }
 
 .customer-table th:nth-child(2),
 .customer-table td:nth-child(2) {
-  width: 14%;
+  width: 13%; /* Name */
 }
 
 .customer-table th:nth-child(3),
 .customer-table td:nth-child(3) {
-  width: 18%;
+  width: 18%; /* Email */
 }
 
 .customer-table th:nth-child(4),
 .customer-table td:nth-child(4) {
-  width: 12%;
+  width: 11%; /* Phone */
 }
 
 .customer-table th:nth-child(5),
 .customer-table td:nth-child(5) {
-  width: 10%;
+  width: 9%; /* Country */
 }
 
 .customer-table th:nth-child(6),
 .customer-table td:nth-child(6) {
-  width: 10%;
+  width: 9%; /* City */
 }
 
 .customer-table th:nth-child(7),
 .customer-table td:nth-child(7) {
-  width: 10%;
+  width: 10%; /* Username */
 }
 
 .customer-table th:nth-child(8),
 .customer-table td:nth-child(8) {
-  width: 10%;
+  width: 15%; /* Actions */
+  text-align: center;
 }
 
 
 /* =========================================================
-   8. ACTION BUTTONS
+   9. ACTION BUTTONS
 ========================================================= */
 
 .customer-table td.actions-cell {
-  display: flex;
-  gap: 5px;
-  align-items: center;
-  justify-content: flex-start;
-
-  overflow: visible;
+  text-align: center;
+  overflow: visible !important;
   white-space: nowrap;
 }
 
 .customer-table td.actions-cell button {
   min-width: 48px;
-  padding: 6px 7px;
-  font-size: 11px;
-  border-radius: 8px;
+  padding: 4px 5px;
+  font-size: 9px;
+  border-radius: 5px;
+  margin: 0 2px;
+}
+
+.customer-table td.actions-cell .ordersBtn {
+  background: #2563eb;
+  color: white;
+}
+
+.customer-table td.actions-cell .ordersBtn:hover {
+  background: #1d4ed8;
+}
+
+.customer-table td.actions-cell .deleteCustomerBtn {
+  background: #dc2626;
+  color: white;
+}
+
+.customer-table td.actions-cell .deleteCustomerBtn:hover {
+  background: #b91c1c;
 }
 
 
 /* =========================================================
-   9. PAGINATION
+   10. PAGINATION
 ========================================================= */
 
 .pagination {
@@ -363,8 +417,18 @@
 
 
 /* =========================================================
-   10. RESPONSIVE
+   11. RESPONSIVE
 ========================================================= */
+
+@media (max-width: 1200px) {
+  .customer-list-layout {
+    grid-template-columns: minmax(260px, 300px) 1fr;
+  }
+
+  .customer-table {
+    min-width: 0;
+  }
+}
 
 @media (max-width: 1100px) {
   .customer-list-layout {
@@ -375,14 +439,11 @@
     position: static;
     max-height: none;
     overflow-y: visible;
+    padding-right: 0;
   }
 
   .table-wrapper {
-    overflow-x: auto;
-  }
-
-  .customer-table {
-    min-width: 950px;
+    overflow-x: hidden;
   }
 }
 
@@ -398,5 +459,10 @@
 
   .customer-list-top-actions button {
     flex: 1;
+  }
+
+  .content-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

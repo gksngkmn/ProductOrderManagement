@@ -22,6 +22,19 @@ class OrderApi {
     });
   }
 
+  static updateOrderItem(orderId, itemId, quantity) {
+    return ClientApi.request(`/orders/${orderId}/items/${itemId}`, {
+      method: "PUT",
+      body: JSON.stringify({ quantity })
+    });
+  }
+
+  static deleteOrderItem(orderId, itemId) {
+    return ClientApi.request(`/orders/${orderId}/items/${itemId}`, {
+      method: "DELETE"
+    });
+  }
+
   static completeOrder(orderId) {
     return ClientApi.request(`/orders/${orderId}/complete`, {
       method: "PUT"

@@ -21,14 +21,18 @@ const orderCountInfo = document.getElementById("orderCountInfo");
 const ordersContainer = document.getElementById("ordersContainer");
 const paginationContainer = document.getElementById("paginationContainer");
 
+const detailPanelInfo = document.getElementById("detailPanelInfo");
+const orderDetailPanel = document.getElementById("orderDetailPanel");
+
 /* =========================
    STATE
 ========================= */
 let allOrders = [];
 let filteredOrders = [];
+let selectedOrderId = null;
 
 let currentPage = 1;
-const ORDERS_PER_PAGE = 10;
+const ORDERS_PER_PAGE = 12;
 
 /* =========================
    INIT
@@ -57,6 +61,12 @@ async function loadOrders() {
 
     renderStats();
     renderCurrentPage();
+
+    if (filteredOrders.length > 0) {
+      selectedOrderId = filteredOrders[0].id;
+      renderOrderDetails(filteredOrders[0]);
+      renderCurrentPage();
+    }
   } catch (error) {
     ordersContainer.innerHTML = `<div class="empty-message">${error.message}</div>`;
     orderStatsContainer.innerHTML = `<div class="empty-message">${error.message}</div>`;
@@ -87,7 +97,7 @@ function renderStats() {
 }
 
 /* =========================
-   RENDER ORDERS
+   RENDER ORDER LIST
 ========================= */
 function renderCurrentPage() {
   const totalOrders = filteredOrders.length;
@@ -113,69 +123,143 @@ function renderCurrentPage() {
 function renderOrders(orders) {
   if (!orders.length) {
     ordersContainer.innerHTML = `<div class="empty-message">No orders found.</div>`;
+    orderDetailPanel.innerHTML = `<div class="empty-message">No order selected.</div>`;
+    detailPanelInfo.innerText = "Select an order to view details.";
     return;
   }
 
-  ordersContainer.innerHTML = orders
-    .map((order) => {
-      const total = calculateOrderTotal(order);
-      const statusClass =
-        order.status === "Completed" ? "badge success" : "badge warning";
+  ordersContainer.innerHTML = `
+    <div class="order-table-wrapper">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th>Details</th>
+            <th>Order Code</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Completed</th>
+            <th>Items</th>
+            <th>Total Price</th>
+          </tr>
+        </thead>
 
-      const itemsHtml = order.items?.length
-        ? order.items
-            .map(
-              (item) => `
-              <div class="order-item-row">
-                <p><strong>${escapeHtml(item.model)}</strong></p>
-                <p>${escapeHtml(item.material)}</p>
-                <p>Qty: ${item.quantity}</p>
-                <p>Unit: ${item.unit_price}</p>
-                <p>Total: ${item.total_price}</p>
-              </div>
-            `
-            )
-            .join("")
-        : `<div class="empty-message">No items in this order.</div>`;
+        <tbody>
+          ${orders
+            .map((order) => {
+              const total = calculateOrderTotal(order);
+              const itemCount = order.items?.length || 0;
+              const selectedClass =
+                String(order.id) === String(selectedOrderId) ? "selected-row" : "";
 
-      return `
-        <article class="order-card">
-          <div class="order-card-header">
-            <div>
-              <h3>${escapeHtml(order.order_code)}</h3>
-              <p>Created: ${formatDate(order.created_at)}</p>
-              ${
-                order.completed_at
-                  ? `<p>Completed: ${formatDate(order.completed_at)}</p>`
-                  : ""
-              }
-            </div>
-
-            <div class="order-meta">
-              <span class="${statusClass}">${escapeHtml(order.status)}</span>
-            </div>
-          </div>
-
-          <div class="order-items">
-            ${itemsHtml}
-          </div>
-
-          <div class="order-total-box">
-            Total Price: ${total}
-          </div>
-        </article>
-      `;
-    })
-    .join("");
+              return `
+                <tr class="${selectedClass}">
+                  <td class="details-cell">
+                    <button class="detailsBtn" data-order-id="${order.id}" type="button">
+                      Details
+                    </button>
+                  </td>
+                  <td title="${escapeHtml(order.order_code)}">${escapeHtml(order.order_code)}</td>
+                  <td>
+                    <span class="${getStatusClass(order.status)}">
+                      ${escapeHtml(order.status)}
+                    </span>
+                  </td>
+                  <td>${formatDate(order.created_at)}</td>
+                  <td>${order.completed_at ? formatDate(order.completed_at) : "-"}</td>
+                  <td>${itemCount}</td>
+                  <td>${total}</td>
+                </tr>
+              `;
+            })
+            .join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
 }
 
-function calculateOrderTotal(order) {
-  if (!order.items?.length) return 0;
+ordersContainer.addEventListener("click", (e) => {
+  if (!e.target.classList.contains("detailsBtn")) return;
 
-  return order.items.reduce(
-    (sum, item) => sum + Number(item.total_price || 0),
-    0
-  );
+  const orderId = e.target.dataset.orderId;
+  const order = allOrders.find((item) => String(item.id) === String(orderId));
+
+  if (!order) {
+    alert("Order not found.");
+    return;
+  }
+
+  selectedOrderId = order.id;
+  renderOrderDetails(order);
+  renderCurrentPage();
+});
+
+/* =========================
+   DETAIL PANEL
+========================= */
+function renderOrderDetails(order) {
+  detailPanelInfo.innerText =
+    `${order.order_code} • ${order.status} • ${order.items?.length || 0} item(s)`;
+
+  if (!order.items || order.items.length === 0) {
+    orderDetailPanel.innerHTML = `<div class="empty-message">No items in this order.</div>`;
+    return;
+  }
+
+  const total = calculateOrderTotal(order);
+
+  orderDetailPanel.innerHTML = `
+    <div class="detail-summary">
+      <p><strong>Order Code:</strong> ${escapeHtml(order.order_code)}</p>
+      <p><strong>Status:</strong> ${escapeHtml(order.status)}</p>
+      <p><strong>Created:</strong> ${formatDate(order.created_at)}</p>
+      <p><strong>Completed:</strong> ${order.completed_at ? formatDate(order.completed_at) : "-"}</p>
+    </div>
+
+    <div class="detail-table-wrapper">
+      <table class="detail-items-table">
+        <thead>
+          <tr>
+            <th>Material</th>
+            <th>Type</th>
+            <th>Model</th>
+            <th>Angle</th>
+            <th>Nodal</th>
+            <th>Width</th>
+            <th>Teeth</th>
+            <th>Qty</th>
+            <th>Unit</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${order.items
+            .map(
+              (item) => `
+              <tr>
+                <td>${escapeHtml(item.material)}</td>
+                <td>${escapeHtml(item.type)}</td>
+                <td>${escapeHtml(item.model)}</td>
+                <td>${item.angle ?? "-"}</td>
+                <td>${item.nodal_length ?? "-"}</td>
+                <td>${item.width ?? "-"}</td>
+                <td>${item.number_of_teeth ?? "-"}</td>
+                <td>${item.quantity}</td>
+                <td>${item.unit_price}</td>
+                <td>${item.total_price}</td>
+              </tr>
+            `
+            )
+            .join("")}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="order-total-box">
+      Total Price: ${total}
+    </div>
+  `;
 }
 
 /* =========================
@@ -273,7 +357,16 @@ clearOrderFiltersBtn.addEventListener("click", () => {
 
   filteredOrders = [...allOrders];
   currentPage = 1;
+  selectedOrderId = filteredOrders[0]?.id || null;
+
   renderCurrentPage();
+
+  if (filteredOrders[0]) {
+    renderOrderDetails(filteredOrders[0]);
+  } else {
+    detailPanelInfo.innerText = "Select an order to view details.";
+    orderDetailPanel.innerHTML = `<div class="empty-message">No order selected.</div>`;
+  }
 });
 
 [orderSearchInput, statusFilter].forEach((input) => {
@@ -288,7 +381,7 @@ function applyOrderFilters() {
 
   filteredOrders = allOrders.filter((order) => {
     const itemsText = (order.items || [])
-      .map((item) => `${item.model} ${item.material}`)
+      .map((item) => `${item.model} ${item.material} ${item.type}`)
       .join(" ")
       .toLowerCase();
 
@@ -305,12 +398,34 @@ function applyOrderFilters() {
   });
 
   currentPage = 1;
+  selectedOrderId = filteredOrders[0]?.id || null;
+
   renderCurrentPage();
+
+  if (filteredOrders[0]) {
+    renderOrderDetails(filteredOrders[0]);
+  } else {
+    detailPanelInfo.innerText = "Select an order to view details.";
+    orderDetailPanel.innerHTML = `<div class="empty-message">No order selected.</div>`;
+  }
 }
 
 /* =========================
    HELPERS
 ========================= */
+function calculateOrderTotal(order) {
+  if (!order.items?.length) return 0;
+
+  return order.items.reduce(
+    (sum, item) => sum + Number(item.total_price || 0),
+    0
+  );
+}
+
+function getStatusClass(status) {
+  return status === "Completed" ? "badge success" : "badge warning";
+}
+
 function formatDate(value) {
   if (!value) return "-";
   return new Date(value).toLocaleString();

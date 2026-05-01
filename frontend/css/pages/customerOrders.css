@@ -1,6 +1,7 @@
 /* =========================================================
    CUSTOMER ORDERS PAGE CSS
    Theme: Blue / White Dashboard Layout
+   Layout: Top Filters + Half Orders / Half Details
 ========================================================= */
 
 
@@ -39,33 +40,80 @@
 
 
 /* =========================================================
-   2. MAIN LAYOUT
+   2. PAGE LAYOUT
 ========================================================= */
 
 .customer-orders-layout {
-  width: min(97%, 1600px);
+  width: min(98%, 1750px);
   margin: 20px auto 32px;
 
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+
+/* =========================================================
+   3. TOP FILTER BAR
+========================================================= */
+
+.orders-filter-bar {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 16px 18px;
+
   display: grid;
-  grid-template-columns: minmax(280px, 24%) 1fr;
+  grid-template-columns: minmax(260px, 1.4fr) minmax(180px, 0.7fr) auto;
+  gap: 14px;
+  align-items: end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter-group label {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--color-text-soft);
+}
+
+.filter-group input,
+.filter-group select {
+  width: 100%;
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.filter-actions button {
+  min-width: 82px;
+}
+
+
+/* =========================================================
+   4. ORDERS + DETAILS GRID
+========================================================= */
+
+.orders-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 20px;
   align-items: start;
 }
 
-.customer-orders-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-
-  position: sticky;
-  top: 18px;
-
-  max-height: calc(100vh - 120px);
-  overflow-y: auto;
-  padding-right: 6px;
-}
-
-.customer-orders-content {
+.orders-list-panel,
+.order-detail-panel {
   min-width: 0;
   background: white;
   border: 1px solid var(--color-border);
@@ -74,182 +122,257 @@
   padding: 18px;
 }
 
-
-/* =========================================================
-   3. SIDEBAR
-========================================================= */
-
-.customer-orders-sidebar::-webkit-scrollbar {
-  width: 7px;
-}
-
-.customer-orders-sidebar::-webkit-scrollbar-thumb {
-  background: #bfdbfe;
-  border-radius: 999px;
-}
-
-.customer-orders-sidebar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar-section {
-  background: white;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: 15px;
-  box-shadow: var(--shadow-sm);
-}
-
-.sidebar-section h2 {
-  font-size: 16px;
-  color: #1d4ed8;
-  margin-bottom: 12px;
-  padding-bottom: 7px;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.sidebar-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-}
-
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-bottom: 10px;
-}
-
-.filter-group label {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--color-text-soft);
-}
-
-.filter-group input,
-.filter-group select {
-  position: relative;
-  z-index: 2;
-  pointer-events: auto;
+.order-detail-panel {
+  position: sticky;
+  top: 18px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
 }
 
 
 /* =========================================================
-   4. SUMMARY STATS
+   5. HEADER AREAS
 ========================================================= */
 
-.stats-list {
-  display: grid;
-  gap: 8px;
-}
-
-.compact-stats {
-  grid-template-columns: 1fr;
-}
-
-.stat-card {
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 10px 12px;
-}
-
-.stat-number {
-  font-size: 22px;
-  line-height: 1.1;
-  font-weight: 800;
-  color: var(--color-primary);
-}
-
-.stat-label {
-  font-size: 12px;
-  color: var(--color-text-soft);
-  font-weight: 700;
-}
-
-
-/* =========================================================
-   5. CONTENT HEADER
-========================================================= */
-
-.content-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 18px;
-
+.content-header,
+.detail-panel-header {
   margin-bottom: 14px;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--color-border);
 }
 
-.content-header h2 {
+.content-header h2,
+.detail-panel-header h2 {
   color: #1d4ed8;
+  font-size: 24px;
+  margin-bottom: 4px;
 }
 
-.content-header p {
+.content-header p,
+.detail-panel-header p {
   margin-top: 4px;
+  font-size: 13px;
+  color: var(--color-text-soft);
 }
 
 
 /* =========================================================
-   6. ORDER CARDS
+   6. EXCEL TABLE BASE
 ========================================================= */
 
-.orders-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
+.order-table-wrapper,
+.detail-table-wrapper {
+  width: 100%;
+  overflow-x: hidden;
 
-.order-card {
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: 16px;
-  box-shadow: var(--shadow-sm);
-}
-
-.order-card-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: flex-start;
-  margin-bottom: 12px;
-}
-
-.order-card-header h3 {
-  color: #1d4ed8;
-  font-size: 17px;
-}
-
-.order-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.order-items {
-  display: grid;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.order-item-row {
   background: white;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 10px;
-  display: grid;
-  grid-template-columns: 1.3fr 1fr 0.6fr 0.8fr 0.8fr;
-  gap: 8px;
-  align-items: center;
+  border: 1px solid #b6c2d1;
+  border-radius: 4px;
+  box-shadow: none;
 }
 
-.order-item-row p {
-  font-size: 13px;
+.orders-table,
+.detail-items-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+  border-collapse: collapse;
+  background: white;
+}
+
+.orders-table th,
+.orders-table td,
+.detail-items-table th,
+.detail-items-table td {
+  padding: 5px 5px;
+  border: 1px solid #cbd5e1;
+
+  text-align: left;
+  font-size: 10px;
+  line-height: 1.15;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.orders-table th,
+.detail-items-table th {
+  background: #eaf2ff;
+  color: #1e40af;
+  font-weight: 900;
+  text-align: center;
+}
+
+.orders-table td,
+.detail-items-table td {
+  color: var(--color-text);
+  background: white;
+}
+
+.orders-table tbody tr:nth-child(even) td,
+.detail-items-table tbody tr:nth-child(even) td {
+  background: #f8fbff;
+}
+
+.orders-table tbody tr:hover td,
+.detail-items-table tbody tr:hover td {
+  background: #dbeafe;
+}
+
+.orders-table tbody tr.selected-row td {
+  background: #dbeafe;
+}
+
+
+/* =========================================================
+   7. ORDERS TABLE WIDTHS
+========================================================= */
+
+.orders-table th:nth-child(1),
+.orders-table td:nth-child(1) {
+  width: 13%;
+  text-align: center;
+}
+
+.orders-table th:nth-child(2),
+.orders-table td:nth-child(2) {
+  width: 25%;
+  font-weight: 700;
+  color: #1e40af;
+}
+
+.orders-table th:nth-child(3),
+.orders-table td:nth-child(3) {
+  width: 13%;
+  text-align: center;
+}
+
+.orders-table th:nth-child(4),
+.orders-table td:nth-child(4) {
+  width: 17%;
+}
+
+.orders-table th:nth-child(5),
+.orders-table td:nth-child(5) {
+  width: 17%;
+}
+
+.orders-table th:nth-child(6),
+.orders-table td:nth-child(6) {
+  width: 6%;
+  text-align: center;
+}
+
+.orders-table th:nth-child(7),
+.orders-table td:nth-child(7) {
+  width: 9%;
+  text-align: right;
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   8. DETAIL TABLE WIDTHS
+========================================================= */
+
+.detail-items-table th:nth-child(1),
+.detail-items-table td:nth-child(1) {
+  width: 12%;
+}
+
+.detail-items-table th:nth-child(2),
+.detail-items-table td:nth-child(2) {
+  width: 9%;
+}
+
+.detail-items-table th:nth-child(3),
+.detail-items-table td:nth-child(3) {
+  width: 11%;
+  font-weight: 700;
+  color: #1e40af;
+}
+
+.detail-items-table th:nth-child(4),
+.detail-items-table td:nth-child(4) {
+  width: 7%;
+  text-align: center;
+}
+
+.detail-items-table th:nth-child(5),
+.detail-items-table td:nth-child(5) {
+  width: 10%;
+  text-align: right;
+}
+
+.detail-items-table th:nth-child(6),
+.detail-items-table td:nth-child(6) {
+  width: 8%;
+  text-align: right;
+}
+
+.detail-items-table th:nth-child(7),
+.detail-items-table td:nth-child(7) {
+  width: 7%;
+  text-align: center;
+}
+
+.detail-items-table th:nth-child(8),
+.detail-items-table td:nth-child(8) {
+  width: 6%;
+  text-align: center;
+}
+
+.detail-items-table th:nth-child(9),
+.detail-items-table td:nth-child(9) {
+  width: 13%;
+  text-align: right;
+}
+
+.detail-items-table th:nth-child(10),
+.detail-items-table td:nth-child(10) {
+  width: 17%;
+  text-align: right;
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   9. DETAILS BUTTON + DETAIL SUMMARY
+========================================================= */
+
+.details-cell {
+  text-align: center;
+  overflow: visible !important;
+}
+
+.detailsBtn {
+  min-width: 52px;
+  padding: 4px 6px;
+  font-size: 9px;
+  border-radius: 5px;
+  background: #2563eb;
+  color: white;
+}
+
+.detailsBtn:hover {
+  background: #1d4ed8;
+}
+
+.detail-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 10px;
+  margin-bottom: 12px;
+
+  padding: 10px;
+  background: #f8fbff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+}
+
+.detail-summary p {
+  font-size: 12px;
   color: var(--color-text);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -257,18 +380,37 @@
 }
 
 .order-total-box {
-  margin-top: 12px;
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
-  background: #dbeafe;
+  margin-top: 10px;
+  padding: 10px 14px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #eaf2ff;
   color: #1e40af;
-  font-weight: 800;
+
+  font-weight: 900;
   text-align: right;
+  font-size: 14px;
 }
 
 
 /* =========================================================
-   7. PAGINATION
+   10. EMPTY MESSAGE
+========================================================= */
+
+.empty-message {
+  text-align: center;
+  color: var(--color-text-soft);
+  padding: 30px 14px;
+
+  background: #f8fbff;
+  border: 1px dashed #bfdbfe;
+  border-radius: var(--radius-md);
+}
+
+
+/* =========================================================
+   11. PAGINATION
 ========================================================= */
 
 .pagination {
@@ -322,22 +464,31 @@
 
 
 /* =========================================================
-   8. RESPONSIVE
+   12. RESPONSIVE
 ========================================================= */
 
-@media (max-width: 1100px) {
-  .customer-orders-layout {
+@media (max-width: 1200px) {
+  .orders-main-grid {
     grid-template-columns: 1fr;
   }
 
-  .customer-orders-sidebar {
+  .order-detail-panel {
     position: static;
     max-height: none;
-    overflow-y: visible;
+  }
+}
+
+@media (max-width: 900px) {
+  .orders-filter-bar {
+    grid-template-columns: 1fr;
   }
 
-  .order-item-row {
-    grid-template-columns: 1fr 1fr;
+  .filter-actions {
+    width: 100%;
+  }
+
+  .filter-actions button {
+    flex: 1;
   }
 }
 
@@ -355,11 +506,7 @@
     flex: 1;
   }
 
-  .order-card-header {
-    flex-direction: column;
-  }
-
-  .order-item-row {
+  .detail-summary {
     grid-template-columns: 1fr;
   }
 }

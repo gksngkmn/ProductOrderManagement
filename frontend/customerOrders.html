@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="./css/pages/customerOrders.css" />
 </head>
 <body>
-  <!-- TOP HEADER -->
   <header class="customer-orders-topbar">
     <div class="customer-orders-title-area">
       <h1>My Order History</h1>
@@ -24,57 +23,59 @@
     </div>
   </header>
 
-  <!-- MAIN LAYOUT -->
   <main class="customer-orders-layout">
-    <aside class="customer-orders-sidebar">
-      <section class="sidebar-section compact-dashboard">
-        <h2>Summary</h2>
-
-        <div id="orderStatsContainer" class="stats-list compact-stats">
-          <div class="empty-message">Loading summary...</div>
-        </div>
-      </section>
-
-      <section class="sidebar-section">
-        <h2>Order Filters</h2>
-
-        <div class="filter-group">
-          <label for="orderSearchInput">Search</label>
-          <input type="text" id="orderSearchInput" placeholder="Search order code or product..." />
-        </div>
-
-        <div class="filter-group">
-          <label for="statusFilter">Status</label>
-          <select id="statusFilter">
-            <option value="">All</option>
-            <option value="Current">Current</option>
-            <option value="Completed">Completed</option>
-          </select>
-        </div>
-
-        <div class="sidebar-actions">
-          <button id="applyOrderFiltersBtn" type="button">Apply</button>
-          <button id="clearOrderFiltersBtn" class="secondary" type="button">Clear</button>
-        </div>
-      </section>
-    </aside>
-
-    <section class="customer-orders-content">
-      <div class="content-header">
-        <div>
-          <h2>Orders</h2>
-          <p id="orderCountInfo" class="info-text">Loading orders...</p>
-        </div>
+    <section class="orders-filter-bar">
+      <div class="filter-group">
+        <label for="orderSearchInput">Search</label>
+        <input type="text" id="orderSearchInput" placeholder="Search order code or product..." />
       </div>
 
-      <div id="ordersContainer" class="orders-list">
-        <div class="empty-message">Loading orders...</div>
+      <div class="filter-group">
+        <label for="statusFilter">Status</label>
+        <select id="statusFilter">
+          <option value="">All</option>
+          <option value="Current">Current</option>
+          <option value="Completed">Completed</option>
+        </select>
       </div>
 
-      <div id="paginationContainer" class="pagination"></div>
+      <div class="filter-actions">
+        <button id="applyOrderFiltersBtn" type="button">Apply</button>
+        <button id="clearOrderFiltersBtn" class="secondary" type="button">Clear</button>
+      </div>
     </section>
+
+    <section class="orders-main-grid">
+      <section class="orders-list-panel">
+        <div class="content-header">
+          <div>
+            <h2>Orders</h2>
+            <p id="orderCountInfo" class="info-text">Loading orders...</p>
+          </div>
+        </div>
+
+        <div id="ordersContainer" class="orders-table-area">
+          <div class="empty-message">Loading orders...</div>
+        </div>
+
+        <div id="paginationContainer" class="pagination"></div>
+      </section>
+
+      <aside class="order-detail-panel">
+        <div class="detail-panel-header">
+          <h2>Order Details</h2>
+          <p id="detailPanelInfo">Select an order to view details.</p>
+        </div>
+
+        <div id="orderDetailPanel" class="detail-panel-body">
+          <div class="empty-message">No order selected.</div>
+        </div>
+      </aside>
+    </section>
+
+    <div id="orderStatsContainer" style="display:none;"></div>
   </main>
 
-  <script type="module" src="./js/pages/CustomerOrdersPage.js"></script>
+  <script type="module" src="./js/pages/CustomerOrdersPage.js?v=41"></script>
 </body>
 </html>

@@ -302,7 +302,7 @@ customersTableBody.addEventListener("click", async (e) => {
   const id = e.target.dataset.id;
 
   if (e.target.classList.contains("ordersBtn")) {
-    window.location.href = `./orderHistory.html?companyId=${id}`;
+    window.location.href = `/orderHistory.html?companyId=${id}`;
     return;
   }
 
