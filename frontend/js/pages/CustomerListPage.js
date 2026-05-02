@@ -1,6 +1,13 @@
 import PageGuard from "../core/PageGuard.js";
 import AuthManager from "../core/AuthManager.js";
+
 import CompanyApi from "../api/CompanyApi.js";
+
+import CustomerInfo from "../components/CustomerInfo.js";
+import CustomerTable from "../components/CustomerTable.js";
+
+import DomHelper from "../helpers/DomHelper.js";
+import PaginationHelper from "../helpers/PaginationHelper.js";
 
 PageGuard.requireRole("manager");
 
@@ -35,8 +42,11 @@ const CUSTOMERS_PER_PAGE = 25;
    INIT
 ========================= */
 const user = AuthManager.getUser();
-managerInfo.innerText = `${user.username} • ${user.role}`;
+managerInfo.innerText = CustomerInfo.renderManagerInfo(user);
 
+/* =========================
+   NAVIGATION / AUTH
+========================= */
 logoutBtn.addEventListener("click", () => {
   AuthManager.logout();
 });
@@ -59,16 +69,15 @@ async function loadCustomers() {
     renderCurrentPage();
     renderStats();
   } catch (error) {
-    customersTableBody.innerHTML = `
-      <tr>
-        <td colspan="8" class="table-empty">${error.message}</td>
-      </tr>
-    `;
-    customerStatsContainer.innerHTML = `<div class="empty-message">${error.message}</div>`;
+    customersTableBody.innerHTML = DomHelper.tableEmpty(error.message, 8);
+    customerStatsContainer.innerHTML = DomHelper.emptyMessage(error.message);
     customerCountInfo.innerText = "Customers could not be loaded.";
   }
 }
 
+/* =========================
+   STATS
+========================= */
 function renderStats() {
   const countries = new Set(
     allCustomers
@@ -101,141 +110,40 @@ function renderStats() {
 }
 
 /* =========================
-   RENDER CUSTOMERS
+   RENDER CURRENT PAGE
 ========================= */
 function renderCurrentPage() {
-  const totalCustomers = filteredCustomers.length;
-  const totalPages = Math.ceil(totalCustomers / CUSTOMERS_PER_PAGE) || 1;
+  const pageData = PaginationHelper.getPageData(
+    filteredCustomers,
+    currentPage,
+    CUSTOMERS_PER_PAGE
+  );
 
-  if (currentPage > totalPages) currentPage = totalPages;
-  if (currentPage < 1) currentPage = 1;
+  currentPage = pageData.currentPage;
 
-  const startIndex = (currentPage - 1) * CUSTOMERS_PER_PAGE;
-  const endIndex = startIndex + CUSTOMERS_PER_PAGE;
-  const customersForPage = filteredCustomers.slice(startIndex, endIndex);
+  customersTableBody.innerHTML = CustomerTable.renderRows(pageData.pageItems);
 
-  renderCustomers(customersForPage);
-  renderPagination(totalPages);
-
-  const visibleStart = totalCustomers === 0 ? 0 : startIndex + 1;
-  const visibleEnd = Math.min(endIndex, totalCustomers);
+  paginationContainer.innerHTML = PaginationHelper.render(
+    pageData.currentPage,
+    pageData.totalPages
+  );
 
   customerCountInfo.innerText =
-    `Showing ${visibleStart}-${visibleEnd} of ${totalCustomers} customers`;
-}
-
-function renderCustomers(customers) {
-  if (!customers.length) {
-    customersTableBody.innerHTML = `
-      <tr>
-        <td colspan="8" class="table-empty">No customers found.</td>
-      </tr>
-    `;
-    return;
-  }
-
-  customersTableBody.innerHTML = customers
-    .map(
-      (customer) => `
-      <tr title="${escapeHtml(customer.companyName)} | ${escapeHtml(customer.email)}">
-        <td>${escapeHtml(customer.companyName)}</td>
-        <td>${escapeHtml(customer.name)} ${escapeHtml(customer.surname)}</td>
-        <td>${escapeHtml(customer.email)}</td>
-        <td>${escapeHtml(customer.phone)}</td>
-        <td>${escapeHtml(customer.country)}</td>
-        <td>${escapeHtml(customer.city)}</td>
-        <td>${escapeHtml(customer.username)}</td>
-        <td class="actions-cell">
-          <button class="ordersBtn" data-id="${customer.id}" type="button">
-            Orders
-          </button>
-          <button class="deleteCustomerBtn danger" data-id="${customer.id}" type="button">
-            Delete
-          </button>
-        </td>
-      </tr>
-    `
-    )
-    .join("");
+    `Showing ${pageData.visibleStart}-${pageData.visibleEnd} of ${pageData.totalItems} customers`;
 }
 
 /* =========================
-   PAGINATION
+   PAGINATION EVENTS
 ========================= */
-function renderPagination(totalPages) {
-  if (totalPages <= 1) {
-    paginationContainer.innerHTML = "";
-    return;
-  }
+paginationContainer.addEventListener("click", (event) => {
+  const page = PaginationHelper.getClickedPage(event);
 
-  const visiblePages = getVisiblePages(currentPage, totalPages);
+  if (!page) return;
 
-  let html = `
-    <button 
-      type="button" 
-      data-page="${currentPage - 1}" 
-      ${currentPage === 1 ? "disabled" : ""}
-    >
-      Prev
-    </button>
-  `;
-
-  visiblePages.forEach((page) => {
-    if (page === "...") {
-      html += `<span class="pagination-dots">...</span>`;
-      return;
-    }
-
-    html += `
-      <button 
-        type="button"
-        class="${page === currentPage ? "active-page" : ""}" 
-        data-page="${page}"
-      >
-        ${page}
-      </button>
-    `;
-  });
-
-  html += `
-    <button 
-      type="button" 
-      data-page="${currentPage + 1}" 
-      ${currentPage === totalPages ? "disabled" : ""}
-    >
-      Next
-    </button>
-
-    <div class="pagination-info">
-      Page ${currentPage} of ${totalPages}
-    </div>
-  `;
-
-  paginationContainer.innerHTML = html;
-}
-
-function getVisiblePages(current, total) {
-  if (total <= 7) {
-    return Array.from({ length: total }, (_, index) => index + 1);
-  }
-
-  if (current <= 4) {
-    return [1, 2, 3, 4, 5, "...", total];
-  }
-
-  if (current >= total - 3) {
-    return [1, "...", total - 4, total - 3, total - 2, total - 1, total];
-  }
-
-  return [1, "...", current - 1, current, current + 1, "...", total];
-}
-
-paginationContainer.addEventListener("click", (e) => {
-  const page = Number(e.target.dataset.page);
-
-  if (!page || Number.isNaN(page)) return;
-
-  const totalPages = Math.ceil(filteredCustomers.length / CUSTOMERS_PER_PAGE) || 1;
+  const totalPages = PaginationHelper.getTotalPages(
+    filteredCustomers.length,
+    CUSTOMERS_PER_PAGE
+  );
 
   if (page < 1 || page > totalPages) return;
 
@@ -298,15 +206,14 @@ function applyCustomerFilters() {
 /* =========================
    TABLE ACTIONS
 ========================= */
-customersTableBody.addEventListener("click", async (e) => {
-  const id = e.target.dataset.id;
+customersTableBody.addEventListener("click", async (event) => {
+  const id = event.target.dataset.id;
 
-  if (e.target.classList.contains("ordersBtn")) {
+  if (event.target.classList.contains("ordersBtn")) {
     window.location.href = `/orderHistory.html?companyId=${id}`;
-    return;
   }
 
-  if (e.target.classList.contains("deleteCustomerBtn")) {
+  if (event.target.classList.contains("deleteCustomerBtn")) {
     const confirmed = confirm("Are you sure you want to delete this customer?");
 
     if (!confirmed) return;
@@ -320,18 +227,6 @@ customersTableBody.addEventListener("click", async (e) => {
     }
   }
 });
-
-/* =========================
-   SECURITY HELPER
-========================= */
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
 
 /* =========================
    PAGE LOAD

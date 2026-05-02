@@ -24,10 +24,44 @@
   </header>
 
   <main class="order-history-layout">
+    <!-- LEFT: ORDERS LIST -->
     <section class="orders-list-panel">
       <div class="content-header">
         <h2>Orders</h2>
         <p id="orderCountInfo" class="info-text">Loading orders...</p>
+      </div>
+
+      <div class="order-filter-bar">
+        <div class="filter-group">
+          <label for="yearFilter">Year</label>
+          <select id="yearFilter">
+            <option value="">All Years</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="monthFilter">Month</label>
+          <select id="monthFilter">
+            <option value="">All Months</option>
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+          </select>
+        </div>
+
+        <div class="filter-actions">
+          <button id="applyDateFiltersBtn" type="button">Apply</button>
+          <button id="clearDateFiltersBtn" class="secondary" type="button">Clear</button>
+        </div>
       </div>
 
       <div class="order-table-wrapper">
@@ -53,6 +87,7 @@
       </div>
     </section>
 
+    <!-- RIGHT: ORDER DETAILS -->
     <aside class="order-detail-panel">
       <div class="detail-panel-header">
         <h2>Order Details</h2>
@@ -65,6 +100,6 @@
     </aside>
   </main>
 
-  <script type="module" src="./js/pages/OrderHistoryPage.js?v=42"></script>
+  <script type="module" src="./js/pages/OrderHistoryPage.js"></script>
 </body>
 </html>

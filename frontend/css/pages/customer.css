@@ -6,41 +6,7 @@
 
 
 /* =========================================================
-   1. TOPBAR
-========================================================= */
-
-.customer-topbar {
-  min-height: 88px;
-  padding: 20px 32px;
-  background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
-  color: white;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 24px;
-
-  box-shadow: var(--shadow-md);
-}
-
-.customer-title-area h1 {
-  color: white;
-  margin-bottom: 4px;
-}
-
-.customer-title-area p {
-  color: rgba(255, 255, 255, 0.88);
-}
-
-.customer-top-actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-
-/* =========================================================
-   2. MAIN LAYOUT
+   1. CUSTOMER MAIN LAYOUT
 ========================================================= */
 
 .customer-layout {
@@ -77,7 +43,7 @@
 
 
 /* =========================================================
-   3. SIDEBAR SCROLLBAR
+   2. CUSTOMER SIDEBAR SCROLLBAR
 ========================================================= */
 
 .customer-sidebar::-webkit-scrollbar {
@@ -95,24 +61,8 @@
 
 
 /* =========================================================
-   4. ADD ITEM SECTION
+   3. ADD ITEM SECTION
 ========================================================= */
-
-.sidebar-section {
-  background: white;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: 16px;
-  box-shadow: var(--shadow-sm);
-}
-
-.sidebar-section h2 {
-  font-size: 17px;
-  color: #1d4ed8;
-  margin-bottom: 10px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--color-border);
-}
 
 .add-item-help {
   margin-bottom: 14px;
@@ -127,41 +77,9 @@
   gap: 2px;
 }
 
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-bottom: 10px;
-}
-
-.filter-group label {
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--color-text-soft);
-}
-
-.filter-group input {
-  width: 100%;
-  position: relative;
-  z-index: 2;
-  pointer-events: auto;
-}
-
-.sidebar-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 12px;
-}
-
-.sidebar-actions button {
-  flex: 1;
-  min-width: 110px;
-}
-
 
 /* =========================================================
-   5. SELECTED PRODUCT INFO
+   4. SELECTED PRODUCT INFO
 ========================================================= */
 
 .selected-product-info {
@@ -190,48 +108,25 @@
 
 
 /* =========================================================
-   6. CURRENT ORDER HEADER
+   5. CUSTOMER CONTENT HEADER
 ========================================================= */
 
-.content-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 18px;
-
-  margin-bottom: 14px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.content-header h2 {
-  color: #1d4ed8;
+.customer-content .content-header h2 {
   font-size: 28px;
-  margin-bottom: 6px;
 }
 
-.content-header p {
-  margin-top: 4px;
+.customer-content .content-header p {
   font-size: 15px;
-  color: var(--color-text-soft);
 }
 
-.content-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.content-actions button {
+.customer-content .content-actions button {
   min-width: 120px;
   padding: 10px 18px;
 }
 
 
 /* =========================================================
-   7. CURRENT ORDER SUMMARY BASE
+   6. CURRENT ORDER SUMMARY
 ========================================================= */
 
 .order-summary {
@@ -248,7 +143,7 @@
 
 
 /* =========================================================
-   8. ORDER ITEMS TABLE - EXCEL STYLE
+   7. ORDER TABLE WRAPPER
 ========================================================= */
 
 .order-table-wrapper {
@@ -256,10 +151,15 @@
   overflow-x: hidden;
 
   background: white;
-  border: 1px solid #b6c2d1;
+  border: 1px solid var(--color-border-dark);
   border-radius: 4px;
   box-shadow: none;
 }
+
+
+/* =========================================================
+   8. ORDER ITEMS TABLE - EXCEL STYLE
+========================================================= */
 
 .order-items-table {
   width: 100%;
@@ -272,7 +172,7 @@
 .order-items-table th,
 .order-items-table td {
   padding: 5px 5px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-border-strong);
 
   text-align: left;
   font-size: 10px;
@@ -310,72 +210,74 @@
 
 /* =========================================================
    9. ORDER TABLE COLUMN WIDTHS
-   Total = 100%
+   Columns:
+   Material, Type, Model, Angle, Nodal Length, Width,
+   Teeth, Qty, Unit Price, Total Price, Actions
 ========================================================= */
 
 .order-items-table th:nth-child(1),
 .order-items-table td:nth-child(1) {
-  width: 9%; /* Material */
+  width: 9%;
 }
 
 .order-items-table th:nth-child(2),
 .order-items-table td:nth-child(2) {
-  width: 7%; /* Type */
+  width: 7%;
 }
 
 .order-items-table th:nth-child(3),
 .order-items-table td:nth-child(3) {
-  width: 8%; /* Model */
+  width: 8%;
   font-weight: 700;
   color: #1e40af;
 }
 
 .order-items-table th:nth-child(4),
 .order-items-table td:nth-child(4) {
-  width: 5%; /* Angle */
+  width: 5%;
   text-align: center;
 }
 
 .order-items-table th:nth-child(5),
 .order-items-table td:nth-child(5) {
-  width: 12%; /* Nodal Length */
+  width: 12%;
   text-align: right;
 }
 
 .order-items-table th:nth-child(6),
 .order-items-table td:nth-child(6) {
-  width: 8%; /* Width */
+  width: 8%;
   text-align: right;
 }
 
 .order-items-table th:nth-child(7),
 .order-items-table td:nth-child(7) {
-  width: 5%; /* Teeth */
+  width: 5%;
   text-align: center;
 }
 
 .order-items-table th:nth-child(8),
 .order-items-table td:nth-child(8) {
-  width: 5%; /* Qty */
+  width: 5%;
   text-align: center;
 }
 
 .order-items-table th:nth-child(9),
 .order-items-table td:nth-child(9) {
-  width: 9%; /* Unit Price */
+  width: 9%;
   text-align: right;
 }
 
 .order-items-table th:nth-child(10),
 .order-items-table td:nth-child(10) {
-  width: 10%; /* Total Price */
+  width: 10%;
   text-align: right;
   font-weight: 800;
 }
 
 .order-items-table th:nth-child(11),
 .order-items-table td:nth-child(11) {
-  width: 22%; /* Actions */
+  width: 22%;
   text-align: center;
 }
 
@@ -407,60 +309,7 @@
 
 
 /* =========================================================
-   11. ORDER TOTAL
-========================================================= */
-
-.order-total-box {
-  margin-top: 10px;
-  padding: 10px 14px;
-
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  background: #eaf2ff;
-  color: #1e40af;
-
-  font-weight: 900;
-  text-align: right;
-  font-size: 14px;
-}
-
-
-/* =========================================================
-   12. EMPTY MESSAGE
-========================================================= */
-
-.empty-message {
-  text-align: center;
-  color: var(--color-text-soft);
-  padding: 34px 16px;
-
-  background: #f8fbff;
-  border: 1px dashed #bfdbfe;
-  border-radius: var(--radius-md);
-}
-
-
-/* =========================================================
-   13. GENERAL BUTTON FIXES
-========================================================= */
-
-button.danger {
-  background: #dc2626;
-  color: white;
-}
-
-button.danger:hover {
-  background: #b91c1c;
-}
-
-button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-
-/* =========================================================
-   14. RESPONSIVE
+   11. CUSTOMER RESPONSIVE
 ========================================================= */
 
 @media (max-width: 1200px) {
@@ -491,38 +340,11 @@ button:disabled {
 }
 
 @media (max-width: 760px) {
-  .customer-topbar {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .customer-top-actions {
-    width: 100%;
-  }
-
-  .customer-top-actions button {
-    flex: 1;
-  }
-
-  .content-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .content-header h2 {
+  .customer-content .content-header h2 {
     font-size: 24px;
   }
 
-  .content-header p {
+  .customer-content .content-header p {
     font-size: 14px;
-  }
-
-  .content-actions {
-    width: 100%;
-    justify-content: stretch;
-  }
-
-  .content-actions button {
-    width: 100%;
   }
 }

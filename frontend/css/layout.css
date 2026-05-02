@@ -1,12 +1,26 @@
+/* =========================================================
+   LAYOUT CSS
+   Purpose: Shared page-level shells only
+   Note: Page-specific widths/grids stay in pages/*.css
+========================================================= */
+
+
+/* =========================================================
+   1. LEGACY GENERAL HEADER / CONTAINER
+========================================================= */
+
 .header {
+  min-height: 88px;
+  padding: 20px 32px;
   background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
   color: white;
-  padding: 22px 32px;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
-  box-shadow: var(--shadow-sm);
+  gap: 24px;
+
+  box-shadow: var(--shadow-md);
 }
 
 .header h1 {
@@ -33,17 +47,115 @@
   border-bottom: 1px solid var(--color-border);
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
+
+/* =========================================================
+   2. SHARED TOPBAR BASE
+========================================================= */
+
+.manager-topbar,
+.customer-topbar,
+.customer-list-topbar,
+.customer-orders-topbar,
+.order-history-topbar {
+  min-height: 88px;
+  padding: 20px 32px;
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+  color: white;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+
+  box-shadow: var(--shadow-md);
 }
 
-.grid-2 {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.manager-title-area,
+.customer-title-area,
+.customer-list-title-area,
+.customer-orders-title-area,
+.history-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.manager-title-area h1,
+.customer-title-area h1,
+.customer-list-title-area h1,
+.customer-orders-title-area h1,
+.history-header-info h1 {
+  color: white;
+  margin-bottom: 4px;
+}
+
+.manager-title-area p,
+.customer-title-area p,
+.customer-list-title-area p,
+.customer-orders-title-area p,
+.history-header-info p {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.manager-top-actions,
+.customer-top-actions,
+.customer-list-top-actions,
+.customer-orders-top-actions,
+.history-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   3. COMMON CONTENT HEADER
+========================================================= */
+
+.content-header,
+.detail-panel-header {
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 18px;
 }
+
+.content-header h2,
+.detail-panel-header h2 {
+  color: var(--color-primary-dark);
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.content-header p,
+.detail-panel-header p {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--color-text-soft);
+}
+
+.content-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.content-actions button {
+  min-width: 120px;
+}
+
+
+/* =========================================================
+   4. CENTER PAGE
+========================================================= */
 
 .center-page {
   min-height: 100vh;
@@ -57,13 +169,72 @@
   margin-bottom: 18px;
 }
 
+
+/* =========================================================
+   5. GRID HELPERS
+========================================================= */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+
+/* =========================================================
+   6. RESPONSIVE SHARED LAYOUT
+========================================================= */
+
 @media (max-width: 900px) {
   .grid-2 {
     grid-template-columns: 1fr;
   }
+}
 
-  .header {
+@media (max-width: 760px) {
+  .header,
+  .manager-topbar,
+  .customer-topbar,
+  .customer-list-topbar,
+  .customer-orders-topbar,
+  .order-history-topbar {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .manager-top-actions,
+  .customer-top-actions,
+  .customer-list-top-actions,
+  .customer-orders-top-actions,
+  .history-actions {
+    width: 100%;
+  }
+
+  .manager-top-actions button,
+  .customer-top-actions button,
+  .customer-list-top-actions button,
+  .customer-orders-top-actions button,
+  .history-actions button {
+    flex: 1;
+  }
+
+  .content-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .content-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .content-actions button {
+    width: 100%;
   }
 }

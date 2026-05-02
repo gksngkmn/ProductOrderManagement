@@ -1,6 +1,10 @@
 import PageGuard from "../core/PageGuard.js";
 import AuthManager from "../core/AuthManager.js";
+
 import OrderApi from "../api/OrderApi.js";
+
+import OrderTable from "../components/OrderTable.js";
+import DomHelper from "../helpers/DomHelper.js";
 
 PageGuard.requireRole("manager");
 
@@ -9,8 +13,14 @@ PageGuard.requireRole("manager");
 ========================= */
 const ordersTableBody = document.getElementById("ordersTableBody");
 const orderCountInfo = document.getElementById("orderCountInfo");
+
 const detailPanelInfo = document.getElementById("detailPanelInfo");
 const orderDetailPanel = document.getElementById("orderDetailPanel");
+
+const yearFilter = document.getElementById("yearFilter");
+const monthFilter = document.getElementById("monthFilter");
+const applyDateFiltersBtn = document.getElementById("applyDateFiltersBtn");
+const clearDateFiltersBtn = document.getElementById("clearDateFiltersBtn");
 
 const backBtn = document.getElementById("backBtn");
 const logoutBtn = document.getElementById("logoutBtn");
@@ -19,13 +29,14 @@ const logoutBtn = document.getElementById("logoutBtn");
    STATE
 ========================= */
 let allOrders = [];
+let filteredOrders = [];
 let selectedOrderId = null;
 
 const params = new URLSearchParams(window.location.search);
 const companyId = params.get("companyId");
 
 /* =========================
-   NAVIGATION
+   NAVIGATION / AUTH
 ========================= */
 backBtn.addEventListener("click", () => {
   window.location.href = "/customerList.html";
@@ -40,189 +51,184 @@ logoutBtn.addEventListener("click", () => {
 ========================= */
 async function loadOrders() {
   if (!companyId) {
-    ordersTableBody.innerHTML = `
-      <tr>
-        <td colspan="7" class="table-empty">No company selected.</td>
-      </tr>
-    `;
-    orderCountInfo.innerText = "No company selected.";
+    renderEmptyOrders("No company selected.");
     return;
   }
 
   try {
-    allOrders = await OrderApi.getOrdersByCompany(companyId);
+    orderCountInfo.innerText = "Loading orders...";
 
-    if (!allOrders.length) {
-      ordersTableBody.innerHTML = `
-        <tr>
-          <td colspan="7" class="table-empty">No orders found.</td>
-        </tr>
-      `;
-      orderCountInfo.innerText = "0 orders found.";
+    allOrders = await OrderApi.getOrdersByCompany(companyId);
+    filteredOrders = [...allOrders];
+
+    populateYearFilter();
+
+    if (!filteredOrders.length) {
+      renderEmptyOrders("No orders found.");
       return;
     }
 
-    renderOrdersTable(allOrders);
-    orderCountInfo.innerText = `${allOrders.length} orders found.`;
+    selectedOrderId = filteredOrders[0].id;
 
-    selectOrder(allOrders[0].id);
+    renderOrdersTable();
+    renderSelectedOrderDetail();
+    updateOrderCountInfo();
   } catch (error) {
-    ordersTableBody.innerHTML = `
-      <tr>
-        <td colspan="7" class="table-empty">${error.message}</td>
-      </tr>
-    `;
+    ordersTableBody.innerHTML = DomHelper.tableEmpty(error.message, 7);
     orderCountInfo.innerText = "Orders could not be loaded.";
+    detailPanelInfo.innerText = "Select an order to view details.";
+    orderDetailPanel.innerHTML = DomHelper.emptyMessage(error.message);
   }
 }
 
 /* =========================
-   RENDER ORDERS TABLE
+   DATE FILTERS
 ========================= */
-function renderOrdersTable(orders) {
-  ordersTableBody.innerHTML = orders
-    .map((order) => {
-      const total = calculateOrderTotal(order);
-      const itemCount = order.items ? order.items.length : 0;
-      const isSelected = String(order.id) === String(selectedOrderId);
+function populateYearFilter() {
+  const years = [
+    ...new Set(
+      allOrders
+        .map((order) => getYear(order.created_at))
+        .filter(Boolean)
+    )
+  ].sort((a, b) => b - a);
 
-      return `
-        <tr 
-          class="${isSelected ? "selected-row" : ""}" 
-          data-order-id="${order.id}"
-        >
-          <td>${order.id}</td>
-          <td title="${escapeHtml(order.order_code)}">${escapeHtml(order.order_code)}</td>
-          <td>${escapeHtml(order.status)}</td>
-          <td>${formatDate(order.created_at)}</td>
-          <td>${formatDate(order.completed_at)}</td>
-          <td>${itemCount}</td>
-          <td>${total}</td>
-        </tr>
-      `;
-    })
-    .join("");
-}
-
-/* =========================
-   SELECT ORDER
-========================= */
-ordersTableBody.addEventListener("click", (e) => {
-  const row = e.target.closest("tr");
-  if (!row || !row.dataset.orderId) return;
-
-  selectOrder(row.dataset.orderId);
-});
-
-function selectOrder(orderId) {
-  selectedOrderId = orderId;
-
-  const order = allOrders.find((item) => String(item.id) === String(orderId));
-
-  if (!order) {
-    orderDetailPanel.innerHTML = `<div class="empty-message">Order not found.</div>`;
-    return;
-  }
-
-  renderOrdersTable(allOrders);
-  renderOrderDetail(order);
-}
-
-/* =========================
-   RENDER DETAIL
-========================= */
-function renderOrderDetail(order) {
-  const total = calculateOrderTotal(order);
-
-  detailPanelInfo.innerText = `${order.order_code} • ${order.status}`;
-
-  const itemsHtml = order.items?.length
-    ? `
-      <div class="detail-table-wrapper">
-        <table class="detail-items-table">
-          <thead>
-            <tr>
-              <th>Material</th>
-              <th>Type</th>
-              <th>Model</th>
-              <th>Angle</th>
-              <th>Nodal Length</th>
-              <th>Width</th>
-              <th>Teeth</th>
-              <th>Qty</th>
-              <th>Unit Price</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            ${order.items
-              .map(
-                (item) => `
-                <tr>
-                  <td>${escapeHtml(item.material)}</td>
-                  <td>${escapeHtml(item.type)}</td>
-                  <td>${escapeHtml(item.model)}</td>
-                  <td>${item.angle ?? ""}</td>
-                  <td>${item.nodal_length ?? ""}</td>
-                  <td>${item.width ?? ""}</td>
-                  <td>${item.number_of_teeth ?? ""}</td>
-                  <td>${item.quantity ?? ""}</td>
-                  <td>${item.unit_price ?? ""}</td>
-                  <td>${item.total_price ?? ""}</td>
-                </tr>
-              `
-              )
-              .join("")}
-          </tbody>
-        </table>
-      </div>
-    `
-    : `<div class="empty-message">No items in this order.</div>`;
-
-  orderDetailPanel.innerHTML = `
-    <div class="detail-summary">
-      <p><strong>Order ID:</strong> ${order.id}</p>
-      <p><strong>Status:</strong> ${escapeHtml(order.status)}</p>
-      <p><strong>Created:</strong> ${formatDate(order.created_at)}</p>
-      <p><strong>Completed:</strong> ${formatDate(order.completed_at)}</p>
-      <p><strong>Items:</strong> ${order.items?.length || 0}</p>
-      <p><strong>Total:</strong> ${total}</p>
-    </div>
-
-    ${itemsHtml}
-
-    <div class="order-total-box">
-      Total Price: ${total}
-    </div>
+  yearFilter.innerHTML = `
+    <option value="">All Years</option>
+    ${years
+      .map((year) => `<option value="${year}">${year}</option>`)
+      .join("")}
   `;
 }
 
-/* =========================
-   HELPERS
-========================= */
-function calculateOrderTotal(order) {
-  if (!order.items?.length) return 0;
+applyDateFiltersBtn.addEventListener("click", applyDateFilters);
+yearFilter.addEventListener("change", applyDateFilters);
+monthFilter.addEventListener("change", applyDateFilters);
 
-  return order.items.reduce(
-    (sum, item) => sum + Number(item.total_price || 0),
-    0
+clearDateFiltersBtn.addEventListener("click", () => {
+  yearFilter.value = "";
+  monthFilter.value = "";
+
+  filteredOrders = [...allOrders];
+  selectedOrderId = filteredOrders[0]?.id || null;
+
+  if (!filteredOrders.length) {
+    renderEmptyOrders("No orders found.");
+    return;
+  }
+
+  renderOrdersTable();
+  renderSelectedOrderDetail();
+  updateOrderCountInfo();
+});
+
+function applyDateFilters() {
+  const selectedYear = yearFilter.value;
+  const selectedMonth = monthFilter.value;
+
+  filteredOrders = allOrders.filter((order) => {
+    const orderYear = getYear(order.created_at);
+    const orderMonth = getMonth(order.created_at);
+
+    const matchesYear =
+      !selectedYear || String(orderYear) === String(selectedYear);
+
+    const matchesMonth =
+      !selectedMonth || String(orderMonth) === String(selectedMonth);
+
+    return matchesYear && matchesMonth;
+  });
+
+  selectedOrderId = filteredOrders[0]?.id || null;
+
+  if (!filteredOrders.length) {
+    renderEmptyOrders("No orders found for selected date filter.");
+    return;
+  }
+
+  renderOrdersTable();
+  renderSelectedOrderDetail();
+  updateOrderCountInfo();
+}
+
+function getYear(dateValue) {
+  if (!dateValue) return null;
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) return null;
+
+  return date.getFullYear();
+}
+
+function getMonth(dateValue) {
+  if (!dateValue) return null;
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) return null;
+
+  return date.getMonth() + 1;
+}
+
+/* =========================
+   RENDER
+========================= */
+function renderOrdersTable() {
+  ordersTableBody.innerHTML = OrderTable.renderManagerOrderRows(
+    filteredOrders,
+    selectedOrderId
   );
 }
 
-function formatDate(value) {
-  if (!value) return "-";
-  return new Date(value).toLocaleString();
+function renderSelectedOrderDetail() {
+  const selectedOrder = filteredOrders.find(
+    (order) => String(order.id) === String(selectedOrderId)
+  );
+
+  if (!selectedOrder) {
+    detailPanelInfo.innerText = "Select an order to view details.";
+    orderDetailPanel.innerHTML = DomHelper.emptyMessage("No order selected.");
+    return;
+  }
+
+  detailPanelInfo.innerText =
+    `${selectedOrder.order_code} • ${selectedOrder.status}`;
+
+  orderDetailPanel.innerHTML = OrderTable.renderOrderDetail(selectedOrder);
 }
 
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+function renderEmptyOrders(message) {
+  ordersTableBody.innerHTML = DomHelper.tableEmpty(message, 7);
+  orderCountInfo.innerText = "0 orders found.";
+  detailPanelInfo.innerText = "Select an order to view details.";
+  orderDetailPanel.innerHTML = DomHelper.emptyMessage("No order selected.");
 }
+
+function updateOrderCountInfo() {
+  const total = allOrders.length;
+  const filtered = filteredOrders.length;
+
+  if (filtered === total) {
+    orderCountInfo.innerText = `${total} orders found.`;
+  } else {
+    orderCountInfo.innerText = `${filtered} of ${total} orders shown.`;
+  }
+}
+
+/* =========================
+   TABLE EVENTS
+========================= */
+ordersTableBody.addEventListener("click", (event) => {
+  const row = event.target.closest("tr");
+
+  if (!row || !row.dataset.orderId) return;
+
+  selectedOrderId = row.dataset.orderId;
+
+  renderOrdersTable();
+  renderSelectedOrderDetail();
+});
 
 /* =========================
    PAGE LOAD

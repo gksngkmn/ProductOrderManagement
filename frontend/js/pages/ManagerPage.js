@@ -1,7 +1,14 @@
 import PageGuard from "../core/PageGuard.js";
 import AuthManager from "../core/AuthManager.js";
+
 import CompanyApi from "../api/CompanyApi.js";
 import ProductApi from "../api/ProductApi.js";
+
+import ProductTable from "../components/ProductTable.js";
+import CustomerInfo from "../components/CustomerInfo.js";
+
+import DomHelper from "../helpers/DomHelper.js";
+import PaginationHelper from "../helpers/PaginationHelper.js";
 
 PageGuard.requireRole("manager");
 
@@ -53,8 +60,7 @@ const PRODUCTS_PER_PAGE = 25;
    INIT
 ========================= */
 const user = AuthManager.getUser();
-
-managerInfo.innerText = `${user.username} • ${user.role}`;
+managerInfo.innerText = CustomerInfo.renderManagerInfo(user);
 
 logoutBtn.addEventListener("click", () => {
   AuthManager.logout();
@@ -94,9 +100,7 @@ async function loadStats() {
       </div>
     `;
   } catch (error) {
-    statsContainer.innerHTML = `
-      <div class="empty-message">${error.message}</div>
-    `;
+    statsContainer.innerHTML = DomHelper.emptyMessage(error.message);
   }
 }
 
@@ -114,12 +118,7 @@ async function loadProducts() {
     renderCurrentPage();
     await loadStats();
   } catch (error) {
-    productsTableBody.innerHTML = `
-      <tr>
-        <td colspan="9" class="table-empty">${error.message}</td>
-      </tr>
-    `;
-
+    productsTableBody.innerHTML = DomHelper.tableEmpty(error.message, 9);
     paginationContainer.innerHTML = "";
     productCountInfo.innerText = "Products could not be loaded.";
   }
@@ -129,144 +128,36 @@ async function loadProducts() {
    PRODUCT RENDER
 ========================= */
 function renderCurrentPage() {
-  const totalProducts = filteredProducts.length;
-  const totalPages = Math.ceil(totalProducts / PRODUCTS_PER_PAGE) || 1;
+  const pageData = PaginationHelper.getPageData(
+    filteredProducts,
+    currentPage,
+    PRODUCTS_PER_PAGE
+  );
 
-  if (currentPage > totalPages) {
-    currentPage = totalPages;
-  }
+  currentPage = pageData.currentPage;
 
-  if (currentPage < 1) {
-    currentPage = 1;
-  }
-
-  const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
-  const endIndex = startIndex + PRODUCTS_PER_PAGE;
-  const productsForPage = filteredProducts.slice(startIndex, endIndex);
-
-  renderProducts(productsForPage);
-  renderPagination(totalPages);
-
-  const visibleStart = totalProducts === 0 ? 0 : startIndex + 1;
-  const visibleEnd = Math.min(endIndex, totalProducts);
+  productsTableBody.innerHTML = ProductTable.renderManagerRows(pageData.pageItems);
+  paginationContainer.innerHTML = PaginationHelper.render(
+    pageData.currentPage,
+    pageData.totalPages
+  );
 
   productCountInfo.innerText =
-    `Showing ${visibleStart}-${visibleEnd} of ${totalProducts} products`;
-}
-
-function renderProducts(products) {
-  if (!products.length) {
-    productsTableBody.innerHTML = `
-      <tr>
-        <td colspan="9" class="table-empty">No products found.</td>
-      </tr>
-    `;
-    return;
-  }
-
-  productsTableBody.innerHTML = products
-    .map(
-      (product) => `
-      <tr title="${escapeHtml(product.material)} | ${escapeHtml(product.type)} | ${escapeHtml(product.model)}">
-        <td>${escapeHtml(product.material)}</td>
-        <td>${escapeHtml(product.type)}</td>
-        <td>${escapeHtml(product.model)}</td>
-        <td>${product.angle ?? ""}</td>
-        <td>${product.nodalLength ?? ""}</td>
-        <td>${product.width ?? ""}</td>
-        <td>${product.numberOfTeeth ?? ""}</td>
-        <td>${product.unitPrice ?? ""}</td>
-        <td class="actions-cell">
-          <button class="editProductBtn secondary" data-id="${product.id}" type="button">
-            Edit
-          </button>
-          <button class="deleteProductBtn danger" data-id="${product.id}" type="button">
-            Delete
-          </button>
-        </td>
-      </tr>
-    `
-    )
-    .join("");
+    `Showing ${pageData.visibleStart}-${pageData.visibleEnd} of ${pageData.totalItems} products`;
 }
 
 /* =========================
-   PAGINATION
+   PAGINATION EVENTS
 ========================= */
-function renderPagination(totalPages) {
-  if (totalPages <= 1) {
-    paginationContainer.innerHTML = "";
-    return;
-  }
+paginationContainer.addEventListener("click", (event) => {
+  const page = PaginationHelper.getClickedPage(event);
 
-  const visiblePages = getVisiblePages(currentPage, totalPages);
+  if (!page) return;
 
-  let html = `
-    <button 
-      type="button" 
-      data-page="${currentPage - 1}" 
-      ${currentPage === 1 ? "disabled" : ""}
-    >
-      Prev
-    </button>
-  `;
-
-  visiblePages.forEach((page) => {
-    if (page === "...") {
-      html += `<span class="pagination-dots">...</span>`;
-      return;
-    }
-
-    html += `
-      <button 
-        type="button"
-        class="${page === currentPage ? "active-page" : ""}" 
-        data-page="${page}"
-      >
-        ${page}
-      </button>
-    `;
-  });
-
-  html += `
-    <button 
-      type="button" 
-      data-page="${currentPage + 1}" 
-      ${currentPage === totalPages ? "disabled" : ""}
-    >
-      Next
-    </button>
-
-    <div class="pagination-info">
-      Page ${currentPage} of ${totalPages}
-    </div>
-  `;
-
-  paginationContainer.innerHTML = html;
-}
-
-function getVisiblePages(current, total) {
-  if (total <= 7) {
-    return Array.from({ length: total }, (_, index) => index + 1);
-  }
-
-  if (current <= 4) {
-    return [1, 2, 3, 4, 5, "...", total];
-  }
-
-  if (current >= total - 3) {
-    return [1, "...", total - 4, total - 3, total - 2, total - 1, total];
-  }
-
-  return [1, "...", current - 1, current, current + 1, "...", total];
-}
-
-paginationContainer.addEventListener("click", (e) => {
-  const page = Number(e.target.dataset.page);
-
-  if (!page || Number.isNaN(page)) return;
-
-  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE) || 1;
+  const totalPages = PaginationHelper.getTotalPages(
+    filteredProducts.length,
+    PRODUCTS_PER_PAGE
+  );
 
   if (page < 1 || page > totalPages) return;
 
@@ -330,19 +221,10 @@ function applyProductFilters() {
 /* =========================
    CREATE / UPDATE PRODUCT
 ========================= */
-productForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
+productForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
 
-  const productData = {
-    material: materialInput.value.trim(),
-    type: typeInput.value.trim(),
-    model: modelInput.value.trim(),
-    angle: Number(angleInput.value),
-    nodalLength: Number(nodalLengthInput.value),
-    width: Number(widthInput.value),
-    numberOfTeeth: Number(numberOfTeethInput.value),
-    unitPrice: Number(unitPriceInput.value)
-  };
+  const productData = getProductFormData();
 
   try {
     if (productIdInput.value) {
@@ -363,10 +245,10 @@ productForm.addEventListener("submit", async (e) => {
 /* =========================
    EDIT / DELETE PRODUCT
 ========================= */
-productsTableBody.addEventListener("click", async (e) => {
-  const id = e.target.dataset.id;
+productsTableBody.addEventListener("click", async (event) => {
+  const id = event.target.dataset.id;
 
-  if (e.target.classList.contains("editProductBtn")) {
+  if (event.target.classList.contains("editProductBtn")) {
     const product = allProducts.find((item) => String(item.id) === String(id));
 
     if (!product) {
@@ -377,7 +259,7 @@ productsTableBody.addEventListener("click", async (e) => {
     fillProductForm(product);
   }
 
-  if (e.target.classList.contains("deleteProductBtn")) {
+  if (event.target.classList.contains("deleteProductBtn")) {
     const confirmed = confirm("Are you sure you want to delete this product?");
 
     if (!confirmed) return;
@@ -395,6 +277,19 @@ productsTableBody.addEventListener("click", async (e) => {
 /* =========================
    FORM HELPERS
 ========================= */
+function getProductFormData() {
+  return {
+    material: materialInput.value.trim(),
+    type: typeInput.value.trim(),
+    model: modelInput.value.trim(),
+    angle: Number(angleInput.value),
+    nodalLength: Number(nodalLengthInput.value),
+    width: Number(widthInput.value),
+    numberOfTeeth: Number(numberOfTeethInput.value),
+    unitPrice: Number(unitPriceInput.value)
+  };
+}
+
 function fillProductForm(product) {
   productIdInput.value = product.id;
   materialInput.value = product.material ?? "";
@@ -418,18 +313,6 @@ function resetProductForm() {
   productForm.reset();
   productIdInput.value = "";
   cancelEditBtn.style.display = "none";
-}
-
-/* =========================
-   SECURITY HELPER
-========================= */
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
 }
 
 /* =========================

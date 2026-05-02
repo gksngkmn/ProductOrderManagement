@@ -1,7 +1,15 @@
 import PageGuard from "../core/PageGuard.js";
 import AuthManager from "../core/AuthManager.js";
+
 import ProductApi from "../api/ProductApi.js";
 import OrderApi from "../api/OrderApi.js";
+
+import ProductTable from "../components/ProductTable.js";
+import CustomerInfo from "../components/CustomerInfo.js";
+
+import DomHelper from "../helpers/DomHelper.js";
+import PaginationHelper from "../helpers/PaginationHelper.js";
+import FormatHelper from "../helpers/FormatHelper.js";
 
 PageGuard.requireRole("customer");
 
@@ -12,46 +20,41 @@ const customerInfo = document.getElementById("customerInfo");
 const logoutBtn = document.getElementById("logoutBtn");
 const myOrdersBtn = document.getElementById("myOrdersBtn");
 
+const createOrderBtn = document.getElementById("createOrderBtn");
 const currentOrderInfo = document.getElementById("currentOrderInfo");
 const currentOrderItems = document.getElementById("currentOrderItems");
 const completeOrderBtn = document.getElementById("completeOrderBtn");
 
-const addItemForm = document.getElementById("addItemForm");
-const clearItemFormBtn = document.getElementById("clearItemFormBtn");
-const selectedProductIdInput = document.getElementById("selectedProductId");
-const selectedProductInfo = document.getElementById("selectedProductInfo");
+const productsTableBody = document.getElementById("productsTableBody");
+const paginationContainer = document.getElementById("paginationContainer");
+const productCountInfo = document.getElementById("productCountInfo");
 
-const materialInput = document.getElementById("materialInput");
-const typeInput = document.getElementById("typeInput");
-const modelInput = document.getElementById("modelInput");
-const angleInput = document.getElementById("angleInput");
-const nodalLengthInput = document.getElementById("nodalLengthInput");
-const widthInput = document.getElementById("widthInput");
-const numberOfTeethInput = document.getElementById("numberOfTeethInput");
-const quantityInput = document.getElementById("quantityInput");
-const unitPriceInput = document.getElementById("unitPriceInput");
-
-const materialOptions = document.getElementById("materialOptions");
-const typeOptions = document.getElementById("typeOptions");
-const modelOptions = document.getElementById("modelOptions");
-const angleOptions = document.getElementById("angleOptions");
-const nodalLengthOptions = document.getElementById("nodalLengthOptions");
-const widthOptions = document.getElementById("widthOptions");
-const numberOfTeethOptions = document.getElementById("numberOfTeethOptions");
-const unitPriceOptions = document.getElementById("unitPriceOptions");
+const productSearchInput = document.getElementById("productSearchInput");
+const materialFilter = document.getElementById("materialFilter");
+const typeFilter = document.getElementById("typeFilter");
+const applyProductFiltersBtn = document.getElementById("applyProductFiltersBtn");
+const clearProductFiltersBtn = document.getElementById("clearProductFiltersBtn");
 
 /* =========================
    STATE
 ========================= */
 let currentOrder = null;
+
 let allProducts = [];
+let filteredProducts = [];
+
+let currentPage = 1;
+const PRODUCTS_PER_PAGE = 25;
 
 /* =========================
    INIT
 ========================= */
 const user = AuthManager.getUser();
-customerInfo.innerText = `${user.company || user.username} • ${user.role}`;
+customerInfo.innerText = CustomerInfo.renderCustomerInfo(user);
 
+/* =========================
+   AUTH / NAVIGATION
+========================= */
 logoutBtn.addEventListener("click", () => {
   AuthManager.logout();
 });
@@ -63,16 +66,24 @@ myOrdersBtn.addEventListener("click", () => {
 /* =========================
    ORDER ACTIONS
 ========================= */
+createOrderBtn.addEventListener("click", async () => {
+  try {
+    currentOrder = await OrderApi.createOrder();
+
+    currentOrderInfo.innerText =
+      `Current Order: ${currentOrder.order_code} • ${currentOrder.status}`;
+
+    completeOrderBtn.disabled = false;
+
+    await loadMyOrders();
+  } catch (error) {
+    currentOrderInfo.innerText = error.message;
+  }
+});
 
 completeOrderBtn.addEventListener("click", async () => {
   if (!currentOrder) {
     alert("No active order.");
-    return;
-  }
-
-  if (!currentOrder.items || currentOrder.items.length === 0) {
-    alert("You cannot complete an empty order.");
-    completeOrderBtn.disabled = true;
     return;
   }
 
@@ -86,11 +97,9 @@ completeOrderBtn.addEventListener("click", async () => {
     alert(`Order completed: ${completedOrder.order_code}`);
 
     currentOrder = null;
-    currentOrderInfo.innerText = "Creating new current order...";
-    currentOrderItems.innerHTML = `<div class="empty-message">Preparing new current order...</div>`;
+    currentOrderInfo.innerText = "No active order loaded.";
+    currentOrderItems.innerHTML = DomHelper.emptyMessage("No current order items.");
     completeOrderBtn.disabled = true;
-
-    await loadMyOrders();
   } catch (error) {
     alert(error.message);
   }
@@ -102,35 +111,30 @@ completeOrderBtn.addEventListener("click", async () => {
 async function loadMyOrders() {
   try {
     const orders = await OrderApi.getMyOrders();
-    let activeOrder = orders.find((order) => order.status === "Current");
+    const activeOrder = orders.find((order) => order.status === "Current");
 
     if (!activeOrder) {
-      activeOrder = await OrderApi.createOrder();
+      currentOrder = null;
+      currentOrderInfo.innerText = "No active order loaded.";
+      currentOrderItems.innerHTML = DomHelper.emptyMessage("No current order items.");
+      completeOrderBtn.disabled = true;
+      return;
     }
 
     currentOrder = activeOrder;
-
     currentOrderInfo.innerText =
       `Current Order: ${activeOrder.order_code} • ${activeOrder.status}`;
+    completeOrderBtn.disabled = false;
 
     renderCurrentOrderItems(activeOrder);
   } catch (error) {
-    currentOrder = null;
-    currentOrderInfo.innerText = "Current order could not be loaded.";
-    currentOrderItems.innerHTML = `<div class="empty-message">${error.message}</div>`;
-    completeOrderBtn.disabled = true;
+    currentOrderItems.innerHTML = DomHelper.emptyMessage(error.message);
   }
 }
 
 function renderCurrentOrderItems(order) {
-  const hasItems = order.items && order.items.length > 0;
-
-  completeOrderBtn.disabled = !hasItems;
-
-  if (!hasItems) {
-    currentOrderItems.innerHTML = `
-      <div class="empty-message">No items in current order.</div>
-    `;
+  if (!order.items || order.items.length === 0) {
+    currentOrderItems.innerHTML = DomHelper.emptyMessage("No items in current order.");
     return;
   }
 
@@ -140,308 +144,153 @@ function renderCurrentOrderItems(order) {
   );
 
   currentOrderItems.innerHTML = `
-    <div class="order-table-wrapper">
-      <table class="order-items-table">
-        <thead>
-          <tr>
-            <th>Material</th>
-            <th>Type</th>
-            <th>Model</th>
-            <th>Angle</th>
-            <th>Nodal Length (mm)</th>
-            <th>Width (mm)</th>
-            <th>Teeth</th>
-            <th>Qty</th>
-            <th>Unit Price</th>
-            <th>Total Price</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${order.items
-            .map(
-              (item) => `
-              <tr>
-                <td>${escapeHtml(item.material)}</td>
-                <td>${escapeHtml(item.type)}</td>
-                <td>${escapeHtml(item.model)}</td>
-                <td>${item.angle ?? "-"}</td>
-                <td>${item.nodal_length ?? "-"}</td>
-                <td>${item.width ?? "-"}</td>
-                <td>${item.number_of_teeth ?? "-"}</td>
-                <td>${item.quantity}</td>
-                <td>${item.unit_price}</td>
-                <td>${item.total_price}</td>
-                <td class="order-actions-cell">
-                  <div class="order-actions-wrapper">
-                    <button class="editOrderItemBtn secondary" data-item-id="${item.id}" type="button">
-                      Edit
-                    </button>
-                    <button class="deleteOrderItemBtn danger" data-item-id="${item.id}" type="button">
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            `
-            )
-            .join("")}
-        </tbody>
-      </table>
-    </div>
+    <h3>Order Items</h3>
+
+    ${order.items
+      .map(
+        (item) => `
+        <div class="order-item-row">
+          <p><strong>${DomHelper.escapeHtml(item.model)}</strong></p>
+          <p>Material: ${DomHelper.escapeHtml(item.material)}</p>
+          <p>Qty: ${FormatHelper.dash(item.quantity)}</p>
+          <p>Total: ${FormatHelper.money(item.total_price)}</p>
+        </div>
+      `
+      )
+      .join("")}
 
     <div class="order-total-box">
-      Total Price: ${total}
+      Total Price: ${FormatHelper.money(total)}
     </div>
   `;
 }
 
-currentOrderItems.addEventListener("click", async (e) => {
-  if (!currentOrder) return;
-
-  const itemId = e.target.dataset.itemId;
-
-  if (e.target.classList.contains("editOrderItemBtn")) {
-    const item = currentOrder.items.find(
-      (orderItem) => String(orderItem.id) === String(itemId)
-    );
-
-    if (!item) {
-      alert("Order item not found.");
-      return;
-    }
-
-    const newQuantity = prompt("Enter new quantity:", item.quantity);
-
-    if (newQuantity === null) return;
-
-    const quantity = Number(newQuantity);
-
-    if (!quantity || quantity <= 0) {
-      alert("Quantity must be greater than 0.");
-      return;
-    }
-
-    try {
-      await OrderApi.updateOrderItem(currentOrder.id, itemId, quantity);
-      alert("Order item updated successfully.");
-      await loadMyOrders();
-    } catch (error) {
-      alert(error.message);
-    }
-  }
-
-  if (e.target.classList.contains("deleteOrderItemBtn")) {
-    const confirmed = confirm("Delete this item from current order?");
-
-    if (!confirmed) return;
-
-    try {
-      await OrderApi.deleteOrderItem(currentOrder.id, itemId);
-      alert("Order item deleted successfully.");
-      await loadMyOrders();
-    } catch (error) {
-      alert(error.message);
-    }
-  }
-});
-
 /* =========================
-   PRODUCTS FOR AUTOCOMPLETE
+   PRODUCTS LOAD
 ========================= */
 async function loadProducts() {
   try {
+    productCountInfo.innerText = "Loading products...";
+
     allProducts = await ProductApi.getProducts();
-    renderDatalistOptions();
-    updateSelectedProductInfo();
+    filteredProducts = [...allProducts];
+    currentPage = 1;
+
+    renderCurrentPage();
   } catch (error) {
-    selectedProductInfo.innerText = error.message;
-    selectedProductInfo.classList.add("error");
+    productsTableBody.innerHTML = DomHelper.tableEmpty(error.message, 10);
+    paginationContainer.innerHTML = "";
+    productCountInfo.innerText = "Products could not be loaded.";
   }
-}
-
-function renderDatalistOptions() {
-  fillDatalist(materialOptions, getUniqueValues("material"));
-  fillDatalist(typeOptions, getUniqueValues("type"));
-  fillDatalist(modelOptions, getUniqueValues("model"));
-  fillDatalist(angleOptions, getUniqueValues("angle"));
-  fillDatalist(nodalLengthOptions, getUniqueValues("nodalLength"));
-  fillDatalist(widthOptions, getUniqueValues("width"));
-  fillDatalist(numberOfTeethOptions, getUniqueValues("numberOfTeeth"));
-  fillDatalist(unitPriceOptions, getUniqueValues("unitPrice"));
-}
-
-function getUniqueValues(key) {
-  return [
-    ...new Set(
-      allProducts
-        .map((product) => product[key])
-        .filter((value) => value !== null && value !== undefined && value !== "")
-        .map(String)
-    )
-  ].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-}
-
-function fillDatalist(datalist, values) {
-  datalist.innerHTML = values
-    .map((value) => `<option value="${escapeHtml(value)}"></option>`)
-    .join("");
 }
 
 /* =========================
-   ADD ITEM FORM
+   PRODUCT RENDER
 ========================= */
-[
-  materialInput,
-  typeInput,
-  modelInput,
-  angleInput,
-  nodalLengthInput,
-  widthInput,
-  numberOfTeethInput,
-  unitPriceInput
-].forEach((input) => {
-  input.addEventListener("input", handleProductInputChange);
-  input.addEventListener("change", handleProductInputChange);
-});
-
-function handleProductInputChange(e) {
-  const matchedProduct = findBestMatchingProduct();
-
-  if (matchedProduct) {
-    selectedProductIdInput.value = matchedProduct.id;
-    fillProductForm(matchedProduct, {
-      keepQuantity: true,
-      avoidOverwritingFocusedInput: e?.target
-    });
-  } else {
-    selectedProductIdInput.value = "";
-  }
-
-  updateSelectedProductInfo();
-}
-
-function findBestMatchingProduct() {
-  const material = normalize(materialInput.value);
-  const type = normalize(typeInput.value);
-  const model = normalize(modelInput.value);
-  const angle = normalizeNumber(angleInput.value);
-  const nodalLength = normalizeNumber(nodalLengthInput.value);
-  const width = normalizeNumber(widthInput.value);
-  const numberOfTeeth = normalizeNumber(numberOfTeethInput.value);
-  const unitPrice = normalizeNumber(unitPriceInput.value);
-
-  const exactFullMatch = allProducts.find((product) => {
-    return (
-      normalize(product.material) === material &&
-      normalize(product.type) === type &&
-      normalize(product.model) === model &&
-      numbersEqual(product.angle, angle) &&
-      numbersEqual(product.nodalLength, nodalLength) &&
-      numbersEqual(product.width, width) &&
-      numbersEqual(product.numberOfTeeth, numberOfTeeth) &&
-      numbersEqual(product.unitPrice, unitPrice)
-    );
-  });
-
-  if (exactFullMatch) return exactFullMatch;
-
-  const exactModelMatches = allProducts.filter(
-    (product) => normalize(product.model) === model && model
+function renderCurrentPage() {
+  const pageData = PaginationHelper.getPageData(
+    filteredProducts,
+    currentPage,
+    PRODUCTS_PER_PAGE
   );
 
-  if (exactModelMatches.length === 1) {
-    return exactModelMatches[0];
-  }
+  currentPage = pageData.currentPage;
 
-  const partialMatches = allProducts.filter((product) => {
-    if (material && normalize(product.material) !== material) return false;
-    if (type && normalize(product.type) !== type) return false;
-    if (model && normalize(product.model) !== model) return false;
-    if (angle !== "" && !numbersEqual(product.angle, angle)) return false;
-    if (nodalLength !== "" && !numbersEqual(product.nodalLength, nodalLength)) return false;
-    if (width !== "" && !numbersEqual(product.width, width)) return false;
-    if (numberOfTeeth !== "" && !numbersEqual(product.numberOfTeeth, numberOfTeeth)) return false;
-    if (unitPrice !== "" && !numbersEqual(product.unitPrice, unitPrice)) return false;
+  productsTableBody.innerHTML = ProductTable.renderCustomerRows(pageData.pageItems);
+  paginationContainer.innerHTML = PaginationHelper.render(
+    pageData.currentPage,
+    pageData.totalPages
+  );
 
-    return true;
-  });
-
-  return partialMatches.length === 1 ? partialMatches[0] : null;
+  productCountInfo.innerText =
+    `Showing ${pageData.visibleStart}-${pageData.visibleEnd} of ${pageData.totalItems} products`;
 }
 
-function fillProductForm(product, options = {}) {
-  const focused = options.avoidOverwritingFocusedInput;
+/* =========================
+   PAGINATION EVENTS
+========================= */
+paginationContainer.addEventListener("click", (event) => {
+  const page = PaginationHelper.getClickedPage(event);
 
-  setValueIfAllowed(materialInput, product.material, focused);
-  setValueIfAllowed(typeInput, product.type, focused);
-  setValueIfAllowed(modelInput, product.model, focused);
-  setValueIfAllowed(angleInput, product.angle, focused);
-  setValueIfAllowed(nodalLengthInput, product.nodalLength, focused);
-  setValueIfAllowed(widthInput, product.width, focused);
-  setValueIfAllowed(numberOfTeethInput, product.numberOfTeeth, focused);
-  setValueIfAllowed(unitPriceInput, product.unitPrice, focused);
+  if (!page) return;
 
-  if (!options.keepQuantity) {
-    quantityInput.value = 1;
-  }
-}
+  const totalPages = PaginationHelper.getTotalPages(
+    filteredProducts.length,
+    PRODUCTS_PER_PAGE
+  );
 
-function setValueIfAllowed(input, value, focusedInput) {
-  if (input === focusedInput) return;
-  input.value = value ?? "";
-}
+  if (page < 1 || page > totalPages) return;
 
-function updateSelectedProductInfo() {
-  const productId = selectedProductIdInput.value;
-  const product = allProducts.find((item) => String(item.id) === String(productId));
-
-  if (!product) {
-    selectedProductInfo.className = "selected-product-info";
-    selectedProductInfo.innerText =
-      "No exact product selected. Choose a suggestion from the existing products.";
-    return;
-  }
-
-  selectedProductInfo.className = "selected-product-info success";
-  selectedProductInfo.innerHTML = `
-    Selected product:
-    <strong>${escapeHtml(product.model)}</strong>
-    • ${escapeHtml(product.material)}
-    • ${escapeHtml(product.type)}
-    • Angle: ${product.angle ?? "-"}
-  `;
-}
-
-clearItemFormBtn.addEventListener("click", () => {
-  clearItemForm();
+  currentPage = page;
+  renderCurrentPage();
 });
 
-function clearItemForm() {
-  selectedProductIdInput.value = "";
+/* =========================
+   FILTERS
+========================= */
+applyProductFiltersBtn.addEventListener("click", applyProductFilters);
 
-  materialInput.value = "";
-  typeInput.value = "";
-  modelInput.value = "";
-  angleInput.value = "";
-  nodalLengthInput.value = "";
-  widthInput.value = "";
-  numberOfTeethInput.value = "";
-  quantityInput.value = 1;
-  unitPriceInput.value = "";
+clearProductFiltersBtn.addEventListener("click", () => {
+  productSearchInput.value = "";
+  materialFilter.value = "";
+  typeFilter.value = "";
 
-  updateSelectedProductInfo();
+  filteredProducts = [...allProducts];
+  currentPage = 1;
+  renderCurrentPage();
+});
+
+[productSearchInput, materialFilter, typeFilter].forEach((input) => {
+  input.addEventListener("input", applyProductFilters);
+  input.addEventListener("keyup", applyProductFilters);
+  input.addEventListener("change", applyProductFilters);
+});
+
+function applyProductFilters() {
+  const search = productSearchInput.value.toLowerCase().trim();
+  const material = materialFilter.value.toLowerCase().trim();
+  const type = typeFilter.value.toLowerCase().trim();
+
+  filteredProducts = allProducts.filter((product) => {
+    const productMaterial = String(product.material || "").toLowerCase();
+    const productType = String(product.type || "").toLowerCase();
+    const productModel = String(product.model || "").toLowerCase();
+
+    const combined = `
+      ${productMaterial}
+      ${productType}
+      ${productModel}
+      ${product.angle ?? ""}
+      ${product.nodalLength ?? ""}
+      ${product.width ?? ""}
+      ${product.numberOfTeeth ?? ""}
+      ${product.unitPrice ?? ""}
+    `.toLowerCase();
+
+    const matchesSearch = !search || combined.includes(search);
+    const matchesMaterial = !material || productMaterial.includes(material);
+    const matchesType = !type || productType.includes(type);
+
+    return matchesSearch && matchesMaterial && matchesType;
+  });
+
+  currentPage = 1;
+  renderCurrentPage();
 }
 
-addItemForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
+/* =========================
+   ADD ITEM
+========================= */
+productsTableBody.addEventListener("click", async (event) => {
+  if (!event.target.classList.contains("addItemBtn")) return;
 
   if (!currentOrder) {
     alert("Please create or load current order first.");
     return;
   }
 
-  const product = findBestMatchingProduct();
+  const productId = event.target.dataset.productId;
+  const quantityInput = document.getElementById(`quantity-${productId}`);
   const quantity = Number(quantityInput.value);
 
   if (!quantity || quantity <= 0) {
@@ -449,59 +298,14 @@ addItemForm.addEventListener("submit", async (e) => {
     return;
   }
 
-  if (!product) {
-    alert(
-      "This item does not match an existing product. Please select a valid product suggestion from the product list."
-    );
-    return;
-  }
-
   try {
-    selectedProductIdInput.value = product.id;
-
-    await OrderApi.addItemToOrder(currentOrder.id, product.id, quantity);
-
+    await OrderApi.addItemToOrder(currentOrder.id, productId, quantity);
     alert("Product added to order.");
-
-    clearItemForm();
     await loadMyOrders();
   } catch (error) {
     alert(error.message);
   }
 });
-
-/* =========================
-   HELPERS
-========================= */
-function normalize(value) {
-  return String(value ?? "").trim().toLowerCase();
-}
-
-function normalizeNumber(value) {
-  if (value === null || value === undefined || value === "") return "";
-  const number = Number(value);
-  return Number.isNaN(number) ? "" : number;
-}
-
-function numbersEqual(a, b) {
-  if (a === "" || b === "") return false;
-
-  const first = Number(a);
-  const second = Number(b);
-
-  if (Number.isNaN(first) || Number.isNaN(second)) return false;
-
-  return Math.abs(first - second) < 0.000001;
-}
-
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
 
 /* =========================
    PAGE LOAD

@@ -54,8 +54,26 @@
           </div>
         </div>
 
-        <div id="ordersContainer" class="orders-table-area">
-          <div class="empty-message">Loading orders...</div>
+        <div class="order-table-wrapper">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Order Code</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Completed</th>
+                <th>Items</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+
+            <tbody id="ordersTableBody">
+              <tr>
+                <td colspan="7" class="table-empty">Loading orders...</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         <div id="paginationContainer" class="pagination"></div>
@@ -76,6 +94,6 @@
     <div id="orderStatsContainer" style="display:none;"></div>
   </main>
 
-  <script type="module" src="./js/pages/CustomerOrdersPage.js?v=41"></script>
+  <script type="module" src="./js/pages/CustomerOrdersPage.js"></script>
 </body>
 </html>

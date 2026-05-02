@@ -1,72 +1,26 @@
 /* =========================================================
-   CUSTOMER LIST PAGE CSS
+   ORDER HISTORY PAGE CSS
    Theme: Blue / White Dashboard Layout
-   Customer Table: Excel Style
+   Layout: Half Orders + Half Order Details
 ========================================================= */
 
 
 /* =========================================================
-   1. TOPBAR
+   1. ORDER HISTORY MAIN LAYOUT
 ========================================================= */
 
-.customer-list-topbar {
-  min-height: 88px;
-  padding: 20px 32px;
-  background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
-  color: white;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 24px;
-
-  box-shadow: var(--shadow-md);
-}
-
-.customer-list-title-area h1 {
-  color: white;
-  margin-bottom: 4px;
-}
-
-.customer-list-title-area p {
-  color: rgba(255, 255, 255, 0.88);
-}
-
-.customer-list-top-actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-
-/* =========================================================
-   2. MAIN LAYOUT
-========================================================= */
-
-.customer-list-layout {
-  width: min(98%, 1700px);
+.order-history-layout {
+  width: min(98%, 1750px);
   margin: 20px auto 32px;
 
   display: grid;
-  grid-template-columns: minmax(280px, 320px) 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 20px;
   align-items: start;
 }
 
-.customer-list-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-
-  position: sticky;
-  top: 18px;
-
-  max-height: calc(100vh - 120px);
-  overflow-y: auto;
-  padding-right: 6px;
-}
-
-.customer-list-content {
+.orders-list-panel,
+.order-detail-panel {
   min-width: 0;
   background: white;
   border: 1px solid var(--color-border);
@@ -75,154 +29,94 @@
   padding: 18px;
 }
 
+.order-detail-panel {
+  position: sticky;
+  top: 18px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
 
 /* =========================================================
-   3. SIDEBAR
+   2. ORDER DATE FILTERS
 ========================================================= */
 
-.customer-list-sidebar::-webkit-scrollbar {
-  width: 7px;
-}
-
-.customer-list-sidebar::-webkit-scrollbar-thumb {
-  background: #bfdbfe;
-  border-radius: 999px;
-}
-
-.customer-list-sidebar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar-section {
-  background: white;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: 15px;
-  box-shadow: var(--shadow-sm);
-}
-
-.sidebar-section h2 {
-  font-size: 16px;
-  color: #1d4ed8;
-  margin-bottom: 12px;
-  padding-bottom: 7px;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.sidebar-actions {
+.order-filter-bar {
   display: flex;
-  gap: 8px;
   flex-wrap: wrap;
-  margin-top: 10px;
+  gap: 14px;
+  align-items: end;
+
+  margin-bottom: 14px;
+  padding: 12px;
+
+  background: #f8fbff;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
 }
 
-.sidebar-actions button {
-  flex: 1;
-}
-
-.filter-group {
+.order-filter-bar .filter-group {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  margin-bottom: 10px;
+  flex: 0 0 220px;
+  max-width: 220px;
+  margin-bottom: 0;
 }
 
-.filter-group label {
+.order-filter-bar label {
   font-size: 12px;
-  font-weight: 700;
-  color: var(--color-text-soft);
-}
-
-.filter-group input {
-  width: 100%;
-  position: relative;
-  z-index: 2;
-  pointer-events: auto;
-}
-
-
-/* =========================================================
-   4. SUMMARY STATS
-========================================================= */
-
-.stats-list {
-  display: grid;
-  gap: 8px;
-}
-
-.compact-stats {
-  grid-template-columns: 1fr;
-}
-
-.stat-card {
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 10px 12px;
-}
-
-.stat-number {
-  font-size: 22px;
-  line-height: 1.1;
   font-weight: 800;
-  color: var(--color-primary);
-}
-
-.stat-label {
-  font-size: 12px;
   color: var(--color-text-soft);
-  font-weight: 700;
+  margin: 0;
 }
 
+.order-filter-bar select {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
 
-/* =========================================================
-   5. CONTENT HEADER
-========================================================= */
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: white;
+  color: var(--color-text);
+}
 
-.content-header {
+.order-filter-bar .filter-actions {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 18px;
-
-  margin-bottom: 14px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--color-border);
+  gap: 8px;
+  flex: 0 0 auto;
 }
 
-.content-header h2 {
-  color: #1d4ed8;
-  font-size: 28px;
-  margin-bottom: 4px;
-}
-
-.content-header p {
-  margin-top: 4px;
-  font-size: 14px;
-  color: var(--color-text-soft);
+.order-filter-bar .filter-actions button {
+  min-width: 110px;
+  height: 42px;
 }
 
 
 /* =========================================================
-   6. CUSTOMER TABLE WRAPPER
+   3. TABLE WRAPPERS
 ========================================================= */
 
-.table-wrapper {
+.order-table-wrapper,
+.detail-table-wrapper {
   width: 100%;
   overflow-x: hidden;
 
   background: white;
-  border: 1px solid #b6c2d1;
+  border: 1px solid var(--color-border-dark);
   border-radius: 4px;
   box-shadow: none;
 }
 
 
 /* =========================================================
-   7. CUSTOMER TABLE - EXCEL STYLE
+   4. ORDERS + DETAIL TABLE BASE - EXCEL STYLE
 ========================================================= */
 
-.customer-table {
+.orders-table,
+.detail-items-table {
   width: 100%;
   min-width: 0;
   table-layout: fixed;
@@ -230,10 +124,12 @@
   background: white;
 }
 
-.customer-table th,
-.customer-table td {
+.orders-table th,
+.orders-table td,
+.detail-items-table th,
+.detail-items-table td {
   padding: 5px 5px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-border-strong);
 
   text-align: left;
   font-size: 10px;
@@ -244,7 +140,8 @@
   text-overflow: ellipsis;
 }
 
-.customer-table th {
+.orders-table th,
+.detail-items-table th {
   background: #eaf2ff;
   color: #1e40af;
   font-weight: 900;
@@ -255,214 +152,202 @@
   z-index: 1;
 }
 
-.customer-table td {
+.orders-table td,
+.detail-items-table td {
   color: var(--color-text);
   background: white;
 }
 
-.customer-table tbody tr:nth-child(even) td {
+.orders-table tbody tr:nth-child(even) td,
+.detail-items-table tbody tr:nth-child(even) td {
   background: #f8fbff;
 }
 
-.customer-table tbody tr:hover td {
+.orders-table tbody tr:hover td,
+.detail-items-table tbody tr:hover td {
   background: #dbeafe;
 }
 
-.table-empty {
-  text-align: center !important;
-  color: var(--color-text-soft);
-  padding: 26px !important;
+.orders-table tbody tr.selected-row td {
+  background: #dbeafe;
 }
 
 
 /* =========================================================
-   8. CUSTOMER TABLE COLUMN WIDTHS
-   Total = 100%
-   Columns: Company, Name, Email, Phone, Country, City, Username, Actions
+   5. ORDERS TABLE COLUMN WIDTHS
+   Columns:
+   ID, Order Code, Status, Created, Completed, Items, Total
 ========================================================= */
 
-.customer-table th:nth-child(1),
-.customer-table td:nth-child(1) {
-  width: 15%; /* Company */
+.orders-table th:nth-child(1),
+.orders-table td:nth-child(1) {
+  width: 13%;
+  text-align: center;
+}
+
+.orders-table th:nth-child(2),
+.orders-table td:nth-child(2) {
+  width: 25%;
   font-weight: 700;
   color: #1e40af;
 }
 
-.customer-table th:nth-child(2),
-.customer-table td:nth-child(2) {
-  width: 13%; /* Name */
-}
-
-.customer-table th:nth-child(3),
-.customer-table td:nth-child(3) {
-  width: 18%; /* Email */
-}
-
-.customer-table th:nth-child(4),
-.customer-table td:nth-child(4) {
-  width: 11%; /* Phone */
-}
-
-.customer-table th:nth-child(5),
-.customer-table td:nth-child(5) {
-  width: 9%; /* Country */
-}
-
-.customer-table th:nth-child(6),
-.customer-table td:nth-child(6) {
-  width: 9%; /* City */
-}
-
-.customer-table th:nth-child(7),
-.customer-table td:nth-child(7) {
-  width: 10%; /* Username */
-}
-
-.customer-table th:nth-child(8),
-.customer-table td:nth-child(8) {
-  width: 15%; /* Actions */
+.orders-table th:nth-child(3),
+.orders-table td:nth-child(3) {
+  width: 13%;
   text-align: center;
+}
+
+.orders-table th:nth-child(4),
+.orders-table td:nth-child(4) {
+  width: 17%;
+}
+
+.orders-table th:nth-child(5),
+.orders-table td:nth-child(5) {
+  width: 17%;
+}
+
+.orders-table th:nth-child(6),
+.orders-table td:nth-child(6) {
+  width: 6%;
+  text-align: center;
+}
+
+.orders-table th:nth-child(7),
+.orders-table td:nth-child(7) {
+  width: 9%;
+  text-align: right;
+  font-weight: 800;
 }
 
 
 /* =========================================================
-   9. ACTION BUTTONS
+   6. DETAIL TABLE COLUMN WIDTHS
+   Columns:
+   Material, Type, Model, Angle, Nodal Length,
+   Width, Teeth, Qty, Unit Price, Total
 ========================================================= */
 
-.customer-table td.actions-cell {
-  text-align: center;
-  overflow: visible !important;
-  white-space: nowrap;
+.detail-items-table th:nth-child(1),
+.detail-items-table td:nth-child(1) {
+  width: 12%;
 }
 
-.customer-table td.actions-cell button {
-  min-width: 48px;
-  padding: 4px 5px;
-  font-size: 9px;
-  border-radius: 5px;
-  margin: 0 2px;
+.detail-items-table th:nth-child(2),
+.detail-items-table td:nth-child(2) {
+  width: 9%;
 }
 
-.customer-table td.actions-cell .ordersBtn {
-  background: #2563eb;
-  color: white;
-}
-
-.customer-table td.actions-cell .ordersBtn:hover {
-  background: #1d4ed8;
-}
-
-.customer-table td.actions-cell .deleteCustomerBtn {
-  background: #dc2626;
-  color: white;
-}
-
-.customer-table td.actions-cell .deleteCustomerBtn:hover {
-  background: #b91c1c;
-}
-
-
-/* =========================================================
-   10. PAGINATION
-========================================================= */
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  gap: 8px;
-  flex-wrap: wrap;
-
-  margin-top: 18px;
-}
-
-.pagination button {
-  min-width: 34px;
-  padding: 7px 10px;
-  font-size: 13px;
-
-  background: #dbeafe;
-  color: #1d4ed8;
-}
-
-.pagination button:hover {
-  background: #bfdbfe;
-}
-
-.pagination button.active-page {
-  background: var(--color-primary);
-  color: white;
-}
-
-.pagination button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.pagination .pagination-dots {
-  padding: 0 6px;
-  color: var(--color-text-soft);
+.detail-items-table th:nth-child(3),
+.detail-items-table td:nth-child(3) {
+  width: 11%;
   font-weight: 700;
+  color: #1e40af;
 }
 
-.pagination .pagination-info {
-  width: 100%;
+.detail-items-table th:nth-child(4),
+.detail-items-table td:nth-child(4) {
+  width: 7%;
   text-align: center;
+}
 
-  color: var(--color-text-soft);
-  font-size: 13px;
-  margin-top: 4px;
+.detail-items-table th:nth-child(5),
+.detail-items-table td:nth-child(5) {
+  width: 10%;
+  text-align: right;
+}
+
+.detail-items-table th:nth-child(6),
+.detail-items-table td:nth-child(6) {
+  width: 8%;
+  text-align: right;
+}
+
+.detail-items-table th:nth-child(7),
+.detail-items-table td:nth-child(7) {
+  width: 7%;
+  text-align: center;
+}
+
+.detail-items-table th:nth-child(8),
+.detail-items-table td:nth-child(8) {
+  width: 6%;
+  text-align: center;
+}
+
+.detail-items-table th:nth-child(9),
+.detail-items-table td:nth-child(9) {
+  width: 13%;
+  text-align: right;
+}
+
+.detail-items-table th:nth-child(10),
+.detail-items-table td:nth-child(10) {
+  width: 17%;
+  text-align: right;
+  font-weight: 800;
 }
 
 
 /* =========================================================
-   11. RESPONSIVE
+   7. ORDER HISTORY RESPONSIVE
 ========================================================= */
 
 @media (max-width: 1200px) {
-  .customer-list-layout {
-    grid-template-columns: minmax(260px, 300px) 1fr;
+  .order-history-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 1fr);
   }
 
-  .customer-table {
-    min-width: 0;
+  .order-detail-panel {
+    position: sticky;
+    top: 18px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
   }
 }
 
-@media (max-width: 1100px) {
-  .customer-list-layout {
+@media (max-width: 900px) {
+  .order-history-layout {
     grid-template-columns: 1fr;
   }
 
-  .customer-list-sidebar {
+  .order-detail-panel {
     position: static;
     max-height: none;
-    overflow-y: visible;
-    padding-right: 0;
-  }
-
-  .table-wrapper {
-    overflow-x: hidden;
   }
 }
 
 @media (max-width: 760px) {
-  .customer-list-topbar {
+  .order-filter-bar {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
   }
 
-  .customer-list-top-actions {
+  .order-filter-bar .filter-group {
+    flex: 1 1 auto;
+    max-width: none;
     width: 100%;
   }
 
-  .customer-list-top-actions button {
+  .order-filter-bar .filter-actions {
+    width: 100%;
+  }
+
+  .order-filter-bar .filter-actions button {
     flex: 1;
   }
 
-  .content-header {
-    flex-direction: column;
-    align-items: flex-start;
+  .order-table-wrapper,
+  .detail-table-wrapper {
+    overflow-x: auto;
+  }
+
+  .orders-table {
+    min-width: 720px;
+  }
+
+  .detail-items-table {
+    min-width: 900px;
   }
 }
