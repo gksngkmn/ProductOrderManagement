@@ -24,33 +24,45 @@
   </header>
 
   <main class="order-history-layout">
-    <section class="order-history-content">
-      <div class="orders-main-grid">
-        <section class="orders-list-panel">
-          <div class="content-header">
-            <div>
-              <h2>Orders</h2>
-              <p id="orderCountInfo" class="info-text">Loading orders...</p>
-            </div>
-          </div>
+    <section class="orders-list-panel">
+      <div class="content-header">
+        <h2>Orders</h2>
+        <p id="orderCountInfo" class="info-text">Loading orders...</p>
+      </div>
 
-          <div id="ordersContainer" class="orders-table-area">
-            <div class="empty-message">Loading orders...</div>
-          </div>
-        </section>
+      <div class="order-table-wrapper">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Order Code</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Completed</th>
+              <th>Items</th>
+              <th>Total</th>
+            </tr>
+          </thead>
 
-        <aside class="order-detail-panel">
-          <div class="detail-panel-header">
-            <h2>Order Details</h2>
-            <p id="detailPanelInfo">Select an order to view details.</p>
-          </div>
-
-          <div id="orderDetailPanel" class="detail-panel-body">
-            <div class="empty-message">No order selected.</div>
-          </div>
-        </aside>
+          <tbody id="ordersTableBody">
+            <tr>
+              <td colspan="7" class="table-empty">Loading orders...</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
+
+    <aside class="order-detail-panel">
+      <div class="detail-panel-header">
+        <h2>Order Details</h2>
+        <p id="detailPanelInfo">Select an order to view details.</p>
+      </div>
+
+      <div id="orderDetailPanel" class="detail-panel-body">
+        <div class="empty-message">No order selected.</div>
+      </div>
+    </aside>
   </main>
 
   <script type="module" src="./js/pages/OrderHistoryPage.js?v=42"></script>
