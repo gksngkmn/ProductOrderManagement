@@ -24,39 +24,41 @@
   </header>
 
   <main class="customer-list-layout">
-    <aside class="customer-list-sidebar">
-      <section class="sidebar-section">
+    <section class="customer-list-filter-panel">
+      <div class="filter-panel-header">
         <h2>Customer Filters</h2>
+      </div>
 
-        <div class="filter-group">
+      <div class="customer-filter-row">
+        <div class="filter-group customer-search-group">
           <label for="customerSearchInput">Search</label>
-          <input type="text" id="customerSearchInput" placeholder="Search company, name, email..." />
+          <input
+            type="text"
+            id="customerSearchInput"
+            placeholder="Search company, name, email..."
+          />
         </div>
 
         <div class="filter-group">
           <label for="cityFilter">City</label>
-          <input type="text" id="cityFilter" placeholder="City" />
+          <select id="cityFilter">
+            <option value="">All Cities</option>
+          </select>
         </div>
 
         <div class="filter-group">
           <label for="countryFilter">Country</label>
-          <input type="text" id="countryFilter" placeholder="Country" />
+          <select id="countryFilter">
+            <option value="">All Countries</option>
+          </select>
         </div>
 
-        <div class="sidebar-actions">
+        <div class="filter-actions customer-filter-actions">
           <button id="applyCustomerFiltersBtn" type="button">Apply</button>
           <button id="clearCustomerFiltersBtn" class="secondary" type="button">Clear</button>
         </div>
-      </section>
-
-      <section class="sidebar-section compact-dashboard">
-        <h2>Summary</h2>
-
-        <div id="customerStatsContainer" class="stats-list compact-stats">
-          <div class="empty-message">Loading summary...</div>
-        </div>
-      </section>
-    </aside>
+      </div>
+    </section>
 
     <section class="customer-list-content">
       <div class="content-header">
@@ -77,7 +79,7 @@
               <th>Country</th>
               <th>City</th>
               <th>Username</th>
-              <th>Actions</th>
+              <th></th>
             </tr>
           </thead>
 
@@ -93,6 +95,6 @@
     </section>
   </main>
 
-  <script type="module" src="./js/pages/CustomerListPage.js?v=61"></script>
+  <script type="module" src="./js/pages/CustomerListPage.js?v=62"></script>
 </body>
 </html>

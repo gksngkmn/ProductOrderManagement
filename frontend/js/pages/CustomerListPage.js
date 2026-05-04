@@ -24,7 +24,6 @@ const countryFilter = document.getElementById("countryFilter");
 const applyCustomerFiltersBtn = document.getElementById("applyCustomerFiltersBtn");
 const clearCustomerFiltersBtn = document.getElementById("clearCustomerFiltersBtn");
 
-const customerStatsContainer = document.getElementById("customerStatsContainer");
 const customerCountInfo = document.getElementById("customerCountInfo");
 const customersTableBody = document.getElementById("customersTableBody");
 const paginationContainer = document.getElementById("paginationContainer");
@@ -66,46 +65,38 @@ async function loadCustomers() {
     filteredCustomers = [...allCustomers];
     currentPage = 1;
 
+    populateFilterOptions();
     renderCurrentPage();
-    renderStats();
   } catch (error) {
     customersTableBody.innerHTML = DomHelper.tableEmpty(error.message, 8);
-    customerStatsContainer.innerHTML = DomHelper.emptyMessage(error.message);
     customerCountInfo.innerText = "Customers could not be loaded.";
   }
 }
 
 /* =========================
-   STATS
+   FILTER OPTIONS
 ========================= */
-function renderStats() {
-  const countries = new Set(
-    allCustomers
-      .map((customer) => customer.country)
-      .filter(Boolean)
-  );
+function populateFilterOptions() {
+  populateSelectOptions(cityFilter, allCustomers, "city", "All Cities");
+  populateSelectOptions(countryFilter, allCustomers, "country", "All Countries");
+}
 
-  const cities = new Set(
-    allCustomers
-      .map((customer) => customer.city)
-      .filter(Boolean)
-  );
+function populateSelectOptions(selectElement, customers, fieldName, defaultText) {
+  const values = [
+    ...new Set(
+      customers
+        .map((customer) => customer[fieldName])
+        .filter(Boolean)
+        .map((value) => String(value).trim())
+        .filter(Boolean)
+    )
+  ].sort((a, b) => a.localeCompare(b));
 
-  customerStatsContainer.innerHTML = `
-    <div class="stat-card">
-      <div class="stat-number">${allCustomers.length}</div>
-      <div class="stat-label">Customers</div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-number">${countries.size}</div>
-      <div class="stat-label">Countries</div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-number">${cities.size}</div>
-      <div class="stat-label">Cities</div>
-    </div>
+  selectElement.innerHTML = `
+    <option value="">${defaultText}</option>
+    ${values
+      .map((value) => `<option value="${DomHelper.escapeHtml(value)}">${DomHelper.escapeHtml(value)}</option>`)
+      .join("")}
   `;
 }
 
@@ -168,18 +159,17 @@ clearCustomerFiltersBtn.addEventListener("click", () => {
 
 [customerSearchInput, cityFilter, countryFilter].forEach((input) => {
   input.addEventListener("input", applyCustomerFilters);
-  input.addEventListener("keyup", applyCustomerFilters);
   input.addEventListener("change", applyCustomerFilters);
 });
 
 function applyCustomerFilters() {
   const search = customerSearchInput.value.toLowerCase().trim();
-  const city = cityFilter.value.toLowerCase().trim();
-  const country = countryFilter.value.toLowerCase().trim();
+  const selectedCity = cityFilter.value.toLowerCase().trim();
+  const selectedCountry = countryFilter.value.toLowerCase().trim();
 
   filteredCustomers = allCustomers.filter((customer) => {
-    const customerCity = String(customer.city || "").toLowerCase();
-    const customerCountry = String(customer.country || "").toLowerCase();
+    const customerCity = String(customer.city || "").toLowerCase().trim();
+    const customerCountry = String(customer.country || "").toLowerCase().trim();
 
     const combined = `
       ${customer.companyName}
@@ -193,8 +183,8 @@ function applyCustomerFilters() {
     `.toLowerCase();
 
     const matchesSearch = !search || combined.includes(search);
-    const matchesCity = !city || customerCity.includes(city);
-    const matchesCountry = !country || customerCountry.includes(country);
+    const matchesCity = !selectedCity || customerCity === selectedCity;
+    const matchesCountry = !selectedCountry || customerCountry === selectedCountry;
 
     return matchesSearch && matchesCity && matchesCountry;
   });
@@ -208,6 +198,10 @@ function applyCustomerFilters() {
 ========================= */
 customersTableBody.addEventListener("click", async (event) => {
   const id = event.target.dataset.id;
+
+  if (event.target.classList.contains("detailsCustomerBtn")) {
+    window.location.href = `/customerDetails.html?companyId=${id}`;
+  }
 
   if (event.target.classList.contains("ordersBtn")) {
     window.location.href = `/orderHistory.html?companyId=${id}`;

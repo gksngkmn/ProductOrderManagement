@@ -188,12 +188,78 @@
 
 
 /* =========================================================
-   6. RESPONSIVE SHARED LAYOUT
+   6. ORDER HISTORY / CUSTOMER ORDERS SPLIT LAYOUT
+   Used by:
+   - orderHistory.html
+   - customerOrders.html
+========================================================= */
+
+.order-history-layout {
+  width: min(96%, 1700px);
+  margin: 24px auto 36px;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.customer-orders-layout {
+  width: min(96%, 1700px);
+  margin: 24px auto 36px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.orders-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.orders-list-panel,
+.order-detail-panel {
+  min-width: 0;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 20px;
+}
+
+.order-detail-panel {
+  position: sticky;
+  top: 20px;
+  max-height: calc(100vh - 130px);
+  overflow-y: auto;
+}
+
+
+/* =========================================================
+   7. RESPONSIVE SHARED LAYOUT
 ========================================================= */
 
 @media (max-width: 900px) {
   .grid-2 {
     grid-template-columns: 1fr;
+  }
+
+  .order-history-layout,
+  .orders-main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .order-history-layout,
+  .customer-orders-layout {
+    width: min(94%, 100%);
+  }
+
+  .order-detail-panel {
+    position: static;
+    max-height: none;
   }
 }
 

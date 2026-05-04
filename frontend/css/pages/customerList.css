@@ -1,26 +1,102 @@
 /* =========================================================
-   ORDER HISTORY PAGE CSS
+   CUSTOMER LIST PAGE CSS
    Theme: Blue / White Dashboard Layout
-   Layout: Half Orders + Half Order Details
+   Layout: Top Filters + Excel Style Customer Table
 ========================================================= */
 
 
 /* =========================================================
-   1. ORDER HISTORY MAIN LAYOUT
+   1. CUSTOMER LIST MAIN LAYOUT
 ========================================================= */
 
-.order-history-layout {
-  width: min(98%, 1750px);
-  margin: 20px auto 32px;
+.customer-list-layout {
+  width: min(96%, 1700px);
+  margin: 24px auto 36px;
 
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 20px;
-  align-items: start;
 }
 
-.orders-list-panel,
-.order-detail-panel {
+
+/* =========================================================
+   2. TOP FILTER PANEL
+========================================================= */
+
+.customer-list-filter-panel {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 16px 18px;
+}
+
+.filter-panel-header {
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.filter-panel-header h2 {
+  color: #1d4ed8;
+  font-size: 20px;
+}
+
+.customer-filter-row {
+  display: grid;
+  grid-template-columns: minmax(320px, 1.4fr) minmax(180px, 0.7fr) minmax(180px, 0.7fr) auto;
+  gap: 14px;
+  align-items: end;
+}
+
+.customer-filter-row .filter-group {
+  margin-bottom: 0;
+}
+
+.customer-filter-row .filter-group label {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--color-text-soft);
+}
+
+.customer-filter-row .filter-group input,
+.customer-filter-row .filter-group select {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: white;
+  color: var(--color-text);
+
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+.customer-search-group {
+  min-width: 0;
+}
+
+.customer-filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.customer-filter-actions button {
+  min-width: 90px;
+  min-height: 42px;
+}
+
+
+/* =========================================================
+   3. CUSTOMER LIST CONTENT
+========================================================= */
+
+.customer-list-content {
   min-width: 0;
   background: white;
   border: 1px solid var(--color-border);
@@ -29,78 +105,35 @@
   padding: 18px;
 }
 
-.order-detail-panel {
-  position: sticky;
-  top: 18px;
-  max-height: calc(100vh - 120px);
-  overflow-y: auto;
-}
-
-
-/* =========================================================
-   2. ORDER DATE FILTERS
-========================================================= */
-
-.order-filter-bar {
+.customer-list-content .content-header {
   display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  align-items: end;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
 
   margin-bottom: 14px;
-  padding: 12px;
-
-  background: #f8fbff;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
 }
 
-.order-filter-bar .filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  flex: 0 0 220px;
-  max-width: 220px;
-  margin-bottom: 0;
+.customer-list-content .content-header h2 {
+  color: #1d4ed8;
+  font-size: 28px;
+  margin-bottom: 4px;
 }
 
-.order-filter-bar label {
-  font-size: 12px;
-  font-weight: 800;
+.customer-list-content .content-header p {
+  margin-top: 4px;
+  font-size: 14px;
   color: var(--color-text-soft);
-  margin: 0;
-}
-
-.order-filter-bar select {
-  width: 100%;
-  height: 42px;
-  padding: 0 12px;
-
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: white;
-  color: var(--color-text);
-}
-
-.order-filter-bar .filter-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 0 0 auto;
-}
-
-.order-filter-bar .filter-actions button {
-  min-width: 110px;
-  height: 42px;
 }
 
 
 /* =========================================================
-   3. TABLE WRAPPERS
+   4. CUSTOMER TABLE WRAPPER
 ========================================================= */
 
-.order-table-wrapper,
-.detail-table-wrapper {
+.customer-list-content .table-wrapper {
   width: 100%;
   overflow-x: hidden;
 
@@ -112,11 +145,10 @@
 
 
 /* =========================================================
-   4. ORDERS + DETAIL TABLE BASE - EXCEL STYLE
+   5. CUSTOMER TABLE - EXCEL STYLE
 ========================================================= */
 
-.orders-table,
-.detail-items-table {
+.customer-table {
   width: 100%;
   min-width: 0;
   table-layout: fixed;
@@ -124,10 +156,8 @@
   background: white;
 }
 
-.orders-table th,
-.orders-table td,
-.detail-items-table th,
-.detail-items-table td {
+.customer-table th,
+.customer-table td {
   padding: 5px 5px;
   border: 1px solid var(--color-border-strong);
 
@@ -140,8 +170,7 @@
   text-overflow: ellipsis;
 }
 
-.orders-table th,
-.detail-items-table th {
+.customer-table th {
   background: #eaf2ff;
   color: #1e40af;
   font-weight: 900;
@@ -152,202 +181,225 @@
   z-index: 1;
 }
 
-.orders-table td,
-.detail-items-table td {
+.customer-table td {
   color: var(--color-text);
   background: white;
 }
 
-.orders-table tbody tr:nth-child(even) td,
-.detail-items-table tbody tr:nth-child(even) td {
+.customer-table tbody tr:nth-child(even) td {
   background: #f8fbff;
 }
 
-.orders-table tbody tr:hover td,
-.detail-items-table tbody tr:hover td {
+.customer-table tbody tr:hover td {
   background: #dbeafe;
 }
 
-.orders-table tbody tr.selected-row td {
-  background: #dbeafe;
+.customer-table .table-empty {
+  text-align: center !important;
+  color: var(--color-text-soft);
+  padding: 26px !important;
 }
 
 
 /* =========================================================
-   5. ORDERS TABLE COLUMN WIDTHS
+   6. CUSTOMER TABLE COLUMN WIDTHS
    Columns:
-   ID, Order Code, Status, Created, Completed, Items, Total
+   Company, Name, Email, Phone, Country, City, Username, Actions
 ========================================================= */
 
-.orders-table th:nth-child(1),
-.orders-table td:nth-child(1) {
-  width: 13%;
-  text-align: center;
-}
-
-.orders-table th:nth-child(2),
-.orders-table td:nth-child(2) {
-  width: 25%;
+.customer-table th:nth-child(1),
+.customer-table td:nth-child(1) {
+  width: 15%;
   font-weight: 700;
   color: #1e40af;
 }
 
-.orders-table th:nth-child(3),
-.orders-table td:nth-child(3) {
+.customer-table th:nth-child(2),
+.customer-table td:nth-child(2) {
   width: 13%;
-  text-align: center;
 }
 
-.orders-table th:nth-child(4),
-.orders-table td:nth-child(4) {
-  width: 17%;
+.customer-table th:nth-child(3),
+.customer-table td:nth-child(3) {
+  width: 18%;
 }
 
-.orders-table th:nth-child(5),
-.orders-table td:nth-child(5) {
-  width: 17%;
-}
-
-.orders-table th:nth-child(6),
-.orders-table td:nth-child(6) {
-  width: 6%;
-  text-align: center;
-}
-
-.orders-table th:nth-child(7),
-.orders-table td:nth-child(7) {
-  width: 9%;
-  text-align: right;
-  font-weight: 800;
-}
-
-
-/* =========================================================
-   6. DETAIL TABLE COLUMN WIDTHS
-   Columns:
-   Material, Type, Model, Angle, Nodal Length,
-   Width, Teeth, Qty, Unit Price, Total
-========================================================= */
-
-.detail-items-table th:nth-child(1),
-.detail-items-table td:nth-child(1) {
-  width: 12%;
-}
-
-.detail-items-table th:nth-child(2),
-.detail-items-table td:nth-child(2) {
-  width: 9%;
-}
-
-.detail-items-table th:nth-child(3),
-.detail-items-table td:nth-child(3) {
+.customer-table th:nth-child(4),
+.customer-table td:nth-child(4) {
   width: 11%;
-  font-weight: 700;
-  color: #1e40af;
 }
 
-.detail-items-table th:nth-child(4),
-.detail-items-table td:nth-child(4) {
-  width: 7%;
-  text-align: center;
+.customer-table th:nth-child(5),
+.customer-table td:nth-child(5) {
+  width: 9%;
 }
 
-.detail-items-table th:nth-child(5),
-.detail-items-table td:nth-child(5) {
+.customer-table th:nth-child(6),
+.customer-table td:nth-child(6) {
+  width: 9%;
+}
+
+.customer-table th:nth-child(7),
+.customer-table td:nth-child(7) {
   width: 10%;
-  text-align: right;
 }
 
-.detail-items-table th:nth-child(6),
-.detail-items-table td:nth-child(6) {
-  width: 8%;
-  text-align: right;
-}
-
-.detail-items-table th:nth-child(7),
-.detail-items-table td:nth-child(7) {
-  width: 7%;
+.customer-table th:nth-child(8),
+.customer-table td:nth-child(8) {
+  width: 15%;
   text-align: center;
-}
-
-.detail-items-table th:nth-child(8),
-.detail-items-table td:nth-child(8) {
-  width: 6%;
-  text-align: center;
-}
-
-.detail-items-table th:nth-child(9),
-.detail-items-table td:nth-child(9) {
-  width: 13%;
-  text-align: right;
-}
-
-.detail-items-table th:nth-child(10),
-.detail-items-table td:nth-child(10) {
-  width: 17%;
-  text-align: right;
-  font-weight: 800;
 }
 
 
 /* =========================================================
-   7. ORDER HISTORY RESPONSIVE
+   7. ACTION BUTTONS
+========================================================= */
+
+.customer-table td.actions-cell {
+  text-align: center;
+  overflow: visible !important;
+  white-space: nowrap;
+}
+
+.customer-table td.actions-cell button {
+  min-width: 42px;
+  padding: 4px 4px;
+  font-size: 8.5px;
+  border-radius: 5px;
+  margin: 0 1px;
+}
+
+.customer-table td.actions-cell .detailsCustomerBtn {
+  background: #0ea5e9;
+  color: white;
+}
+
+.customer-table td.actions-cell .detailsCustomerBtn:hover {
+  background: #0284c7;
+}
+
+.customer-table td.actions-cell .ordersBtn {
+  background: #2563eb;
+  color: white;
+}
+
+.customer-table td.actions-cell .ordersBtn:hover {
+  background: #1d4ed8;
+}
+
+.customer-table td.actions-cell .deleteCustomerBtn {
+  background: var(--color-danger);
+  color: white;
+}
+
+.customer-table td.actions-cell .deleteCustomerBtn:hover {
+  background: var(--color-danger-dark);
+}
+
+
+/* =========================================================
+   8. PAGINATION
+========================================================= */
+
+.customer-list-content .pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 8px;
+  flex-wrap: wrap;
+
+  margin-top: 18px;
+}
+
+.customer-list-content .pagination button {
+  min-width: 34px;
+  padding: 7px 10px;
+  font-size: 13px;
+
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+.customer-list-content .pagination button:hover {
+  background: #bfdbfe;
+}
+
+.customer-list-content .pagination button.active-page {
+  background: var(--color-primary);
+  color: white;
+}
+
+.customer-list-content .pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.customer-list-content .pagination .pagination-dots {
+  padding: 0 6px;
+  color: var(--color-text-soft);
+  font-weight: 700;
+}
+
+.customer-list-content .pagination .pagination-info {
+  width: 100%;
+  text-align: center;
+
+  color: var(--color-text-soft);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+
+/* =========================================================
+   9. RESPONSIVE
 ========================================================= */
 
 @media (max-width: 1200px) {
-  .order-history-layout {
-    grid-template-columns: minmax(0, 1fr) minmax(360px, 1fr);
+  .customer-filter-row {
+    grid-template-columns: minmax(280px, 1fr) minmax(160px, 0.6fr) minmax(160px, 0.6fr);
   }
 
-  .order-detail-panel {
-    position: sticky;
-    top: 18px;
-    max-height: calc(100vh - 120px);
-    overflow-y: auto;
+  .customer-filter-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
   }
 }
 
 @media (max-width: 900px) {
-  .order-history-layout {
+  .customer-list-layout {
+    width: min(94%, 100%);
+  }
+
+  .customer-filter-row {
     grid-template-columns: 1fr;
   }
 
-  .order-detail-panel {
-    position: static;
-    max-height: none;
+  .customer-filter-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .customer-filter-actions button {
+    flex: 1;
   }
 }
 
 @media (max-width: 760px) {
-  .order-filter-bar {
+  .customer-list-content .content-header {
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start;
   }
 
-  .order-filter-bar .filter-group {
-    flex: 1 1 auto;
-    max-width: none;
-    width: 100%;
+  .customer-list-content .content-header h2 {
+    font-size: 24px;
   }
 
-  .order-filter-bar .filter-actions {
-    width: 100%;
-  }
-
-  .order-filter-bar .filter-actions button {
-    flex: 1;
-  }
-
-  .order-table-wrapper,
-  .detail-table-wrapper {
+  .customer-list-content .table-wrapper {
     overflow-x: auto;
   }
 
-  .orders-table {
-    min-width: 720px;
-  }
-
-  .detail-items-table {
+  .customer-table {
     min-width: 900px;
   }
 }

@@ -1,11 +1,78 @@
 /* =========================================================
-   3. TABLE WRAPPERS
+   ORDER HISTORY PAGE CSS
+   Purpose: Manager order history filters + Excel tables
+   Layout rules are handled by layout.css
+========================================================= */
+
+
+/* =========================================================
+   1. ORDER DATE FILTERS
+========================================================= */
+
+.order-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: end;
+
+  margin-bottom: 14px;
+  padding: 12px;
+
+  background: #f8fbff;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.order-filter-bar .filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 0 0 220px;
+  max-width: 220px;
+  margin-bottom: 0;
+}
+
+.order-filter-bar label {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--color-text-soft);
+  margin: 0;
+}
+
+.order-filter-bar select {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: white;
+  color: var(--color-text);
+}
+
+.order-filter-bar .filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.order-filter-bar .filter-actions button {
+  min-width: 110px;
+  height: 42px;
+}
+
+
+/* =========================================================
+   2. TABLE WRAPPERS
 ========================================================= */
 
 .order-table-wrapper,
 .detail-table-wrapper {
   width: 100%;
   overflow-x: hidden;
+
+  margin-top: 10px;
 
   background: white;
   border: 1px solid var(--color-border-dark);
@@ -15,7 +82,7 @@
 
 
 /* =========================================================
-   4. ORDERS + DETAIL TABLE BASE - EXCEL STYLE
+   3. ORDERS + DETAIL TABLE BASE - EXCEL STYLE
 ========================================================= */
 
 .orders-table,
@@ -73,4 +140,160 @@
 
 .orders-table tbody tr.selected-row td {
   background: #dbeafe;
+}
+
+
+/* =========================================================
+   4. ORDERS TABLE COLUMN WIDTHS
+   Columns:
+   ID, Order Code, Status, Created, Completed, Items, Total
+========================================================= */
+
+.orders-table th:nth-child(1),
+.orders-table td:nth-child(1) {
+  width: 13%;
+  text-align: center;
+}
+
+.orders-table th:nth-child(2),
+.orders-table td:nth-child(2) {
+  width: 25%;
+  font-weight: 700;
+  color: #1e40af;
+}
+
+.orders-table th:nth-child(3),
+.orders-table td:nth-child(3) {
+  width: 13%;
+  text-align: center;
+}
+
+.orders-table th:nth-child(4),
+.orders-table td:nth-child(4) {
+  width: 17%;
+}
+
+.orders-table th:nth-child(5),
+.orders-table td:nth-child(5) {
+  width: 17%;
+}
+
+.orders-table th:nth-child(6),
+.orders-table td:nth-child(6) {
+  width: 6%;
+  text-align: center;
+}
+
+.orders-table th:nth-child(7),
+.orders-table td:nth-child(7) {
+  width: 9%;
+  text-align: right;
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   5. DETAIL TABLE COLUMN WIDTHS
+   Columns:
+   Material, Type, Model, Angle, Nodal Length,
+   Width, Teeth, Qty, Unit Price, Total
+========================================================= */
+
+.detail-items-table th:nth-child(1),
+.detail-items-table td:nth-child(1) {
+  width: 12%;
+}
+
+.detail-items-table th:nth-child(2),
+.detail-items-table td:nth-child(2) {
+  width: 9%;
+}
+
+.detail-items-table th:nth-child(3),
+.detail-items-table td:nth-child(3) {
+  width: 11%;
+  font-weight: 700;
+  color: #1e40af;
+}
+
+.detail-items-table th:nth-child(4),
+.detail-items-table td:nth-child(4) {
+  width: 7%;
+  text-align: center;
+}
+
+.detail-items-table th:nth-child(5),
+.detail-items-table td:nth-child(5) {
+  width: 10%;
+  text-align: right;
+}
+
+.detail-items-table th:nth-child(6),
+.detail-items-table td:nth-child(6) {
+  width: 8%;
+  text-align: right;
+}
+
+.detail-items-table th:nth-child(7),
+.detail-items-table td:nth-child(7) {
+  width: 7%;
+  text-align: center;
+}
+
+.detail-items-table th:nth-child(8),
+.detail-items-table td:nth-child(8) {
+  width: 6%;
+  text-align: center;
+}
+
+.detail-items-table th:nth-child(9),
+.detail-items-table td:nth-child(9) {
+  width: 13%;
+  text-align: right;
+}
+
+.detail-items-table th:nth-child(10),
+.detail-items-table td:nth-child(10) {
+  width: 17%;
+  text-align: right;
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   6. RESPONSIVE TABLE FIXES
+========================================================= */
+
+@media (max-width: 760px) {
+  .order-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .order-filter-bar .filter-group {
+    flex: 1 1 auto;
+    max-width: none;
+    width: 100%;
+  }
+
+  .order-filter-bar .filter-actions {
+    width: 100%;
+  }
+
+  .order-filter-bar .filter-actions button {
+    flex: 1;
+  }
+
+  .order-table-wrapper,
+  .detail-table-wrapper {
+    overflow-x: auto;
+  }
+
+  .orders-table {
+    min-width: 720px;
+  }
+
+  .detail-items-table {
+    min-width: 900px;
+  }
 }

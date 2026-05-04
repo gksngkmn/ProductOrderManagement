@@ -21,11 +21,26 @@ class CustomerTable {
             <td>${DomHelper.escapeHtml(customer.city)}</td>
             <td>${DomHelper.escapeHtml(customer.username)}</td>
             <td class="actions-cell">
-              <button class="ordersBtn" data-id="${customer.id}" type="button">
-                Orders
+              <button
+                class="detailsCustomerBtn"
+                data-id="${customer.id}"
+                type="button"
+              >
+                Details
               </button>
 
-              <button class="deleteCustomerBtn danger" data-id="${customer.id}" type="button">
+              <button
+                class="ordersBtn"
+                data-id="${customer.id}"
+                type="button"
+              >
+                Orders
+              </button>
+              <button
+                class="deleteCustomerBtn danger"
+                data-id="${customer.id}"
+                type="button"
+              >
                 Delete
               </button>
             </td>
