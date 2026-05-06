@@ -8,9 +8,13 @@ const {
   login,
   managerLogin,
   customerLogin,
+
   requestPasswordCode,
   verifyPasswordCode,
-  resetPassword
+  resetPassword,
+
+  requestForgotPasswordCode,
+  resetForgotPassword
 } = require("../controllers/authController");
 
 // ===== LOGIN =====
@@ -18,7 +22,12 @@ router.post("/login", login);
 router.post("/manager-login", managerLogin);
 router.post("/customer-login", customerLogin);
 
-// ===== PASSWORD OPERATIONS (ONLY CUSTOMER) =====
+// ===== FORGOT PASSWORD OPERATIONS (PUBLIC) =====
+// User does not need to be logged in for these routes.
+router.post("/forgot-password/request-code", requestForgotPasswordCode);
+router.post("/forgot-password/reset", resetForgotPassword);
+
+// ===== PASSWORD OPERATIONS (ONLY LOGGED-IN CUSTOMER) =====
 router.post(
   "/request-password-code",
   authMiddleware,

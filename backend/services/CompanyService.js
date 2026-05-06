@@ -1,5 +1,7 @@
 const bcrypt = require("bcryptjs");
 const pool = require("../db");
+const VerificationService = require("./VerificationService");
+
 
 const {
   sendCustomerUpdatedInfoMailToManager,
@@ -198,6 +200,51 @@ class CompanyService {
     }
 
     return fields;
+  }
+
+
+    static async requestCompanyUpdateCode(id, user) {
+    if (user.role === "customer" && Number(user.id) !== Number(id)) {
+      const error = new Error("You can only request update code for your own profile.");
+      error.statusCode = 403;
+      throw error;
+    }
+
+    const company = await this.getCompanyById(id);
+    const formattedCompany = this.formatCompany(company);
+
+    await VerificationService.createCode({
+      companyId: formattedCompany.id,
+      email: formattedCompany.email,
+      phone: formattedCompany.phone,
+      name: formattedCompany.name,
+      purpose: "info_update",
+      reason: "Information update verification"
+    });
+
+    return {
+      message: "Information update verification code sent successfully."
+    };
+  }
+
+  static async verifyAndUpdateCompany(id, user, companyData, code) {
+    if (!code) {
+      const error = new Error("Verification code is required.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const company = await this.getCompanyById(id);
+    const formattedCompany = this.formatCompany(company);
+
+    await VerificationService.verifyCode({
+      companyId: formattedCompany.id,
+      email: formattedCompany.email,
+      purpose: "info_update",
+      code
+    });
+
+    return this.updateCompany(id, user, companyData);
   }
 
   static async updateCompany(id, user, companyData) {

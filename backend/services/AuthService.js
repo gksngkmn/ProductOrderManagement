@@ -2,8 +2,10 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const pool = require("../db");
 
+const VerificationService = require("./VerificationService");
+
 const {
-  sendMailFromManagerToCustomer
+  sendCustomerPasswordChangedMailToManager
 } = require("../utils/mailService");
 
 class AuthService {
@@ -11,10 +13,6 @@ class AuthService {
     return jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "1d"
     });
-  }
-
-  static generateVerificationCode() {
-    return String(Math.floor(100000 + Math.random() * 900000));
   }
 
   static formatManager(manager) {
@@ -187,6 +185,10 @@ class AuthService {
     };
   }
 
+  /* =========================
+     PASSWORD CHANGE
+     LOGGED-IN CUSTOMER ONLY
+  ========================= */
   static async requestPasswordCode(companyId) {
     if (!companyId) {
       const error = new Error("Company ID is required.");
@@ -194,88 +196,39 @@ class AuthService {
       throw error;
     }
 
-    const companyResult = await pool.query(
-      "SELECT * FROM companies WHERE id = $1",
-      [companyId]
-    );
+    const company = await this.getCompanyById(companyId);
 
-    if (companyResult.rows.length === 0) {
-      const error = new Error("Customer not found.");
-      error.statusCode = 404;
-      throw error;
-    }
-
-    const company = companyResult.rows[0];
-
-    const code = this.generateVerificationCode();
-    const codeHash = await bcrypt.hash(code, 10);
-
-    await pool.query(
-      `
-      UPDATE companies
-      SET reset_code_hash = $1,
-          reset_code_expires = CURRENT_TIMESTAMP + INTERVAL '10 minutes'
-      WHERE id = $2
-      `,
-      [codeHash, companyId]
-    );
-
-    await sendMailFromManagerToCustomer({
-      to: company.email,
-      subject: "Password Change Verification Code",
-      text: `
-Hello ${company.name},
-
-Your password change verification code is:
-
-${code}
-
-This code is valid for 10 minutes.
-      `
+    await VerificationService.createCode({
+      companyId: company.id,
+      email: company.email,
+      phone: company.phone,
+      name: company.name,
+      purpose: "password_change",
+      reason: "Password change verification"
     });
 
     return {
-      message: "Verification code sent to email."
+      message: "Password change verification code sent successfully."
     };
   }
 
-  static async verifyPasswordCode(companyId, code) {
+    static async verifyPasswordCode(companyId, code) {
     if (!companyId || !code) {
       const error = new Error("Company ID and code are required.");
       error.statusCode = 400;
       throw error;
     }
 
-    const company = await this.getCompanyById(companyId);
-
-    if (!company.reset_code_hash || !company.reset_code_expires) {
-      const error = new Error("No verification code requested.");
-      error.statusCode = 400;
-      throw error;
-    }
-
-    const now = new Date();
-    const expires = new Date(company.reset_code_expires);
-
-    if (now > expires) {
-      const error = new Error("Verification code expired.");
-      error.statusCode = 400;
-      throw error;
-    }
-
-    const isCodeCorrect = await bcrypt.compare(code, company.reset_code_hash);
-
-    if (!isCodeCorrect) {
-      const error = new Error("Verification code is incorrect.");
-      error.statusCode = 400;
-      throw error;
-    }
+    await VerificationService.checkCode({
+      companyId,
+      purpose: "password_change",
+      code
+    });
 
     return {
       message: "Verification successful."
     };
   }
-
   static async resetPassword(companyId, code, newPassword) {
     if (!companyId || !code || !newPassword) {
       const error = new Error("Company ID, code and new password are required.");
@@ -291,7 +244,11 @@ This code is valid for 10 minutes.
 
     const company = await this.getCompanyById(companyId);
 
-    await this.verifyPasswordCode(companyId, code);
+    await VerificationService.verifyCode({
+      companyId,
+      purpose: "password_change",
+      code
+    });
 
     const isSamePassword = await bcrypt.compare(
       newPassword,
@@ -317,8 +274,122 @@ This code is valid for 10 minutes.
       [newPasswordHash, companyId]
     );
 
+    try {
+      await sendCustomerPasswordChangedMailToManager({
+        customer: this.formatCustomer(company)
+      });
+    } catch (mailError) {
+      console.log("Password change notification mail could not be sent:", mailError.message);
+    }
+
     return {
       message: "Password changed successfully."
+    };
+  }
+
+  /* =========================
+     FORGOT PASSWORD
+     PUBLIC ROUTES
+  ========================= */
+  static async findCustomerByIdentifier(identifier) {
+    if (!identifier) {
+      const error = new Error("Email or username is required.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const result = await pool.query(
+      `
+      SELECT *
+      FROM companies
+      WHERE email = $1
+      OR username = $1
+      `,
+      [identifier]
+    );
+
+    if (result.rows.length === 0) {
+      const error = new Error("Customer not found.");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    return result.rows[0];
+  }
+
+  static async requestForgotPasswordCode(identifier) {
+    const company = await this.findCustomerByIdentifier(identifier);
+
+    await VerificationService.createCode({
+      companyId: company.id,
+      email: company.email,
+      phone: company.phone,
+      name: company.name,
+      purpose: "forgot_password",
+      reason: "Forgot password verification"
+    });
+
+    return {
+      message: "Forgot password verification code sent successfully."
+    };
+  }
+
+  static async resetForgotPassword(identifier, code, newPassword) {
+    if (!identifier || !code || !newPassword) {
+      const error = new Error("Identifier, code and new password are required.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (newPassword.length < 4) {
+      const error = new Error("New password must be at least 4 characters.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const company = await this.findCustomerByIdentifier(identifier);
+
+    await VerificationService.verifyCode({
+      companyId: company.id,
+      email: company.email,
+      purpose: "forgot_password",
+      code
+    });
+
+    const isSamePassword = await bcrypt.compare(
+      newPassword,
+      company.password_hash
+    );
+
+    if (isSamePassword) {
+      const error = new Error("New password cannot be the same as old password.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+    await pool.query(
+      `
+      UPDATE companies
+      SET password_hash = $1,
+          reset_code_hash = NULL,
+          reset_code_expires = NULL
+      WHERE id = $2
+      `,
+      [newPasswordHash, company.id]
+    );
+
+    try {
+      await sendCustomerPasswordChangedMailToManager({
+        customer: this.formatCustomer(company)
+      });
+    } catch (mailError) {
+      console.log("Forgot password notification mail could not be sent:", mailError.message);
+    }
+
+    return {
+      message: "Password reset successfully."
     };
   }
 

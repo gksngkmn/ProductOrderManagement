@@ -29,6 +29,7 @@ async function createCompany(req, res) {
 async function updateCompany(req, res) {
   try {
     const { id } = req.params;
+
     const updatedCompany = await CompanyService.updateCompany(
       id,
       req.user,
@@ -38,6 +39,42 @@ async function updateCompany(req, res) {
     return res.json(updatedCompany);
   } catch (error) {
     return handleError(res, error, "Update company error:");
+  }
+}
+
+/* =========================
+   INFO UPDATE VERIFICATION
+========================= */
+async function requestCompanyUpdateCode(req, res) {
+  try {
+    const { id } = req.params;
+
+    const result = await CompanyService.requestCompanyUpdateCode(
+      id,
+      req.user
+    );
+
+    return res.json(result);
+  } catch (error) {
+    return handleError(res, error, "Request company update code error:");
+  }
+}
+
+async function verifyAndUpdateCompany(req, res) {
+  try {
+    const { id } = req.params;
+    const { code, ...companyData } = req.body;
+
+    const updatedCompany = await CompanyService.verifyAndUpdateCompany(
+      id,
+      req.user,
+      companyData,
+      code
+    );
+
+    return res.json(updatedCompany);
+  } catch (error) {
+    return handleError(res, error, "Verify and update company error:");
   }
 }
 
@@ -68,6 +105,10 @@ module.exports = {
   getCompanies,
   createCompany,
   updateCompany,
+
+  requestCompanyUpdateCode,
+  verifyAndUpdateCompany,
+
   updateCustomerPassword,
   deleteCompany
 };

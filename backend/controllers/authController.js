@@ -44,6 +44,10 @@ async function customerLogin(req, res) {
   }
 }
 
+/* =========================
+   PASSWORD CHANGE
+   LOGGED-IN CUSTOMER ONLY
+========================= */
 async function requestPasswordCode(req, res) {
   try {
     const companyId = req.user.id;
@@ -86,11 +90,47 @@ async function resetPassword(req, res) {
   }
 }
 
+/* =========================
+   FORGOT PASSWORD
+   PUBLIC ROUTES
+========================= */
+async function requestForgotPasswordCode(req, res) {
+  try {
+    const { identifier } = req.body;
+
+    const result = await AuthService.requestForgotPasswordCode(identifier);
+
+    return res.json(result);
+  } catch (error) {
+    return handleError(res, error, "Request forgot password code error:");
+  }
+}
+
+async function resetForgotPassword(req, res) {
+  try {
+    const { identifier, code, newPassword } = req.body;
+
+    const result = await AuthService.resetForgotPassword(
+      identifier,
+      code,
+      newPassword
+    );
+
+    return res.json(result);
+  } catch (error) {
+    return handleError(res, error, "Reset forgot password error:");
+  }
+}
+
 module.exports = {
   login,
   managerLogin,
   customerLogin,
+
   requestPasswordCode,
   verifyPasswordCode,
-  resetPassword
+  resetPassword,
+
+  requestForgotPasswordCode,
+  resetForgotPassword
 };

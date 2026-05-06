@@ -13,20 +13,31 @@ const {
   completeOrder
 } = require("../controllers/orderController");
 
-
 // Customer kendi siparişlerini görür
-router.get("/my", authMiddleware, requireRole("customer"), getOrdersByCompany);
+router.get(
+  "/my",
+  authMiddleware,
+  requireRole("customer"),
+  getOrdersByCompany
+);
 
-// Manager belirli company'nin siparişlerini görür
+// Manager belirli company'nin siparişlerini görür.
+// Customer tarafında eski frontend /company/:companyId çağırıyorsa da çalışsın diye
+// burada sadece authMiddleware bırakıyoruz.
+// Yetki kontrolünü OrderService içinde yapıyoruz.
 router.get(
   "/company/:companyId",
   authMiddleware,
-  requireRole("manager"),
   getOrdersByCompany
 );
 
 // Customer sipariş oluşturur
-router.post("/", authMiddleware, requireRole("customer"), createOrder);
+router.post(
+  "/",
+  authMiddleware,
+  requireRole("customer"),
+  createOrder
+);
 
 // Customer siparişe ürün ekler
 router.post(

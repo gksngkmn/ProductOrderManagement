@@ -53,61 +53,66 @@ class OrderService {
   }
 
   static async getOrdersByCompany(user, companyIdParam) {
-    const companyId =
-      user.role === "customer" ? user.id : Number(companyIdParam);
+  let companyId;
 
-    if (!companyId) {
-      const error = new Error("Company ID is required.");
-      error.statusCode = 400;
-      throw error;
-    }
+  if (user.role === "customer") {
+    companyId = user.id;
+  } else if (user.role === "manager") {
+    companyId = Number(companyIdParam);
+  }
 
-    const ordersResult = await pool.query(
+  if (!companyId) {
+    const error = new Error("Company ID is required.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const ordersResult = await pool.query(
+    `
+    SELECT *
+    FROM orders
+    WHERE company_id = $1
+    ORDER BY created_at DESC
+    `,
+    [companyId]
+  );
+
+  const orders = [];
+
+  for (const order of ordersResult.rows) {
+    const itemsResult = await pool.query(
       `
-      SELECT *
-      FROM orders
-      WHERE company_id = $1
-      ORDER BY created_at DESC
+      SELECT 
+        oi.id,
+        oi.order_id,
+        oi.product_id,
+        oi.quantity,
+        oi.unit_price,
+        oi.total_price,
+
+        p.material,
+        p.type,
+        p.model,
+        p.angle,
+        p.nodal_length,
+        p.width,
+        p.number_of_teeth
+
+      FROM order_items oi
+      LEFT JOIN products p ON oi.product_id = p.id
+      WHERE oi.order_id = $1
       `,
-      [companyId]
+      [order.id]
     );
 
-    const orders = [];
-
-    for (const order of ordersResult.rows) {
-      const itemsResult = await pool.query(
-        `
-        SELECT 
-          oi.id,
-          oi.order_id,
-          oi.product_id,
-          oi.quantity,
-          oi.unit_price,
-          oi.total_price,
-
-          p.material,
-          p.type,
-          p.model,
-          p.angle,
-          p.nodal_length,
-          p.width,
-          p.number_of_teeth
-
-        FROM order_items oi
-        LEFT JOIN products p ON oi.product_id = p.id
-        WHERE oi.order_id = $1
-        `,
-        [order.id]
-      );
-
-      orders.push({
-        ...order,
-        items: itemsResult.rows
-      });
-    }
-
-    return orders;
+    orders.push({
+      ...order,
+      items: itemsResult.rows
+    });
   }
+
+  return orders;
+}
 
   static async createOrder(user) {
     if (user.role !== "customer") {
