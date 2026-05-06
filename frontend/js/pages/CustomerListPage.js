@@ -8,6 +8,7 @@ import CustomerTable from "../components/CustomerTable.js";
 
 import DomHelper from "../helpers/DomHelper.js";
 import PaginationHelper from "../helpers/PaginationHelper.js";
+import ExportHelper from "../helpers/ExportHelper.js";
 
 PageGuard.requireRole("manager");
 
@@ -27,7 +28,28 @@ const clearCustomerFiltersBtn = document.getElementById("clearCustomerFiltersBtn
 const customerCountInfo = document.getElementById("customerCountInfo");
 const customersTableBody = document.getElementById("customersTableBody");
 const paginationContainer = document.getElementById("paginationContainer");
+const exportCustomersBtn = document.getElementById("exportCustomersBtn");
 
+const openAddCustomerModalBtn = document.getElementById("openAddCustomerModalBtn");
+const addCustomerModal = document.getElementById("addCustomerModal");
+const closeAddCustomerModalBtn = document.getElementById("closeAddCustomerModalBtn");
+const cancelAddCustomerBtn = document.getElementById("cancelAddCustomerBtn");
+
+const addCustomerForm = document.getElementById("addCustomerForm");
+const addCustomerMessage = document.getElementById("addCustomerMessage");
+
+const addNameInput = document.getElementById("addNameInput");
+const addSurnameInput = document.getElementById("addSurnameInput");
+const addEmailInput = document.getElementById("addEmailInput");
+const addPhoneInput = document.getElementById("addPhoneInput");
+const addUsernameInput = document.getElementById("addUsernameInput");
+const addPasswordInput = document.getElementById("addPasswordInput");
+
+const addCompanyNameInput = document.getElementById("addCompanyNameInput");
+const addCompanyPhoneInput = document.getElementById("addCompanyPhoneInput");
+const addAddressInput = document.getElementById("addAddressInput");
+const addCountryInput = document.getElementById("addCountryInput");
+const addCityInput = document.getElementById("addCityInput");
 /* =========================
    STATE
 ========================= */
@@ -53,6 +75,52 @@ logoutBtn.addEventListener("click", () => {
 backToManagerBtn.addEventListener("click", () => {
   window.location.href = "/manager.html";
 });
+
+
+/* =========================
+   ADD CUSTOMER MODAL
+========================= */
+openAddCustomerModalBtn.addEventListener("click", () => {
+  openAddCustomerModal();
+});
+
+closeAddCustomerModalBtn.addEventListener("click", () => {
+  closeAddCustomerModal();
+});
+
+cancelAddCustomerBtn.addEventListener("click", () => {
+  closeAddCustomerModal();
+});
+
+addCustomerModal.addEventListener("click", (event) => {
+  if (event.target === addCustomerModal) {
+    closeAddCustomerModal();
+  }
+});
+
+function openAddCustomerModal() {
+  addCustomerModal.classList.remove("hidden");
+  addCustomerMessage.innerText = "";
+  addCustomerMessage.className = "add-customer-message";
+}
+
+function closeAddCustomerModal() {
+  addCustomerModal.classList.add("hidden");
+  addCustomerForm.reset();
+  addCustomerMessage.innerText = "";
+  addCustomerMessage.className = "add-customer-message";
+}
+
+function getAddCustomerNotificationMethod() {
+  return document.querySelector(
+    'input[name="addCustomerNotificationMethod"]:checked'
+  )?.value || "email";
+}
+
+function showAddCustomerMessage(message, type = "success") {
+  addCustomerMessage.innerText = message;
+  addCustomerMessage.className = `add-customer-message ${type}`;
+}
 
 /* =========================
    LOAD CUSTOMERS
@@ -99,6 +167,67 @@ function populateSelectOptions(selectElement, customers, fieldName, defaultText)
       .join("")}
   `;
 }
+
+
+/* =========================
+   CREATE CUSTOMER
+========================= */
+addCustomerForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const notificationMethod = getAddCustomerNotificationMethod();
+
+  const customerData = {
+    name: addNameInput.value.trim(),
+    surname: addSurnameInput.value.trim(),
+    email: addEmailInput.value.trim(),
+    phone: addPhoneInput.value.trim(),
+    username: addUsernameInput.value.trim(),
+    password: addPasswordInput.value.trim(),
+
+    companyName: addCompanyNameInput.value.trim(),
+    companyPhone: addCompanyPhoneInput.value.trim(),
+    address: addAddressInput.value.trim(),
+    country: addCountryInput.value.trim(),
+    city: addCityInput.value.trim(),
+
+    notificationMethod
+  };
+
+  if (!customerData.name || !customerData.surname || !customerData.email) {
+    showAddCustomerMessage("Name, surname and email are required.", "error");
+    return;
+  }
+
+  if (!customerData.username || !customerData.password) {
+    showAddCustomerMessage("Username and password are required.", "error");
+    return;
+  }
+
+  if (!customerData.companyName || !customerData.country || !customerData.city) {
+    showAddCustomerMessage("Company name, country and city are required.", "error");
+    return;
+  }
+
+  try {
+    showAddCustomerMessage("Creating customer...", "success");
+
+    await CompanyApi.createCompany(customerData);
+
+    showAddCustomerMessage(
+      `Customer created successfully. Notification method: ${notificationMethod.toUpperCase()}`,
+      "success"
+    );
+
+    await loadCustomers();
+
+    setTimeout(() => {
+      closeAddCustomerModal();
+    }, 700);
+  } catch (error) {
+    showAddCustomerMessage(error.message, "error");
+  }
+});
 
 /* =========================
    RENDER CURRENT PAGE
@@ -220,6 +349,31 @@ customersTableBody.addEventListener("click", async (event) => {
       alert(error.message);
     }
   }
+});
+
+
+/* =========================
+   EXPORT CUSTOMERS
+========================= */
+exportCustomersBtn.addEventListener("click", () => {
+  ExportHelper.exportToExcel(
+    `customers-${ExportHelper.getTodayFileDate()}`,
+    "Customers",
+    [
+      { label: "Company", key: "companyName" },
+      {
+        label: "Name",
+        key: (customer) =>
+          `${customer.name || ""} ${customer.surname || ""}`.trim()
+      },
+      { label: "Email", key: "email" },
+      { label: "Phone", key: "phone" },
+      { label: "Country", key: "country" },
+      { label: "City", key: "city" },
+      { label: "Username", key: "username" }
+    ],
+    filteredCustomers
+  );
 });
 
 /* =========================

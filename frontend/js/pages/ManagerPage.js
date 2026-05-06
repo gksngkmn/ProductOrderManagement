@@ -9,6 +9,7 @@ import CustomerInfo from "../components/CustomerInfo.js";
 
 import DomHelper from "../helpers/DomHelper.js";
 import PaginationHelper from "../helpers/PaginationHelper.js";
+import ExportHelper from "../helpers/ExportHelper.js";
 
 PageGuard.requireRole("manager");
 
@@ -25,6 +26,10 @@ const statsContainer = document.getElementById("statsContainer");
 const productsTableBody = document.getElementById("productsTableBody");
 const paginationContainer = document.getElementById("paginationContainer");
 const productCountInfo = document.getElementById("productCountInfo");
+
+const typeSort = document.getElementById("typeSort");
+
+const exportProductsBtn = document.getElementById("exportProductsBtn");
 
 const productSearchInput = document.getElementById("productSearchInput");
 const materialFilter = document.getElementById("materialFilter");
@@ -67,7 +72,7 @@ logoutBtn.addEventListener("click", () => {
 });
 
 editManagerBtn.addEventListener("click", () => {
-  alert("Manager edit feature will be added later.");
+  window.location.href = "/editManager.html";
 });
 
 customerListPageBtn.addEventListener("click", () => {
@@ -174,13 +179,12 @@ clearProductFiltersBtn.addEventListener("click", () => {
   productSearchInput.value = "";
   materialFilter.value = "";
   typeFilter.value = "";
+  typeSort.value = "";
 
-  filteredProducts = [...allProducts];
-  currentPage = 1;
   renderCurrentPage();
 });
 
-[productSearchInput, materialFilter, typeFilter].forEach((input) => {
+[productSearchInput, materialFilter, typeFilter, typeSort].forEach((input) => {
   input.addEventListener("input", applyProductFilters);
   input.addEventListener("keyup", applyProductFilters);
   input.addEventListener("change", applyProductFilters);
@@ -190,7 +194,7 @@ function applyProductFilters() {
   const search = productSearchInput.value.toLowerCase().trim();
   const material = materialFilter.value.toLowerCase().trim();
   const type = typeFilter.value.toLowerCase().trim();
-
+  const sort = typeSort.value;
   filteredProducts = allProducts.filter((product) => {
     const productMaterial = String(product.material || "").toLowerCase();
     const productType = String(product.type || "").toLowerCase();
@@ -214,8 +218,31 @@ function applyProductFilters() {
     return matchesSearch && matchesMaterial && matchesType;
   });
 
+  applyTypeSort();
+
   currentPage = 1;
   renderCurrentPage();
+}
+
+function applyTypeSort() {
+  const sortValue = typeSort.value;
+
+  if (!sortValue) return;
+
+  filteredProducts.sort((a, b) => {
+    const typeA = String(a.type || "").toLowerCase();
+    const typeB = String(b.type || "").toLowerCase();
+
+    if (sortValue === "type-asc") {
+      return typeA.localeCompare(typeB);
+    }
+
+    if (sortValue === "type-desc") {
+      return typeB.localeCompare(typeA);
+    }
+
+    return 0;
+  });
 }
 
 /* =========================
@@ -314,6 +341,37 @@ function resetProductForm() {
   productIdInput.value = "";
   cancelEditBtn.style.display = "none";
 }
+
+
+/* =========================
+   EXPORT PRODUCTS
+========================= */
+exportProductsBtn.addEventListener("click", () => {
+  ExportHelper.exportToExcel(
+    `products-${ExportHelper.getTodayFileDate()}`,
+    "Products",
+    [
+      { label: "Material", key: "material" },
+      { label: "Type", key: "type" },
+      { label: "Model", key: "model" },
+      { label: "Angle", key: "angle" },
+      {
+        label: "Nodal Length (mm)",
+        key: (product) => product.nodalLength ?? product.nodal_length ?? ""
+      },
+      { label: "Width (mm)", key: "width" },
+      {
+        label: "Number of Teeth",
+        key: (product) => product.numberOfTeeth ?? product.number_of_teeth ?? ""
+      },
+      {
+        label: "Unit Price",
+        key: (product) => product.unitPrice ?? product.unit_price ?? ""
+      }
+    ],
+    filteredProducts
+  );
+});
 
 /* =========================
    PAGE LOAD

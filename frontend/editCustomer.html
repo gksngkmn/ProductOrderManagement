@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Customer</title>
+
+  <link rel="stylesheet" href="./css/base.css" />
+  <link rel="stylesheet" href="./css/layout.css" />
+  <link rel="stylesheet" href="./css/components.css" />
+  <link rel="stylesheet" href="./css/pages/editCustomer.css" />
+</head>
+<body>
+  <header class="edit-customer-topbar">
+    <div class="edit-customer-title-area">
+      <h1>Edit Customer</h1>
+      <p id="customerInfo">Customer information</p>
+    </div>
+
+    <div class="edit-customer-top-actions">
+      <button id="backToCustomerBtn" class="light" type="button">Back to Customer Panel</button>
+      <button id="logoutBtn" class="secondary" type="button">Logout</button>
+    </div>
+  </header>
+
+  <main class="edit-customer-layout">
+    <section class="edit-customer-summary-panel">
+      <div class="summary-header">
+        <h2 id="summaryCompanyName">Loading customer...</h2>
+        <p id="summaryCustomerName">Customer information</p>
+      </div>
+
+      <div class="summary-grid">
+        <div class="summary-item">
+          <span>Email</span>
+          <strong id="summaryEmail">-</strong>
+        </div>
+
+        <div class="summary-item">
+          <span>Phone</span>
+          <strong id="summaryPhone">-</strong>
+        </div>
+
+        <div class="summary-item">
+          <span>Country</span>
+          <strong id="summaryCountry">-</strong>
+        </div>
+
+        <div class="summary-item">
+          <span>City</span>
+          <strong id="summaryCity">-</strong>
+        </div>
+
+        <div class="summary-item">
+          <span>Username</span>
+          <strong id="summaryUsername">-</strong>
+        </div>
+
+        <div class="summary-item">
+          <span>Role</span>
+          <strong id="summaryRole">-</strong>
+        </div>
+      </div>
+
+      <div class="verification-info-box">
+        <h3>Verification Policy</h3>
+        <p>
+          Every information or password change requires a verification code.
+          You may choose email or SMS verification.
+        </p>
+      </div>
+    </section>
+
+    <section class="edit-customer-main-grid">
+      <section class="edit-card">
+        <div class="edit-card-header">
+          <h2>Customer & Company Information</h2>
+          <p>Edit your customer and company information.</p>
+        </div>
+
+        <form id="editCustomerForm" class="edit-form">
+          <div class="form-section-title">Customer Information</div>
+
+          <div class="edit-form-grid">
+            <div class="filter-group">
+              <label for="nameInput">Name</label>
+              <input type="text" id="nameInput" required />
+            </div>
+
+            <div class="filter-group">
+              <label for="surnameInput">Surname</label>
+              <input type="text" id="surnameInput" required />
+            </div>
+
+            <div class="filter-group">
+              <label for="emailInput">Email</label>
+              <input type="email" id="emailInput" required />
+            </div>
+
+            <div class="filter-group">
+              <label for="phoneInput">Phone</label>
+              <input type="text" id="phoneInput" required />
+            </div>
+
+            <div class="filter-group">
+              <label for="usernameInput">Username</label>
+              <input type="text" id="usernameInput" disabled />
+            </div>
+          </div>
+
+          <div class="form-section-title">Company Information</div>
+
+          <div class="edit-form-grid">
+            <div class="filter-group">
+              <label for="companyNameInput">Company Name</label>
+              <input type="text" id="companyNameInput" />
+            </div>
+
+            <div class="filter-group">
+              <label for="companyPhoneInput">Company Phone</label>
+              <input type="text" id="companyPhoneInput" />
+            </div>
+
+            <div class="filter-group full-width">
+              <label for="addressInput">Address</label>
+              <textarea id="addressInput" rows="3"></textarea>
+            </div>
+
+            <div class="filter-group">
+              <label for="countryInput">Country</label>
+              <input type="text" id="countryInput" />
+            </div>
+
+            <div class="filter-group">
+              <label for="cityInput">City</label>
+              <input type="text" id="cityInput" />
+            </div>
+          </div>
+
+          <div class="verification-method-box">
+            <h3>Verification Method</h3>
+
+            <label class="verification-option">
+              <input type="radio" name="detailsVerificationMethod" value="email" checked />
+              Send verification code by Email
+            </label>
+
+            <label class="verification-option">
+              <input type="radio" name="detailsVerificationMethod" value="sms" />
+              Send verification code by SMS
+            </label>
+          </div>
+
+          <div class="edit-actions">
+            <button id="requestDetailsCodeBtn" type="button">Request Verification Code</button>
+            <button id="saveDetailsBtn" type="submit" disabled>Save Changes</button>
+          </div>
+
+          <div id="detailsVerificationArea" class="verification-code-area hidden">
+            <div class="filter-group">
+              <label for="detailsVerificationCodeInput">Verification Code</label>
+              <input type="text" id="detailsVerificationCodeInput" placeholder="Enter 6-digit code" />
+            </div>
+
+            <p id="detailsVerificationMessage" class="edit-message"></p>
+          </div>
+        </form>
+      </section>
+
+      <section class="edit-card">
+        <div class="edit-card-header">
+          <h2>Password Change</h2>
+          <p>Change your password with verification.</p>
+        </div>
+
+        <form id="passwordForm" class="edit-form">
+          <div class="edit-form-grid">
+            <div class="filter-group">
+              <label for="newPasswordInput">New Password</label>
+              <input type="password" id="newPasswordInput" required />
+            </div>
+
+            <div class="filter-group">
+              <label for="confirmPasswordInput">Confirm Password</label>
+              <input type="password" id="confirmPasswordInput" required />
+            </div>
+          </div>
+
+          <div class="verification-method-box">
+            <h3>Verification Method</h3>
+
+            <label class="verification-option">
+              <input type="radio" name="passwordVerificationMethod" value="email" checked />
+              Send verification code by Email
+            </label>
+
+            <label class="verification-option">
+              <input type="radio" name="passwordVerificationMethod" value="sms" />
+              Send verification code by SMS
+            </label>
+          </div>
+
+          <div class="edit-actions">
+            <button id="requestPasswordCodeBtn" type="button">Request Verification Code</button>
+            <button id="savePasswordBtn" type="submit" disabled>Change Password</button>
+          </div>
+
+          <div id="passwordVerificationArea" class="verification-code-area hidden">
+            <div class="filter-group">
+              <label for="passwordVerificationCodeInput">Verification Code</label>
+              <input type="text" id="passwordVerificationCodeInput" placeholder="Enter 6-digit code" />
+            </div>
+
+            <p id="passwordVerificationMessage" class="edit-message"></p>
+          </div>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="./js/pages/EditCustomerPage.js"></script>
+</body>
+</html>

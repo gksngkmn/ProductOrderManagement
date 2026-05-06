@@ -1,5 +1,9 @@
 const ProductService = require("../services/ProductService");
 
+const {
+  sendNewProductMailToCustomer
+} = require("../utils/mailService");
+
 function handleError(res, error, logMessage) {
   console.error(logMessage, error);
 
@@ -20,6 +24,24 @@ async function getProducts(req, res) {
 async function createProduct(req, res) {
   try {
     const product = await ProductService.createProduct(req.body);
+
+    try {
+      const customers = await ProductService.getCustomersForProductMail();
+      const productForMail = ProductService.formatProductForMail(product);
+
+      for (const customer of customers) {
+        await sendNewProductMailToCustomer({
+          customerEmail: customer.email,
+          customerName: `${customer.name || ""} ${customer.surname || ""}`.trim(),
+          product: productForMail
+        });
+      }
+
+      console.log(`New product mail sent to ${customers.length} customers.`);
+    } catch (mailError) {
+      console.error("New product mail sending error:", mailError.message);
+    }
+
     return res.status(201).json(product);
   } catch (error) {
     return handleError(res, error, "Create product error:");

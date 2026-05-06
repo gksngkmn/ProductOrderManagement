@@ -403,3 +403,152 @@
     min-width: 900px;
   }
 }
+
+/* =========================================================
+   ADD CUSTOMER MODAL
+========================================================= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+
+  padding: 28px 16px;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+
+  overflow-y: auto;
+}
+
+.modal-overlay.hidden {
+  display: none !important;
+}
+
+.add-customer-modal {
+  width: min(96%, 980px);
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
+  padding: 20px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.modal-header h2 {
+  color: #1d4ed8;
+  font-size: 26px;
+  margin-bottom: 4px;
+}
+
+.modal-header p {
+  font-size: 14px;
+  color: var(--color-text-soft);
+}
+
+.add-customer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-section-title {
+  font-size: 14px;
+  font-weight: 900;
+  color: #1d4ed8;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.add-customer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.add-customer-grid .full-width {
+  grid-column: 1 / -1;
+}
+
+.add-customer-form textarea {
+  resize: vertical;
+}
+
+.notification-box {
+  padding: 12px;
+  background: #f8fbff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.notification-box h3 {
+  font-size: 14px;
+  color: #1d4ed8;
+  margin-bottom: 8px;
+}
+
+.notification-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  font-size: 13px;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+
+.notification-option input {
+  width: auto;
+}
+
+.add-customer-message {
+  min-height: 20px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.add-customer-message.success {
+  color: var(--color-success);
+}
+
+.add-customer-message.error {
+  color: var(--color-danger);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 760px) {
+  .modal-header {
+    flex-direction: column;
+  }
+
+  .add-customer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-actions {
+    width: 100%;
+  }
+
+  .modal-actions button {
+    flex: 1;
+  }
+}

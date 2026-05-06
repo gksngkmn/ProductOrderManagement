@@ -16,6 +16,20 @@ class ProductService {
     };
   }
 
+  static formatProductForMail(product) {
+    return {
+      id: product.id,
+      material: product.material,
+      type: product.type,
+      model: product.model,
+      angle: product.angle,
+      nodal_length: product.nodalLength,
+      width: product.width,
+      number_of_teeth: product.numberOfTeeth,
+      unit_price: product.unitPrice
+    };
+  }
+
   static async getProducts() {
     const result = await pool.query(`
       SELECT 
@@ -173,6 +187,29 @@ class ProductService {
     return {
       message: "Product deleted successfully."
     };
+  }
+
+  static async getCustomersForProductMail() {
+    const result = await pool.query(`
+      SELECT
+        id,
+        name,
+        surname,
+        email,
+        company_name
+      FROM companies
+      WHERE email IS NOT NULL
+      AND email <> ''
+      ORDER BY id ASC
+    `);
+
+    return result.rows.map((customer) => ({
+      id: customer.id,
+      name: customer.name,
+      surname: customer.surname,
+      email: customer.email,
+      companyName: customer.company_name
+    }));
   }
 }
 

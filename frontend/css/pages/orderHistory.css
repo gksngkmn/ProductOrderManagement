@@ -1,34 +1,70 @@
 /* =========================================================
    ORDER HISTORY PAGE CSS
-   Purpose: Manager order history filters + Excel tables
-   Layout rules are handled by layout.css
+   Purpose: Top filters + manager order history Excel tables
 ========================================================= */
 
 
 /* =========================================================
-   1. ORDER DATE FILTERS
+   1. PAGE LAYOUT
+========================================================= */
+
+.order-history-layout {
+  width: min(96%, 1700px);
+  margin: 24px auto 36px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.order-history-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.orders-list-panel,
+.order-detail-panel {
+  min-width: 0;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 20px;
+}
+
+.order-detail-panel {
+  position: sticky;
+  top: 20px;
+  max-height: calc(100vh - 130px);
+  overflow-y: auto;
+}
+
+
+/* =========================================================
+   2. TOP ORDER DATE FILTERS
 ========================================================= */
 
 .order-filter-bar {
-  display: flex;
-  flex-wrap: wrap;
+  width: 100%;
+
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 16px 18px;
+
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(260px, 1fr) auto;
   gap: 14px;
   align-items: end;
-
-  margin-bottom: 14px;
-  padding: 12px;
-
-  background: #f8fbff;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
 }
 
 .order-filter-bar .filter-group {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  flex: 0 0 220px;
-  max-width: 220px;
   margin-bottom: 0;
 }
 
@@ -41,30 +77,75 @@
 
 .order-filter-bar select {
   width: 100%;
-  height: 42px;
-  padding: 0 12px;
+  min-height: 42px;
+  padding: 8px 10px;
 
   border: 1px solid var(--color-border);
   border-radius: 8px;
   background: white;
   color: var(--color-text);
+
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
 }
 
 .order-filter-bar .filter-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
-  flex: 0 0 auto;
+  flex-wrap: nowrap;
 }
 
 .order-filter-bar .filter-actions button {
   min-width: 110px;
-  height: 42px;
+  min-height: 42px;
 }
 
 
 /* =========================================================
-   2. TABLE WRAPPERS
+   3. PANEL HEADERS
+========================================================= */
+
+.orders-list-panel .content-header,
+.order-detail-panel .detail-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.orders-list-panel .content-header h2,
+.order-detail-panel .detail-panel-header h2 {
+  color: #1d4ed8;
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.orders-list-panel .content-header p,
+.order-detail-panel .detail-panel-header p {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--color-text-soft);
+}
+
+.orders-list-panel .content-actions,
+.order-detail-panel .content-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   4. TABLE WRAPPERS
 ========================================================= */
 
 .order-table-wrapper,
@@ -82,7 +163,7 @@
 
 
 /* =========================================================
-   3. ORDERS + DETAIL TABLE BASE - EXCEL STYLE
+   5. ORDERS + DETAIL TABLE BASE - EXCEL STYLE
 ========================================================= */
 
 .orders-table,
@@ -144,7 +225,7 @@
 
 
 /* =========================================================
-   4. ORDERS TABLE COLUMN WIDTHS
+   6. ORDERS TABLE COLUMN WIDTHS
    Columns:
    ID, Order Code, Status, Created, Completed, Items, Total
 ========================================================= */
@@ -193,7 +274,7 @@
 
 
 /* =========================================================
-   5. DETAIL TABLE COLUMN WIDTHS
+   7. DETAIL TABLE COLUMN WIDTHS
    Columns:
    Material, Type, Model, Angle, Nodal Length,
    Width, Teeth, Qty, Unit Price, Total
@@ -261,19 +342,27 @@
 
 
 /* =========================================================
-   6. RESPONSIVE TABLE FIXES
+   8. RESPONSIVE
 ========================================================= */
 
-@media (max-width: 760px) {
-  .order-filter-bar {
-    flex-direction: column;
-    align-items: stretch;
+@media (max-width: 1200px) {
+  .order-history-main-grid {
+    grid-template-columns: 1fr;
   }
 
-  .order-filter-bar .filter-group {
-    flex: 1 1 auto;
-    max-width: none;
-    width: 100%;
+  .order-detail-panel {
+    position: static;
+    max-height: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .order-history-layout {
+    width: min(94%, 100%);
+  }
+
+  .order-filter-bar {
+    grid-template-columns: 1fr;
   }
 
   .order-filter-bar .filter-actions {
@@ -282,6 +371,24 @@
 
   .order-filter-bar .filter-actions button {
     flex: 1;
+  }
+}
+
+@media (max-width: 760px) {
+  .orders-list-panel .content-header,
+  .order-detail-panel .detail-panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .orders-list-panel .content-actions,
+  .order-detail-panel .content-actions {
+    width: 100%;
+  }
+
+  .orders-list-panel .content-actions button,
+  .order-detail-panel .content-actions button {
+    width: 100%;
   }
 
   .order-table-wrapper,

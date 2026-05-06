@@ -30,6 +30,13 @@ class CompanyApi {
       method: "DELETE"
     });
   }
+
+  static createCompany(companyData) {
+    return ClientApi.request("/companies", {
+      method: "POST",
+      body: JSON.stringify(companyData)
+    });
+  }
 }
 
 export default CompanyApi;

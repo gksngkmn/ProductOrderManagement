@@ -40,6 +40,7 @@ class OrderApi {
       method: "PUT"
     });
   }
+  
 }
 
 export default OrderApi;

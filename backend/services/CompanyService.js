@@ -2,7 +2,9 @@ const bcrypt = require("bcryptjs");
 const pool = require("../db");
 
 const {
-  sendMailToManager
+  sendCustomerUpdatedInfoMailToManager,
+  sendManagerUpdatedCustomerInfoMail,
+  sendCustomerPasswordChangedMailToManager
 } = require("../utils/mailService");
 
 class CompanyService {
@@ -144,6 +146,60 @@ class CompanyService {
     }
   }
 
+  static async getCompanyById(id) {
+    const result = await pool.query(
+      `
+      SELECT
+        id,
+        name,
+        surname,
+        email,
+        phone,
+        company_name,
+        address,
+        country,
+        city,
+        company_phone,
+        username,
+        role,
+        created_at
+      FROM companies
+      WHERE id = $1
+      `,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      const error = new Error("Customer not found.");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    return result.rows[0];
+  }
+
+  static getUpdatedFields(oldCompany, newData) {
+    const fields = [];
+
+    if (oldCompany.name !== newData.name) {
+      fields.push("Name");
+    }
+
+    if (oldCompany.surname !== newData.surname) {
+      fields.push("Surname");
+    }
+
+    if (oldCompany.email !== newData.email) {
+      fields.push("Email");
+    }
+
+    if (oldCompany.phone !== newData.phone) {
+      fields.push("Phone");
+    }
+
+    return fields;
+  }
+
   static async updateCompany(id, user, companyData) {
     const { name, surname, email, phone } = companyData;
 
@@ -158,6 +214,15 @@ class CompanyService {
       error.statusCode = 403;
       throw error;
     }
+
+    const oldCompany = await this.getCompanyById(id);
+
+    const updatedFields = this.getUpdatedFields(oldCompany, {
+      name,
+      surname,
+      email,
+      phone
+    });
 
     const result = await pool.query(
       `
@@ -193,25 +258,27 @@ class CompanyService {
     }
 
     const updatedCustomer = result.rows[0];
+    const formattedCustomer = this.formatCompany(updatedCustomer);
 
     try {
-      await sendMailToManager({
-        subject: "Customer Profile Updated",
-        text: `
-A customer updated their profile information.
+      if (user.role === "customer") {
+        await sendCustomerUpdatedInfoMailToManager({
+          customer: formattedCustomer,
+          updatedFields
+        });
+      }
 
-Customer: ${updatedCustomer.name} ${updatedCustomer.surname}
-Company: ${updatedCustomer.company_name}
-Email: ${updatedCustomer.email}
-Phone: ${updatedCustomer.phone}
-Username: ${updatedCustomer.username}
-        `
-      });
+      if (user.role === "manager") {
+        await sendManagerUpdatedCustomerInfoMail({
+          customer: formattedCustomer,
+          updatedFields
+        });
+      }
     } catch (mailError) {
-      console.log("Manager notification mail could not be sent:", mailError.message);
+      console.log("Company update notification mail could not be sent:", mailError.message);
     }
 
-    return this.formatCompany(updatedCustomer);
+    return formattedCustomer;
   }
 
   static async updateCustomerPassword(id, newPassword) {
@@ -227,6 +294,7 @@ Username: ${updatedCustomer.username}
       throw error;
     }
 
+    const oldCustomer = await this.getCompanyById(id);
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     const result = await pool.query(
@@ -234,7 +302,20 @@ Username: ${updatedCustomer.username}
       UPDATE companies
       SET password_hash = $1
       WHERE id = $2
-      RETURNING id
+      RETURNING
+        id,
+        name,
+        surname,
+        email,
+        phone,
+        company_name,
+        address,
+        country,
+        city,
+        company_phone,
+        username,
+        role,
+        created_at
       `,
       [hashedPassword, id]
     );
@@ -243,6 +324,14 @@ Username: ${updatedCustomer.username}
       const error = new Error("Customer not found.");
       error.statusCode = 404;
       throw error;
+    }
+
+    try {
+      await sendCustomerPasswordChangedMailToManager({
+        customer: this.formatCompany(result.rows[0] || oldCustomer)
+      });
+    } catch (mailError) {
+      console.log("Password change notification mail could not be sent:", mailError.message);
     }
 
     return {

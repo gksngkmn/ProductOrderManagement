@@ -55,6 +55,15 @@
           <input type="text" id="typeFilter" placeholder="Type" />
         </div>
 
+        <div class="filter-group">
+          <label for="typeSort">Sort by Type</label>
+          <select id="typeSort">
+            <option value="">Default</option>
+            <option value="type-asc">Type A → Z</option>
+            <option value="type-desc">Type Z → A</option>
+          </select>
+        </div>
+
         <div class="sidebar-actions">
           <button id="applyProductFiltersBtn" type="button">Apply</button>
           <button id="clearProductFiltersBtn" class="secondary" type="button">Clear</button>
@@ -84,17 +93,17 @@
 
           <div class="filter-group">
             <label for="angle">Angle</label>
-            <input type="number" id="angle" placeholder="Angle" required />
+            <input type="number" id="angle" placeholder="Angle" step="any" min="0" required />
           </div>
 
           <div class="filter-group">
             <label for="nodalLength">Nodal Length</label>
-            <input type="number" id="nodalLength" placeholder="Nodal Length" required />
+            <input type="number" id="nodalLength" placeholder="Nodal Length" step="any" min="0" required />
           </div>
 
           <div class="filter-group">
             <label for="width">Width</label>
-            <input type="number" id="width" placeholder="Width" required />
+            <input type="number" id="width" placeholder="Width" step="any" min="0" required />
           </div>
 
           <div class="filter-group">
@@ -121,6 +130,10 @@
         <div>
           <h2>Products</h2>
           <p id="productCountInfo" class="info-text">Loading products...</p>
+        </div>
+
+        <div class="content-actions">
+          <button id="exportProductsBtn" class="light" type="button">Export Excel</button>
         </div>
       </div>
 

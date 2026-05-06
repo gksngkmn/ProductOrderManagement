@@ -1,0 +1,294 @@
+/* =========================================================
+   EDIT MANAGER PAGE CSS
+   Theme: Blue / White Dashboard Layout
+========================================================= */
+
+
+/* =========================================================
+   1. TOPBAR
+========================================================= */
+
+.edit-manager-topbar {
+  min-height: 88px;
+  padding: 20px 32px;
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+  color: white;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+
+  box-shadow: var(--shadow-md);
+}
+
+.edit-manager-title-area h1 {
+  color: white;
+  margin-bottom: 4px;
+}
+
+.edit-manager-title-area p {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.edit-manager-top-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   2. MAIN LAYOUT
+========================================================= */
+
+.edit-manager-layout {
+  width: min(96%, 1500px);
+  margin: 24px auto 36px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.edit-manager-summary-panel,
+.edit-card {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 20px;
+}
+
+
+/* =========================================================
+   3. SUMMARY PANEL
+========================================================= */
+
+.summary-header {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.summary-header h2 {
+  color: #1d4ed8;
+  font-size: 28px;
+  margin-bottom: 4px;
+}
+
+.summary-header p {
+  font-size: 14px;
+  color: var(--color-text-soft);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.summary-item {
+  background: #f8fbff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  min-width: 0;
+}
+
+.summary-item span {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--color-text-soft);
+  margin-bottom: 4px;
+}
+
+.summary-item strong {
+  display: block;
+  font-size: 13px;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.verification-info-box {
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--radius-md);
+}
+
+.verification-info-box h3 {
+  font-size: 15px;
+  color: #1d4ed8;
+  margin-bottom: 4px;
+}
+
+.verification-info-box p {
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   4. MAIN GRID
+========================================================= */
+
+.edit-manager-main-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 0.7fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.edit-card-header {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.edit-card-header h2 {
+  color: #1d4ed8;
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.edit-card-header p {
+  font-size: 13px;
+  color: var(--color-text-soft);
+}
+
+
+/* =========================================================
+   5. FORM
+========================================================= */
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.edit-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.form-section-title {
+  font-size: 14px;
+  font-weight: 900;
+  color: #1d4ed8;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+
+/* =========================================================
+   6. VERIFICATION
+========================================================= */
+
+.verification-method-box {
+  padding: 12px;
+  background: #f8fbff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.verification-method-box h3 {
+  font-size: 14px;
+  color: #1d4ed8;
+  margin-bottom: 8px;
+}
+
+.verification-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  font-size: 13px;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+
+.verification-option input {
+  width: auto;
+}
+
+.verification-code-area {
+  padding: 12px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: var(--radius-md);
+}
+
+.edit-message {
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.edit-message.success {
+  color: var(--color-success);
+}
+
+.edit-message.error {
+  color: var(--color-danger);
+}
+
+
+/* =========================================================
+   7. ACTIONS
+========================================================= */
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   8. RESPONSIVE
+========================================================= */
+
+@media (max-width: 1200px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .edit-manager-main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .edit-manager-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .edit-manager-top-actions {
+    width: 100%;
+  }
+
+  .edit-manager-top-actions button {
+    flex: 1;
+  }
+
+  .summary-grid,
+  .edit-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .edit-actions {
+    width: 100%;
+  }
+
+  .edit-actions button {
+    flex: 1;
+  }
+}

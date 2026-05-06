@@ -8,6 +8,7 @@ import CustomerInfo from "../components/CustomerInfo.js";
 
 import DomHelper from "../helpers/DomHelper.js";
 import PaginationHelper from "../helpers/PaginationHelper.js";
+import ExportHelper from "../helpers/ExportHelper.js";
 
 PageGuard.requireRole("customer");
 
@@ -22,6 +23,9 @@ const orderSearchInput = document.getElementById("orderSearchInput");
 const statusFilter = document.getElementById("statusFilter");
 const applyOrderFiltersBtn = document.getElementById("applyOrderFiltersBtn");
 const clearOrderFiltersBtn = document.getElementById("clearOrderFiltersBtn");
+
+const exportCustomerOrdersBtn = document.getElementById("exportCustomerOrdersBtn");
+const exportCustomerOrderDetailsBtn = document.getElementById("exportCustomerOrderDetailsBtn");
 
 const orderStatsContainer = document.getElementById("orderStatsContainer");
 const orderCountInfo = document.getElementById("orderCountInfo");
@@ -234,6 +238,115 @@ function applyOrderFilters() {
 
   currentPage = 1;
   renderCurrentPage();
+}
+
+
+/* =========================
+   EXPORT ORDERS
+========================= */
+exportCustomerOrdersBtn.addEventListener("click", () => {
+  ExportHelper.exportToExcel(
+    `my-orders-${ExportHelper.getTodayFileDate()}`,
+    "My Orders",
+    [
+      { label: "ID", key: "id" },
+      { label: "Order Code", key: "order_code" },
+      { label: "Status", key: "status" },
+      {
+        label: "Created",
+        key: (order) => formatExportDate(order.created_at)
+      },
+      {
+        label: "Completed",
+        key: (order) => formatExportDate(order.completed_at)
+      },
+      {
+        label: "Items",
+        key: (order) => Array.isArray(order.items) ? order.items.length : 0
+      },
+      {
+        label: "Total",
+        key: (order) => calculateOrderTotal(order)
+      }
+    ],
+    filteredOrders
+  );
+});
+
+/* =========================
+   EXPORT ORDER DETAILS
+========================= */
+exportCustomerOrderDetailsBtn.addEventListener("click", () => {
+  const selectedOrder = currentPageOrders.find(
+    (order) => String(order.id) === String(selectedOrderId)
+  );
+
+  if (!selectedOrder) {
+    alert("Please select an order first.");
+    return;
+  }
+
+  const items = selectedOrder.items || [];
+
+  ExportHelper.exportToExcel(
+    `my-order-details-${selectedOrder.order_code || selectedOrder.id}-${ExportHelper.getTodayFileDate()}`,
+    "Order Details",
+    [
+      { label: "Order Code", key: () => selectedOrder.order_code || "" },
+      { label: "Material", key: "material" },
+      { label: "Type", key: "type" },
+      { label: "Model", key: "model" },
+      { label: "Angle", key: "angle" },
+      {
+        label: "Nodal Length (mm)",
+        key: (item) => item.nodalLength ?? item.nodal_length ?? ""
+      },
+      { label: "Width (mm)", key: "width" },
+      {
+        label: "Number of Teeth",
+        key: (item) => item.numberOfTeeth ?? item.number_of_teeth ?? ""
+      },
+      {
+        label: "Quantity",
+        key: (item) => item.quantity ?? item.qty ?? ""
+      },
+      {
+        label: "Unit Price",
+        key: (item) => item.unitPrice ?? item.unit_price ?? ""
+      },
+      {
+        label: "Total Price",
+        key: (item) => calculateItemTotal(item)
+      }
+    ],
+    items
+  );
+});
+
+
+function formatExportDate(dateValue) {
+  if (!dateValue) return "";
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) return "";
+
+  return date.toLocaleDateString();
+}
+
+function calculateOrderTotal(order) {
+  const items = order.items || [];
+
+  return items.reduce((total, item) => {
+    return total + Number(calculateItemTotal(item) || 0);
+  }, 0);
+}
+
+function calculateItemTotal(item) {
+  const quantity = Number(item.quantity ?? item.qty ?? 0);
+  const unitPrice = Number(item.unitPrice ?? item.unit_price ?? 0);
+
+  return quantity * unitPrice;
 }
 
 /* =========================

@@ -18,16 +18,26 @@
     </div>
 
     <div class="customer-orders-top-actions">
-      <button id="backToCustomerBtn" class="light" type="button">Back to Customer Panel</button>
-      <button id="logoutBtn" class="secondary" type="button">Logout</button>
+      <button id="backToCustomerBtn" class="light" type="button">
+        Back to Customer Panel
+      </button>
+
+      <button id="logoutBtn" class="secondary" type="button">
+        Logout
+      </button>
     </div>
   </header>
 
   <main class="customer-orders-layout">
+    <!-- FILTERS -->
     <section class="orders-filter-bar">
       <div class="filter-group">
         <label for="orderSearchInput">Search</label>
-        <input type="text" id="orderSearchInput" placeholder="Search order code or product..." />
+        <input
+          type="text"
+          id="orderSearchInput"
+          placeholder="Search order code or product..."
+        />
       </div>
 
       <div class="filter-group">
@@ -45,12 +55,20 @@
       </div>
     </section>
 
+    <!-- ORDERS + DETAILS -->
     <section class="orders-main-grid">
+      <!-- LEFT: ORDERS LIST -->
       <section class="orders-list-panel">
         <div class="content-header">
           <div>
             <h2>Orders</h2>
             <p id="orderCountInfo" class="info-text">Loading orders...</p>
+          </div>
+
+          <div class="content-actions">
+            <button id="exportCustomerOrdersBtn" class="light" type="button">
+              Export Orders
+            </button>
           </div>
         </div>
 
@@ -79,10 +97,19 @@
         <div id="paginationContainer" class="pagination"></div>
       </section>
 
+      <!-- RIGHT: ORDER DETAILS -->
       <aside class="order-detail-panel">
         <div class="detail-panel-header">
-          <h2>Order Details</h2>
-          <p id="detailPanelInfo">Select an order to view details.</p>
+          <div>
+            <h2>Order Details</h2>
+            <p id="detailPanelInfo">Select an order to view details.</p>
+          </div>
+
+          <div class="content-actions">
+            <button id="exportCustomerOrderDetailsBtn" class="light" type="button">
+              Export Details
+            </button>
+          </div>
         </div>
 
         <div id="orderDetailPanel" class="detail-panel-body">
@@ -91,7 +118,8 @@
       </aside>
     </section>
 
-    <div id="orderStatsContainer" style="display:none;"></div>
+    <!-- Hidden stats container used by CustomerOrdersPage.js -->
+    <div id="orderStatsContainer" style="display: none;"></div>
   </main>
 
   <script type="module" src="./js/pages/CustomerOrdersPage.js"></script>

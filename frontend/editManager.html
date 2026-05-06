@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Manager</title>
+
+  <link rel="stylesheet" href="./css/base.css" />
+  <link rel="stylesheet" href="./css/layout.css" />
+  <link rel="stylesheet" href="./css/components.css" />
+  <link rel="stylesheet" href="./css/pages/editManager.css" />
+</head>
+<body>
+  <header class="edit-manager-topbar">
+    <div class="edit-manager-title-area">
+      <h1>Edit Manager</h1>
+      <p id="managerInfo">Manager information</p>
+    </div>
+
+    <div class="edit-manager-top-actions">
+      <button id="backToManagerBtn" class="light" type="button">Back to Manager Panel</button>
+      <button id="logoutBtn" class="secondary" type="button">Logout</button>
+    </div>
+  </header>
+
+  <main class="edit-manager-layout">
+    <section class="edit-manager-summary-panel">
+      <div class="summary-header">
+        <h2 id="summaryManagerName">Loading manager...</h2>
+        <p id="summaryManagerRole">Manager information</p>
+      </div>
+
+      <div class="summary-grid">
+        <div class="summary-item">
+          <span>Username</span>
+          <strong id="summaryUsername">-</strong>
+        </div>
+
+        <div class="summary-item">
+          <span>Email</span>
+          <strong id="summaryEmail">-</strong>
+        </div>
+
+        <div class="summary-item">
+          <span>Phone</span>
+          <strong id="summaryPhone">-</strong>
+        </div>
+
+        <div class="summary-item">
+          <span>Role</span>
+          <strong id="summaryRole">-</strong>
+        </div>
+      </div>
+
+      <div class="verification-info-box">
+        <h3>Verification Policy</h3>
+        <p>
+          Every manager information or password change requires a verification code.
+          You may choose email or SMS verification.
+        </p>
+      </div>
+    </section>
+
+    <section class="edit-manager-main-grid">
+      <section class="edit-card">
+        <div class="edit-card-header">
+          <h2>Manager Information</h2>
+          <p>Edit manager profile information.</p>
+        </div>
+
+        <form id="editManagerForm" class="edit-form">
+          <div class="form-section-title">Profile Information</div>
+
+          <div class="edit-form-grid">
+            <div class="filter-group">
+              <label for="nameInput">Name</label>
+              <input type="text" id="nameInput" />
+            </div>
+
+            <div class="filter-group">
+              <label for="surnameInput">Surname</label>
+              <input type="text" id="surnameInput" />
+            </div>
+
+            <div class="filter-group">
+              <label for="usernameInput">Username</label>
+              <input type="text" id="usernameInput" disabled />
+            </div>
+
+            <div class="filter-group">
+              <label for="emailInput">Email</label>
+              <input type="email" id="emailInput" />
+            </div>
+
+            <div class="filter-group">
+              <label for="phoneInput">Phone</label>
+              <input type="text" id="phoneInput" />
+            </div>
+
+            <div class="filter-group">
+              <label for="roleInput">Role</label>
+              <input type="text" id="roleInput" disabled />
+            </div>
+          </div>
+
+          <div class="verification-method-box">
+            <h3>Verification Method</h3>
+
+            <label class="verification-option">
+              <input type="radio" name="managerVerificationMethod" value="email" checked />
+              Send verification code by Email
+            </label>
+
+            <label class="verification-option">
+              <input type="radio" name="managerVerificationMethod" value="sms" />
+              Send verification code by SMS
+            </label>
+          </div>
+
+          <div class="edit-actions">
+            <button id="requestManagerCodeBtn" type="button">Request Verification Code</button>
+            <button id="saveManagerBtn" type="submit" disabled>Save Changes</button>
+          </div>
+
+          <div id="managerVerificationArea" class="verification-code-area hidden">
+            <div class="filter-group">
+              <label for="managerVerificationCodeInput">Verification Code</label>
+              <input type="text" id="managerVerificationCodeInput" placeholder="Enter 6-digit code" />
+            </div>
+
+            <p id="managerVerificationMessage" class="edit-message"></p>
+          </div>
+        </form>
+      </section>
+
+      <section class="edit-card">
+        <div class="edit-card-header">
+          <h2>Password Change</h2>
+          <p>Change manager password with verification.</p>
+        </div>
+
+        <form id="passwordForm" class="edit-form">
+          <div class="edit-form-grid">
+            <div class="filter-group">
+              <label for="newPasswordInput">New Password</label>
+              <input type="password" id="newPasswordInput" required />
+            </div>
+
+            <div class="filter-group">
+              <label for="confirmPasswordInput">Confirm Password</label>
+              <input type="password" id="confirmPasswordInput" required />
+            </div>
+          </div>
+
+          <div class="verification-method-box">
+            <h3>Verification Method</h3>
+
+            <label class="verification-option">
+              <input type="radio" name="passwordVerificationMethod" value="email" checked />
+              Send verification code by Email
+            </label>
+
+            <label class="verification-option">
+              <input type="radio" name="passwordVerificationMethod" value="sms" />
+              Send verification code by SMS
+            </label>
+          </div>
+
+          <div class="edit-actions">
+            <button id="requestPasswordCodeBtn" type="button">Request Verification Code</button>
+            <button id="savePasswordBtn" type="submit" disabled>Change Password</button>
+          </div>
+
+          <div id="passwordVerificationArea" class="verification-code-area hidden">
+            <div class="filter-group">
+              <label for="passwordVerificationCodeInput">Verification Code</label>
+              <input type="text" id="passwordVerificationCodeInput" placeholder="Enter 6-digit code" />
+            </div>
+
+            <p id="passwordVerificationMessage" class="edit-message"></p>
+          </div>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="./js/pages/EditManagerPage.js"></script>
+</body>
+</html>

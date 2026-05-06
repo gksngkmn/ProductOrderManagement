@@ -19,6 +19,7 @@ PageGuard.requireRole("customer");
 const customerInfo = document.getElementById("customerInfo");
 const logoutBtn = document.getElementById("logoutBtn");
 const myOrdersBtn = document.getElementById("myOrdersBtn");
+const editCustomerBtn = document.getElementById("editCustomerBtn");
 
 const createOrderBtn = document.getElementById("createOrderBtn");
 const currentOrderInfo = document.getElementById("currentOrderInfo");
@@ -61,6 +62,10 @@ logoutBtn.addEventListener("click", () => {
 
 myOrdersBtn.addEventListener("click", () => {
   window.location.href = "/customerOrders.html";
+});
+
+editCustomerBtn.addEventListener("click", () => {
+  window.location.href = "/editCustomer.html";
 });
 
 /* =========================
