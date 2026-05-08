@@ -47,12 +47,14 @@
 
         <div class="filter-group">
           <label for="materialFilter">Material</label>
-          <input type="text" id="materialFilter" placeholder="Material" />
+          <input type="text" id="materialFilter" list="materialFilterOptions" placeholder="Material" />
+          <datalist id="materialFilterOptions"></datalist>
         </div>
 
         <div class="filter-group">
           <label for="typeFilter">Type</label>
-          <input type="text" id="typeFilter" placeholder="Type" />
+          <input type="text" id="typeFilter" list="typeFilterOptions" placeholder="Type" />
+          <datalist id="typeFilterOptions"></datalist>
         </div>
 
         <div class="filter-group">
@@ -71,11 +73,9 @@
       </section>
 
       <section class="sidebar-section">
-        <h2>Add / Edit Product</h2>
+        <h2>Add Product</h2>
 
         <form id="productForm" class="product-form">
-          <input type="hidden" id="productId" />
-
           <div class="filter-group">
             <label for="material">Material</label>
             <input type="text" id="material" placeholder="Material" required />
@@ -118,7 +118,6 @@
 
           <div class="sidebar-actions">
             <button type="submit" id="saveProductBtn">Add Product</button>
-            <button type="button" id="cancelEditBtn" class="secondary" style="display:none;">Cancel</button>
           </div>
         </form>
       </section>
@@ -163,8 +162,77 @@
 
       <div id="paginationContainer" class="pagination"></div>
     </section>
+
+    <div id="editProductModal" class="modal-overlay hidden">
+  <div class="edit-product-modal">
+    <div class="modal-header">
+      <div>
+        <h2>Edit Product</h2>
+        <p>Update selected product information.</p>
+      </div>
+
+      <button id="closeEditProductModalBtn" class="secondary" type="button">
+        Close
+      </button>
+    </div>
+
+    <form id="editProductForm" class="edit-product-form">
+      <input type="hidden" id="editProductId" />
+
+      <div class="edit-product-grid">
+        <div class="filter-group">
+          <label for="editMaterial">Material</label>
+          <input type="text" id="editMaterial" required />
+        </div>
+
+        <div class="filter-group">
+          <label for="editType">Type</label>
+          <input type="text" id="editType" required />
+        </div>
+
+        <div class="filter-group">
+          <label for="editModel">Model</label>
+          <input type="text" id="editModel" required />
+        </div>
+
+        <div class="filter-group">
+          <label for="editAngle">Angle</label>
+          <input type="number" id="editAngle" step="any" min="0" required />
+        </div>
+
+        <div class="filter-group">
+          <label for="editNodalLength">Nodal Length</label>
+          <input type="number" id="editNodalLength" step="any" min="0" required />
+        </div>
+
+        <div class="filter-group">
+          <label for="editWidth">Width</label>
+          <input type="number" id="editWidth" step="any" min="0" required />
+        </div>
+
+        <div class="filter-group">
+          <label for="editNumberOfTeeth">Number of Teeth</label>
+          <input type="number" id="editNumberOfTeeth" min="0" required />
+        </div>
+
+        <div class="filter-group">
+          <label for="editUnitPrice">Unit Price</label>
+          <input type="number" id="editUnitPrice" step="any" min="0" required />
+        </div>
+      </div>
+
+      <p id="editProductMessage" class="edit-product-message"></p>
+
+      <div class="modal-actions">
+        <button id="updateProductBtn" type="submit">Update Product</button>
+        <button id="cancelEditProductBtn" class="secondary" type="button">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
   </main>
 
-  <script type="module" src="./js/pages/ManagerPage.js?v=60"></script>
+  <script type="module" src="./js/pages/ManagerPage.js?v=62"></script>
 </body>
 </html>

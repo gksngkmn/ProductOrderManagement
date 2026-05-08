@@ -34,11 +34,12 @@ const exportProductsBtn = document.getElementById("exportProductsBtn");
 const productSearchInput = document.getElementById("productSearchInput");
 const materialFilter = document.getElementById("materialFilter");
 const typeFilter = document.getElementById("typeFilter");
+const materialFilterOptions = document.getElementById("materialFilterOptions");
+const typeFilterOptions = document.getElementById("typeFilterOptions");
 const applyProductFiltersBtn = document.getElementById("applyProductFiltersBtn");
 const clearProductFiltersBtn = document.getElementById("clearProductFiltersBtn");
 
 const productForm = document.getElementById("productForm");
-const productIdInput = document.getElementById("productId");
 
 const materialInput = document.getElementById("material");
 const typeInput = document.getElementById("type");
@@ -49,8 +50,21 @@ const widthInput = document.getElementById("width");
 const numberOfTeethInput = document.getElementById("numberOfTeeth");
 const unitPriceInput = document.getElementById("unitPrice");
 
-const cancelEditBtn = document.getElementById("cancelEditBtn");
+const editProductModal = document.getElementById("editProductModal");
+const closeEditProductModalBtn = document.getElementById("closeEditProductModalBtn");
+const cancelEditProductBtn = document.getElementById("cancelEditProductBtn");
+const editProductForm = document.getElementById("editProductForm");
+const editProductMessage = document.getElementById("editProductMessage");
 
+const editProductId = document.getElementById("editProductId");
+const editMaterial = document.getElementById("editMaterial");
+const editType = document.getElementById("editType");
+const editModel = document.getElementById("editModel");
+const editAngle = document.getElementById("editAngle");
+const editNodalLength = document.getElementById("editNodalLength");
+const editWidth = document.getElementById("editWidth");
+const editNumberOfTeeth = document.getElementById("editNumberOfTeeth");
+const editUnitPrice = document.getElementById("editUnitPrice");
 /* =========================
    STATE
 ========================= */
@@ -120,6 +134,8 @@ async function loadProducts() {
     filteredProducts = [...allProducts];
     currentPage = 1;
 
+    populateProductFilterOptions();
+
     renderCurrentPage();
     await loadStats();
   } catch (error) {
@@ -128,6 +144,32 @@ async function loadProducts() {
     productCountInfo.innerText = "Products could not be loaded.";
   }
 }
+/* =========================
+   PRODUCT FILTER OPTIONS
+========================= */
+function populateProductFilterOptions() {
+  populateDatalistOptions(materialFilterOptions, allProducts, "material");
+  populateDatalistOptions(typeFilterOptions, allProducts, "type");
+}
+
+function populateDatalistOptions(datalistElement, products, fieldName) {
+  if (!datalistElement) return;
+
+  const values = [
+    ...new Set(
+      products
+        .map((product) => product[fieldName])
+        .filter(Boolean)
+        .map((value) => String(value).trim())
+        .filter(Boolean)
+    )
+  ].sort((a, b) => a.localeCompare(b));
+
+  datalistElement.innerHTML = values
+    .map((value) => `<option value="${DomHelper.escapeHtml(value)}"></option>`)
+    .join("");
+}
+
 
 /* =========================
    PRODUCT RENDER
@@ -180,6 +222,9 @@ clearProductFiltersBtn.addEventListener("click", () => {
   materialFilter.value = "";
   typeFilter.value = "";
   typeSort.value = "";
+
+  filteredProducts = [...allProducts];
+  currentPage = 1;
 
   renderCurrentPage();
 });
@@ -246,7 +291,7 @@ function applyTypeSort() {
 }
 
 /* =========================
-   CREATE / UPDATE PRODUCT
+   CREATE PRODUCT
 ========================= */
 productForm.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -254,13 +299,8 @@ productForm.addEventListener("submit", async (event) => {
   const productData = getProductFormData();
 
   try {
-    if (productIdInput.value) {
-      await ProductApi.updateProduct(productIdInput.value, productData);
-      alert("Product updated successfully.");
-    } else {
-      await ProductApi.createProduct(productData);
-      alert("Product added successfully.");
-    }
+    await ProductApi.createProduct(productData);
+    alert("Product added successfully.");
 
     resetProductForm();
     await loadProducts();
@@ -283,7 +323,8 @@ productsTableBody.addEventListener("click", async (event) => {
       return;
     }
 
-    fillProductForm(product);
+    openEditProductModal(product);
+    return;
   }
 
   if (event.target.classList.contains("deleteProductBtn")) {
@@ -317,31 +358,96 @@ function getProductFormData() {
   };
 }
 
-function fillProductForm(product) {
-  productIdInput.value = product.id;
-  materialInput.value = product.material ?? "";
-  typeInput.value = product.type ?? "";
-  modelInput.value = product.model ?? "";
-  angleInput.value = product.angle ?? "";
-  nodalLengthInput.value = product.nodalLength ?? "";
-  widthInput.value = product.width ?? "";
-  numberOfTeethInput.value = product.numberOfTeeth ?? "";
-  unitPriceInput.value = product.unitPrice ?? "";
-
-  cancelEditBtn.style.display = "inline";
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-cancelEditBtn.addEventListener("click", () => {
-  resetProductForm();
-});
-
 function resetProductForm() {
   productForm.reset();
-  productIdInput.value = "";
-  cancelEditBtn.style.display = "none";
 }
 
+
+function openEditProductModal(product) {
+  editProductId.value = product.id;
+  editMaterial.value = product.material ?? "";
+  editType.value = product.type ?? "";
+  editModel.value = product.model ?? "";
+  editAngle.value = product.angle ?? "";
+  editNodalLength.value = product.nodalLength ?? "";
+  editWidth.value = product.width ?? "";
+  editNumberOfTeeth.value = product.numberOfTeeth ?? "";
+  editUnitPrice.value = product.unitPrice ?? "";
+
+  editProductMessage.innerText = "";
+  editProductMessage.className = "edit-product-message";
+
+  editProductModal.classList.remove("hidden");
+}
+
+function closeEditProductModal() {
+  editProductModal.classList.add("hidden");
+  editProductForm.reset();
+  editProductId.value = "";
+  editProductMessage.innerText = "";
+  editProductMessage.className = "edit-product-message";
+}
+
+function getEditProductFormData() {
+  return {
+    material: editMaterial.value.trim(),
+    type: editType.value.trim(),
+    model: editModel.value.trim(),
+    angle: Number(editAngle.value),
+    nodalLength: Number(editNodalLength.value),
+    width: Number(editWidth.value),
+    numberOfTeeth: Number(editNumberOfTeeth.value),
+    unitPrice: Number(editUnitPrice.value)
+  };
+}
+
+function showEditProductMessage(message, type = "success") {
+  editProductMessage.innerText = message;
+  editProductMessage.className = `edit-product-message ${type}`;
+}
+
+closeEditProductModalBtn.addEventListener("click", () => {
+  closeEditProductModal();
+});
+
+cancelEditProductBtn.addEventListener("click", () => {
+  closeEditProductModal();
+});
+
+editProductModal.addEventListener("click", (event) => {
+  if (event.target === editProductModal) {
+    closeEditProductModal();
+  }
+});
+
+editProductForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const id = editProductId.value;
+
+  if (!id) {
+    showEditProductMessage("Product ID is missing.", "error");
+    return;
+  }
+
+  const productData = getEditProductFormData();
+
+  try {
+    showEditProductMessage("Updating product...", "success");
+
+    await ProductApi.updateProduct(id, productData);
+
+    showEditProductMessage("Product updated successfully.", "success");
+
+    await loadProducts();
+
+    setTimeout(() => {
+      closeEditProductModal();
+    }, 500);
+  } catch (error) {
+    showEditProductMessage(error.message, "error");
+  }
+});
 
 /* =========================
    EXPORT PRODUCTS
