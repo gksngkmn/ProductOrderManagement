@@ -21,6 +21,8 @@ const backToCustomerBtn = document.getElementById("backToCustomerBtn");
 
 const orderSearchInput = document.getElementById("orderSearchInput");
 const statusFilter = document.getElementById("statusFilter");
+const yearFilter = document.getElementById("yearFilter");
+const monthFilter = document.getElementById("monthFilter");
 const applyOrderFiltersBtn = document.getElementById("applyOrderFiltersBtn");
 const clearOrderFiltersBtn = document.getElementById("clearOrderFiltersBtn");
 
@@ -77,6 +79,8 @@ async function loadOrders() {
     filteredOrders = [...allOrders];
     currentPage = 1;
 
+    populateYearFilter();
+
     renderStats();
     renderCurrentPage();
   } catch (error) {
@@ -111,6 +115,48 @@ function renderStats() {
     </div>
   `;
 }
+
+
+/* =========================
+   DATE FILTER OPTIONS
+========================= */
+function populateYearFilter() {
+  const years = [
+    ...new Set(
+      allOrders
+        .map((order) => getYear(order.submission_date))
+        .filter(Boolean)
+    )
+  ].sort((a, b) => b - a);
+
+  yearFilter.innerHTML = `
+    <option value="">All Years</option>
+    ${years
+      .map((year) => `<option value="${year}">${year}</option>`)
+      .join("")}
+  `;
+}
+
+function getYear(dateValue) {
+  if (!dateValue) return null;
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) return null;
+
+  return date.getFullYear();
+}
+
+function getMonth(dateValue) {
+  if (!dateValue) return null;
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) return null;
+
+  return date.getMonth() + 1;
+}
+
 
 /* =========================
    RENDER CURRENT PAGE
@@ -206,13 +252,15 @@ applyOrderFiltersBtn.addEventListener("click", applyOrderFilters);
 clearOrderFiltersBtn.addEventListener("click", () => {
   orderSearchInput.value = "";
   statusFilter.value = "";
+  yearFilter.value = "";
+  monthFilter.value = "";
 
   filteredOrders = [...allOrders];
   currentPage = 1;
   renderCurrentPage();
 });
 
-[orderSearchInput, statusFilter].forEach((input) => {
+[orderSearchInput, statusFilter, yearFilter, monthFilter].forEach((input) => {
   input.addEventListener("input", applyOrderFilters);
   input.addEventListener("keyup", applyOrderFilters);
   input.addEventListener("change", applyOrderFilters);
@@ -221,6 +269,8 @@ clearOrderFiltersBtn.addEventListener("click", () => {
 function applyOrderFilters() {
   const search = orderSearchInput.value.toLowerCase().trim();
   const status = statusFilter.value;
+  const year = yearFilter.value;
+  const month = monthFilter.value;
 
   filteredOrders = allOrders.filter((order) => {
     const itemsText = (order.items || [])
@@ -234,10 +284,15 @@ function applyOrderFilters() {
       ${itemsText}
     `.toLowerCase();
 
+    const orderYear = getYear(order.submission_date);
+    const orderMonth = getMonth(order.submission_date);
+
     const matchesSearch = !search || combined.includes(search);
     const matchesStatus = !status || order.status === status;
+    const matchesYear = !year || orderYear === parseInt(year);
+    const matchesMonth = !month || orderMonth === parseInt(month);
 
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesYear && matchesMonth;
   });
 
   currentPage = 1;
