@@ -11,9 +11,17 @@ class OrderTable {
     );
   }
 
+  static getDisplayStatus(status) {
+  if (status === "Completed") {
+    return "Submitted";
+  }
+
+  return status || "-";
+}
+
   static renderManagerOrderRows(orders, selectedOrderId = null) {
     if (!orders.length) {
-      return DomHelper.tableEmpty("No orders found.", 7);
+      return DomHelper.tableEmpty("No orders found.", 6);
     }
 
     return orders
@@ -31,9 +39,8 @@ class OrderTable {
             <td title="${DomHelper.escapeHtml(order.order_code)}">
               ${DomHelper.escapeHtml(order.order_code)}
             </td>
-            <td>${DomHelper.escapeHtml(order.status)}</td>
-            <td>${FormatHelper.date(order.created_at)}</td>
-            <td>${FormatHelper.date(order.completed_at)}</td>
+            <td>${DomHelper.escapeHtml(this.getDisplayStatus(order.status))}</td>
+            <td>${FormatHelper.date(order.submission_date)}</td>
             <td>${itemCount}</td>
             <td>${FormatHelper.money(total)}</td>
           </tr>
@@ -96,9 +103,8 @@ class OrderTable {
     return `
       <div class="detail-summary">
         <p><strong>Order ID:</strong> ${order.id}</p>
-        <p><strong>Status:</strong> ${DomHelper.escapeHtml(order.status)}</p>
-        <p><strong>Created:</strong> ${FormatHelper.date(order.created_at)}</p>
-        <p><strong>Completed:</strong> ${FormatHelper.date(order.completed_at)}</p>
+        <p><strong>Status:</strong> ${DomHelper.escapeHtml(this.getDisplayStatus(order.status))}</p>
+        <p><strong>Submission Date:</strong> ${FormatHelper.date(order.submission_date)}</p>
         <p><strong>Items:</strong> ${order.items?.length || 0}</p>
         <p><strong>Total:</strong> ${FormatHelper.money(total)}</p>
       </div>
@@ -120,7 +126,7 @@ class OrderTable {
       .map((order) => {
         const total = this.calculateOrderTotal(order);
         const statusClass =
-          order.status === "Completed" ? "badge success" : "badge warning";
+          order.status === "Submitted" ? "badge success" : "badge warning";
 
         const itemsHtml = order.items?.length
           ? order.items
@@ -143,10 +149,10 @@ class OrderTable {
             <div class="order-card-header">
               <div>
                 <h3>${DomHelper.escapeHtml(order.order_code)}</h3>
-                <p>Created: ${FormatHelper.date(order.created_at)}</p>
+                <p>Created: ${FormatHelper.date(order.submission_date)}</p>
                 ${
-                  order.completed_at
-                    ? `<p>Completed: ${FormatHelper.date(order.completed_at)}</p>`
+                  order.submission_date
+                    ? `<p>Submission Date: ${FormatHelper.date(order.submission_date)}</p>`
                     : ""
                 }
               </div>

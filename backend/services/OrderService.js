@@ -72,7 +72,7 @@ class OrderService {
     SELECT *
     FROM orders
     WHERE company_id = $1
-    ORDER BY created_at DESC
+    ORDER BY submission_date DESC NULLS LAST, id DESC
     `,
     [companyId]
   );
@@ -352,7 +352,7 @@ static async deleteOrderItem(user, orderId, itemId) {
       `
       UPDATE orders
       SET status = 'Completed',
-          completed_at = CURRENT_TIMESTAMP
+          submission_date = CURRENT_TIMESTAMP
       WHERE id = $1
       RETURNING *
       `,

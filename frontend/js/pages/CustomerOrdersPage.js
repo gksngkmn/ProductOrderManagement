@@ -71,14 +71,16 @@ async function loadOrders() {
   try {
     orderCountInfo.innerText = "Loading orders...";
 
-    allOrders = await OrderApi.getMyOrders();
+    const orders = await OrderApi.getMyOrders();
+
+    allOrders = orders.filter((order) => order.status === "Completed");
     filteredOrders = [...allOrders];
     currentPage = 1;
 
     renderStats();
     renderCurrentPage();
   } catch (error) {
-    ordersTableBody.innerHTML = DomHelper.tableEmpty(error.message, 7);
+    ordersTableBody.innerHTML = DomHelper.tableEmpty(error.message, 6);
     orderStatsContainer.innerHTML = DomHelper.emptyMessage(error.message);
     orderCountInfo.innerText = "Orders could not be loaded.";
     orderDetailPanel.innerHTML = DomHelper.emptyMessage(error.message);
@@ -89,7 +91,7 @@ async function loadOrders() {
    STATS
 ========================= */
 function renderStats() {
-  const completed = allOrders.filter((order) => order.status === "Completed").length;
+  const completed = allOrders.filter((order) => order.status === "Submitted").length;
   const current = allOrders.filter((order) => order.status === "Current").length;
 
   orderStatsContainer.innerHTML = `
@@ -105,7 +107,7 @@ function renderStats() {
 
     <div class="stat-card">
       <div class="stat-number">${completed}</div>
-      <div class="stat-label">Completed</div>
+      <div class="stat-label">Submitted</div>
     </div>
   `;
 }
@@ -156,7 +158,9 @@ function renderSelectedOrderDetail() {
   }
 
   detailPanelInfo.innerText =
-    `${selectedOrder.order_code} • ${selectedOrder.status}`;
+    `${selectedOrder.order_code} • ${
+      OrderTable.getDisplayStatus(selectedOrder.status)
+  }`;
 
   orderDetailPanel.innerHTML = OrderTable.renderOrderDetail(selectedOrder);
 }
@@ -253,12 +257,8 @@ exportCustomerOrdersBtn.addEventListener("click", () => {
       { label: "Order Code", key: "order_code" },
       { label: "Status", key: "status" },
       {
-        label: "Created",
-        key: (order) => formatExportDate(order.created_at)
-      },
-      {
-        label: "Completed",
-        key: (order) => formatExportDate(order.completed_at)
+        label: "Submission Date",
+        key: (order) => formatExportDate(order.submission_date)
       },
       {
         label: "Items",

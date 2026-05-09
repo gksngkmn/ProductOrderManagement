@@ -24,12 +24,11 @@
   flex-direction: column;
   gap: 14px;
 
-  position: sticky;
-  top: 18px;
+  position: static;
 
-  max-height: calc(100vh - 120px);
-  overflow-y: auto;
-  padding-right: 6px;
+  max-height: none;
+  overflow-y: visible;
+  padding-right: 0;
 }
 
 .customer-content {
@@ -40,25 +39,6 @@
   box-shadow: var(--shadow-md);
   padding: 18px;
 }
-
-
-/* =========================================================
-   2. CUSTOMER SIDEBAR SCROLLBAR
-========================================================= */
-
-.customer-sidebar::-webkit-scrollbar {
-  width: 7px;
-}
-
-.customer-sidebar::-webkit-scrollbar-thumb {
-  background: #bfdbfe;
-  border-radius: 999px;
-}
-
-.customer-sidebar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
 
 /* =========================================================
    3. ADD ITEM SECTION
@@ -346,5 +326,149 @@
 
   .customer-content .content-header p {
     font-size: 14px;
+  }
+}
+
+
+/* =========================================================
+   EDIT ORDER ITEM MODAL
+========================================================= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+
+  padding: 28px 16px;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+
+  overflow-y: auto;
+}
+
+.modal-overlay.hidden {
+  display: none !important;
+}
+
+.edit-order-item-modal {
+  width: min(96%, 900px);
+
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
+
+  padding: 20px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+
+  border-bottom: 1px solid var(--color-border);
+}
+
+.modal-header h2 {
+  color: #1d4ed8;
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.modal-header p {
+  font-size: 14px;
+  color: var(--color-text-soft);
+}
+
+.edit-order-item-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.edit-order-product-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.edit-order-product-summary div {
+  background: #f8fbff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  min-width: 0;
+}
+
+.edit-order-product-summary span {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--color-text-soft);
+  margin-bottom: 4px;
+}
+
+.edit-order-product-summary strong {
+  display: block;
+  font-size: 13px;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.edit-order-total-box {
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+
+  font-size: 15px;
+  color: #1d4ed8;
+  font-weight: 800;
+}
+
+.edit-order-total-box strong {
+  color: #1d4ed8;
+}
+
+.edit-order-item-message {
+  min-height: 22px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.edit-order-item-message.success {
+  color: var(--color-success);
+}
+
+.edit-order-item-message.error {
+  color: var(--color-danger);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+  .edit-order-product-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .edit-order-product-summary {
+    grid-template-columns: 1fr;
   }
 }

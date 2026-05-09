@@ -62,7 +62,9 @@ async function loadOrders() {
   try {
     orderCountInfo.innerText = "Loading orders...";
 
-    allOrders = await OrderApi.getOrdersByCompany(companyId);
+    const orders = await OrderApi.getOrdersByCompany(companyId);
+
+    allOrders = orders.filter((order) => order.status === "Completed");
     filteredOrders = [...allOrders];
 
     populateYearFilter();
@@ -78,7 +80,7 @@ async function loadOrders() {
     renderSelectedOrderDetail();
     updateOrderCountInfo();
   } catch (error) {
-    ordersTableBody.innerHTML = DomHelper.tableEmpty(error.message, 7);
+    ordersTableBody.innerHTML = DomHelper.tableEmpty(error.message, 6);
     orderCountInfo.innerText = "Orders could not be loaded.";
     detailPanelInfo.innerText = "Select an order to view details.";
     orderDetailPanel.innerHTML = DomHelper.emptyMessage(error.message);
@@ -92,7 +94,7 @@ function populateYearFilter() {
   const years = [
     ...new Set(
       allOrders
-        .map((order) => getYear(order.created_at))
+        .map((order) => getYear(order.submission_date))
         .filter(Boolean)
     )
   ].sort((a, b) => b - a);
@@ -131,8 +133,8 @@ function applyDateFilters() {
   const selectedMonth = monthFilter.value;
 
   filteredOrders = allOrders.filter((order) => {
-    const orderYear = getYear(order.created_at);
-    const orderMonth = getMonth(order.created_at);
+    const orderYear = getYear(order.submission_date);
+    const orderMonth = getMonth(order.submission_date);
 
     const matchesYear =
       !selectedYear || String(orderYear) === String(selectedYear);
@@ -197,13 +199,15 @@ function renderSelectedOrderDetail() {
   }
 
   detailPanelInfo.innerText =
-    `${selectedOrder.order_code} • ${selectedOrder.status}`;
+    `${selectedOrder.order_code} • ${
+      OrderTable.getDisplayStatus(selectedOrder.status)
+  }`;
 
   orderDetailPanel.innerHTML = OrderTable.renderOrderDetail(selectedOrder);
 }
 
 function renderEmptyOrders(message) {
-  ordersTableBody.innerHTML = DomHelper.tableEmpty(message, 7);
+  ordersTableBody.innerHTML = DomHelper.tableEmpty(message, 6);
   orderCountInfo.innerText = "0 orders found.";
   detailPanelInfo.innerText = "Select an order to view details.";
   orderDetailPanel.innerHTML = DomHelper.emptyMessage("No order selected.");
@@ -247,13 +251,10 @@ exportOrdersBtn.addEventListener("click", () => {
       { label: "ID", key: "id" },
       { label: "Order Code", key: "order_code" },
       { label: "Status", key: "status" },
+  
       {
-        label: "Created",
-        key: (order) => formatExportDate(order.created_at)
-      },
-      {
-        label: "Completed",
-        key: (order) => formatExportDate(order.completed_at)
+        label: "Submission Date",
+        key: (order) => formatExportDate(order.submission_date)
       },
       {
         label: "Items",
