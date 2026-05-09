@@ -31,6 +31,18 @@ const typeSort = document.getElementById("typeSort");
 
 const exportProductsBtn = document.getElementById("exportProductsBtn");
 
+const sendProductUpdatesBtn = document.getElementById("sendProductUpdatesBtn");
+const sendProductUpdatesModal = document.getElementById("sendProductUpdatesModal");
+const closeSendProductUpdatesModalBtn = document.getElementById("closeSendProductUpdatesModalBtn");
+const cancelSendProductUpdatesBtn = document.getElementById("cancelSendProductUpdatesBtn");
+const sendProductUpdatesForm = document.getElementById("sendProductUpdatesForm");
+const productUpdatePeriod = document.getElementById("productUpdatePeriod");
+const customProductUpdateDateFields = document.getElementById("customProductUpdateDateFields");
+const productUpdateStartDate = document.getElementById("productUpdateStartDate");
+const productUpdateEndDate = document.getElementById("productUpdateEndDate");
+const sendProductUpdatesMessage = document.getElementById("sendProductUpdatesMessage");
+const confirmSendProductUpdatesBtn = document.getElementById("confirmSendProductUpdatesBtn");
+
 const productSearchInput = document.getElementById("productSearchInput");
 const materialFilter = document.getElementById("materialFilter");
 const typeFilter = document.getElementById("typeFilter");
@@ -388,6 +400,57 @@ function closeEditProductModal() {
   editProductMessage.className = "edit-product-message";
 }
 
+function openSendProductUpdatesModal() {
+  sendProductUpdatesForm.reset();
+  productUpdatePeriod.value = "7d";
+  customProductUpdateDateFields.classList.add("hidden");
+  sendProductUpdatesMessage.innerText = "";
+  sendProductUpdatesMessage.className = "edit-product-message";
+  confirmSendProductUpdatesBtn.disabled = false;
+
+  sendProductUpdatesModal.classList.remove("hidden");
+}
+
+function closeSendProductUpdatesModal() {
+  sendProductUpdatesModal.classList.add("hidden");
+  sendProductUpdatesForm.reset();
+  customProductUpdateDateFields.classList.add("hidden");
+  sendProductUpdatesMessage.innerText = "";
+  sendProductUpdatesMessage.className = "edit-product-message";
+  confirmSendProductUpdatesBtn.disabled = false;
+}
+
+function showSendProductUpdatesMessage(message, type = "success") {
+  sendProductUpdatesMessage.innerText = message;
+  sendProductUpdatesMessage.className = `edit-product-message ${type}`;
+}
+
+function getProductUpdatesPayload() {
+  const selectedPeriod = productUpdatePeriod.value;
+
+  if (selectedPeriod === "custom") {
+    const startDate = productUpdateStartDate.value;
+    const endDate = productUpdateEndDate.value;
+
+    if (!startDate || !endDate) {
+      throw new Error("Please select both start date and end date.");
+    }
+
+    if (new Date(startDate) > new Date(endDate)) {
+      throw new Error("Start date cannot be later than end date.");
+    }
+
+    return {
+      startDate,
+      endDate
+    };
+  }
+
+  return {
+    period: selectedPeriod
+  };
+}
+
 function getEditProductFormData() {
   return {
     material: editMaterial.value.trim(),
@@ -448,6 +511,61 @@ editProductForm.addEventListener("submit", async (event) => {
     showEditProductMessage(error.message, "error");
   }
 });
+
+
+/* =========================
+   SEND PRODUCT UPDATES
+========================= */
+sendProductUpdatesBtn.addEventListener("click", () => {
+  openSendProductUpdatesModal();
+});
+
+closeSendProductUpdatesModalBtn.addEventListener("click", () => {
+  closeSendProductUpdatesModal();
+});
+
+cancelSendProductUpdatesBtn.addEventListener("click", () => {
+  closeSendProductUpdatesModal();
+});
+
+sendProductUpdatesModal.addEventListener("click", (event) => {
+  if (event.target === sendProductUpdatesModal) {
+    closeSendProductUpdatesModal();
+  }
+});
+
+productUpdatePeriod.addEventListener("change", () => {
+  if (productUpdatePeriod.value === "custom") {
+    customProductUpdateDateFields.classList.remove("hidden");
+  } else {
+    customProductUpdateDateFields.classList.add("hidden");
+    productUpdateStartDate.value = "";
+    productUpdateEndDate.value = "";
+  }
+});
+
+sendProductUpdatesForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  try {
+    const payload = getProductUpdatesPayload();
+
+    confirmSendProductUpdatesBtn.disabled = true;
+    showSendProductUpdatesMessage("Sending product updates...", "success");
+
+    const result = await ProductApi.sendProductUpdates(payload);
+
+    showSendProductUpdatesMessage(
+      `${result.message} Sent: ${result.sentCount}, Failed: ${result.failedCount}, Products: ${result.productCount}`,
+      "success"
+    );
+  } catch (error) {
+    showSendProductUpdatesMessage(error.message, "error");
+  } finally {
+    confirmSendProductUpdatesBtn.disabled = false;
+  }
+});
+
 
 /* =========================
    EXPORT PRODUCTS

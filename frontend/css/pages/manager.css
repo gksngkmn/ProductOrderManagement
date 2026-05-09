@@ -343,3 +343,16 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+.edit-product-message.success {
+  color: #166534;
+}
+
+.edit-product-message.error {
+  color: #b91c1c;
+}
+
+#customProductUpdateDateFields.hidden {
+  display: none;
+}

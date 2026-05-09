@@ -96,9 +96,12 @@ async function resetPassword(req, res) {
 ========================= */
 async function requestForgotPasswordCode(req, res) {
   try {
-    const { identifier } = req.body;
+    const { identifier, deliveryMethod } = req.body;
 
-    const result = await AuthService.requestForgotPasswordCode(identifier);
+    const result = await AuthService.requestForgotPasswordCode(
+      identifier,
+      deliveryMethod
+    );
 
     return res.json(result);
   } catch (error) {

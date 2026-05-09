@@ -20,7 +20,8 @@ class VerificationService {
     phone,
     name,
     purpose,
-    reason
+    reason,
+    deliveryMethod = "both"
   }) {
     if (!purpose) {
       const error = new Error("Verification purpose is required.");
@@ -74,7 +75,7 @@ class VerificationService {
       ]
     );
 
-    if (email) {
+    if ((deliveryMethod === "email" || deliveryMethod === "both") && email) {
       await sendVerificationCodeMail({
         to: email,
         name,
@@ -83,7 +84,7 @@ class VerificationService {
       });
     }
 
-    if (phone) {
+    if ((deliveryMethod === "sms" || deliveryMethod === "both") && phone) {
       await sendVerificationCodeSms({
         to: phone,
         code,

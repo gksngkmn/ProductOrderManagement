@@ -1,7 +1,7 @@
 const ProductService = require("../services/ProductService");
 
 const {
-  sendNewProductMailToCustomer
+  sendProductUpdatesMailToCustomer
 } = require("../utils/mailService");
 
 function handleError(res, error, logMessage) {
@@ -25,26 +25,70 @@ async function createProduct(req, res) {
   try {
     const product = await ProductService.createProduct(req.body);
 
-    try {
-      const customers = await ProductService.getCustomersForProductMail();
-      const productForMail = ProductService.formatProductForMail(product);
-
-      for (const customer of customers) {
-        await sendNewProductMailToCustomer({
-          customerEmail: customer.email,
-          customerName: `${customer.name || ""} ${customer.surname || ""}`.trim(),
-          product: productForMail
-        });
-      }
-
-      console.log(`New product mail sent to ${customers.length} customers.`);
-    } catch (mailError) {
-      console.error("New product mail sending error:", mailError.message);
-    }
+    /*
+      Product creation does NOT send automatic emails anymore.
+      Product update mails are sent manually by manager using:
+      POST /api/products/send-updates
+    */
 
     return res.status(201).json(product);
   } catch (error) {
     return handleError(res, error, "Create product error:");
+  }
+}
+
+async function sendProductUpdates(req, res) {
+  try {
+    const { period, startDate, endDate } = req.body;
+
+    const { products, periodLabel } =
+      await ProductService.getProductsForUpdateMail({
+        period,
+        startDate,
+        endDate
+      });
+
+    if (!products.length) {
+      return res.status(400).json({
+        message: "No products found for selected period."
+      });
+    }
+
+    const customers = await ProductService.getCustomersForProductMail();
+
+    if (!customers.length) {
+      return res.status(400).json({
+        message: "No customers found for product update mail."
+      });
+    }
+
+    const results = [];
+
+    for (const customer of customers) {
+      const result = await sendProductUpdatesMailToCustomer({
+        customerEmail: customer.email,
+        customerName: `${customer.name || ""} ${customer.surname || ""}`.trim(),
+        products,
+        periodLabel
+      });
+
+      results.push({
+        customerEmail: customer.email,
+        success: result
+      });
+    }
+
+    return res.json({
+      message: "Product update mails processed successfully.",
+      periodLabel,
+      productCount: products.length,
+      customerCount: customers.length,
+      sentCount: results.filter((item) => item.success).length,
+      failedCount: results.filter((item) => !item.success).length,
+      results
+    });
+  } catch (error) {
+    return handleError(res, error, "Send product updates error:");
   }
 }
 
@@ -71,6 +115,7 @@ async function deleteProduct(req, res) {
 module.exports = {
   getProducts,
   createProduct,
+  sendProductUpdates,
   updateProduct,
   deleteProduct
 };

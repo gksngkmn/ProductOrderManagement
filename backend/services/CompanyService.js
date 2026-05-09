@@ -6,7 +6,8 @@ const VerificationService = require("./VerificationService");
 const {
   sendCustomerUpdatedInfoMailToManager,
   sendManagerUpdatedCustomerInfoMail,
-  sendCustomerPasswordChangedMailToManager
+  sendCustomerPasswordChangedMailToManager,
+  sendManagerUpdatedCustomerPasswordMail
 } = require("../utils/mailService");
 
 class CompanyService {
@@ -374,11 +375,12 @@ class CompanyService {
     }
 
     try {
-      await sendCustomerPasswordChangedMailToManager({
-        customer: this.formatCompany(result.rows[0] || oldCustomer)
+      await sendManagerUpdatedCustomerPasswordMail({
+        customer: this.formatCompany(result.rows[0] || oldCustomer),
+        newPassword
       });
     } catch (mailError) {
-      console.log("Password change notification mail could not be sent:", mailError.message);
+      console.log("Customer password update mail could not be sent:", mailError.message);
     }
 
     return {

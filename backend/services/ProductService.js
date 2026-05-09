@@ -50,6 +50,82 @@ class ProductService {
     return result.rows.map(this.formatProduct);
   }
 
+
+    static getPeriodConfig({ period, startDate, endDate }) {
+    if (startDate && endDate) {
+      return {
+        whereClause: "created_at BETWEEN $1 AND $2",
+        values: [startDate, endDate],
+        periodLabel: `${startDate} - ${endDate}`
+      };
+    }
+
+    const allowedPeriods = {
+      "7d": {
+        interval: "7 days",
+        label: "Last 7 Days"
+      },
+      "14d": {
+        interval: "14 days",
+        label: "Last 14 Days"
+      },
+      "30d": {
+        interval: "30 days",
+        label: "Last 30 Days"
+      },
+      "3m": {
+        interval: "3 months",
+        label: "Last 3 Months"
+      },
+      "6m": {
+        interval: "6 months",
+        label: "Last 6 Months"
+      }
+    };
+
+    const selectedPeriod = allowedPeriods[period] || allowedPeriods["7d"];
+
+    return {
+      whereClause: `created_at >= CURRENT_TIMESTAMP - INTERVAL '${selectedPeriod.interval}'`,
+      values: [],
+      periodLabel: selectedPeriod.label
+    };
+  }
+
+  static async getProductsForUpdateMail({ period, startDate, endDate }) {
+    const config = this.getPeriodConfig({
+      period,
+      startDate,
+      endDate
+    });
+
+    const result = await pool.query(
+      `
+      SELECT 
+        id,
+        material,
+        type,
+        model,
+        angle,
+        nodal_length,
+        width,
+        number_of_teeth,
+        unit_price,
+        created_at
+      FROM products
+      WHERE ${config.whereClause}
+      ORDER BY created_at DESC
+      `,
+      config.values
+    );
+
+    return {
+      products: result.rows,
+      periodLabel: config.periodLabel
+    };
+  }
+  
+
   static async createProduct(data) {
     const {
       material,

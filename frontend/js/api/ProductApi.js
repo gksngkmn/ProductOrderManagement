@@ -24,6 +24,13 @@ class ProductApi {
       method: "DELETE"
     });
   }
+
+  static sendProductUpdates(updateData) {
+    return ClientApi.request("/products/send-updates", {
+      method: "POST",
+      body: JSON.stringify(updateData)
+    });
+  }
 }
 
 export default ProductApi;

@@ -133,6 +133,7 @@
 
         <div class="content-actions">
           <button id="exportProductsBtn" class="light" type="button">Export Excel</button>
+          <button id="sendProductUpdatesBtn" type="button">Send Product Updates</button>
         </div>
       </div>
 
@@ -226,6 +227,58 @@
       <div class="modal-actions">
         <button id="updateProductBtn" type="submit">Update Product</button>
         <button id="cancelEditProductBtn" class="secondary" type="button">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="sendProductUpdatesModal" class="modal-overlay hidden">
+  <div class="edit-product-modal">
+    <div class="modal-header">
+      <div>
+        <h2>Send Product Updates</h2>
+        <p>Select which recently added products will be emailed to customers.</p>
+      </div>
+
+      <button id="closeSendProductUpdatesModalBtn" class="secondary" type="button">
+        Close
+      </button>
+    </div>
+
+    <form id="sendProductUpdatesForm" class="edit-product-form">
+      <div class="filter-group">
+        <label for="productUpdatePeriod">Product Period</label>
+        <select id="productUpdatePeriod" required>
+          <option value="7d">Last 7 Days</option>
+          <option value="14d">Last 14 Days</option>
+          <option value="30d">Last 30 Days</option>
+          <option value="3m">Last 3 Months</option>
+          <option value="6m">Last 6 Months</option>
+          <option value="custom">Custom Date Range</option>
+        </select>
+      </div>
+
+      <div id="customProductUpdateDateFields" class="edit-product-grid hidden">
+        <div class="filter-group">
+          <label for="productUpdateStartDate">Start Date</label>
+          <input type="date" id="productUpdateStartDate" />
+        </div>
+
+        <div class="filter-group">
+          <label for="productUpdateEndDate">End Date</label>
+          <input type="date" id="productUpdateEndDate" />
+        </div>
+      </div>
+
+      <p id="sendProductUpdatesMessage" class="edit-product-message"></p>
+
+      <div class="modal-actions">
+        <button id="confirmSendProductUpdatesBtn" type="submit">
+          Send Updates
+        </button>
+        <button id="cancelSendProductUpdatesBtn" class="secondary" type="button">
+          Cancel
+        </button>
       </div>
     </form>
   </div>

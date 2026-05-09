@@ -317,8 +317,28 @@ class AuthService {
     return result.rows[0];
   }
 
-  static async requestForgotPasswordCode(identifier) {
+  static async requestForgotPasswordCode(identifier, deliveryMethod = "email") {
+    const allowedMethods = ["email", "sms"];
+
+    if (!allowedMethods.includes(deliveryMethod)) {
+      const error = new Error("Delivery method must be email or sms.");
+      error.statusCode = 400;
+      throw error;
+    }
+
     const company = await this.findCustomerByIdentifier(identifier);
+
+    if (deliveryMethod === "email" && !company.email) {
+      const error = new Error("Customer email address is missing.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (deliveryMethod === "sms" && !company.phone) {
+      const error = new Error("Customer phone number is missing.");
+      error.statusCode = 400;
+      throw error;
+    }
 
     await VerificationService.createCode({
       companyId: company.id,
@@ -326,11 +346,12 @@ class AuthService {
       phone: company.phone,
       name: company.name,
       purpose: "forgot_password",
-      reason: "Forgot password verification"
+      reason: "Forgot password verification",
+      deliveryMethod
     });
 
     return {
-      message: "Forgot password verification code sent successfully."
+      message: `Forgot password verification code sent by ${deliveryMethod}.`
     };
   }
 

@@ -269,6 +269,186 @@ Product Order Management
   });
 }
 
+
+/* =========================
+   PRODUCT UPDATES NEWSLETTER
+   MANAGER → CUSTOMERS
+========================= */
+async function sendProductUpdatesMailToCustomer({
+  customerEmail,
+  customerName,
+  products,
+  periodLabel
+}) {
+  const subject = `Product Updates - ${periodLabel || "New Products"}`;
+
+  const productListText = products
+    .map((product, index) => {
+      return `
+${index + 1}) ${product.type || "-"} ${product.model || "-"}
+- Material: ${product.material || "-"}
+- Angle: ${product.angle ?? "-"}
+- Nodal Length: ${product.nodal_length ?? product.nodalLength ?? "-"} mm
+- Width: ${product.width ?? "-"} mm
+- Number of Teeth: ${product.number_of_teeth ?? product.numberOfTeeth ?? "-"}
+- Unit Price: ${product.unit_price ?? product.unitPrice ?? "-"}
+`;
+    })
+    .join("\n");
+
+  const text = `
+Hello ${customerName || "Customer"},
+
+Here are the new product updates for ${periodLabel || "the selected period"}.
+
+${productListText}
+
+You can login to your customer panel to create an order.
+
+Product Order Management
+`;
+
+  return sendMailFromManagerToCustomer({
+    to: customerEmail,
+    subject,
+    text
+  });
+}
+
+/* =========================
+   ORDER SUBMITTED MAIL
+   CUSTOMER CONFIRMATION
+========================= */
+async function sendOrderSubmittedMailToCustomer({
+  customer,
+  order,
+  items
+}) {
+  const subject = `Order Submitted: ${order.order_code || order.id}`;
+
+  const text = `
+Hello ${customer.name || "Customer"},
+
+Your order has been submitted successfully.
+
+Order Information:
+- Order Code: ${order.order_code || "-"}
+- Status: ${order.status || "-"}
+- Submission Date: ${order.submission_date || "-"}
+
+Order Items:
+${formatOrderItems(items)}
+
+Thank you for your order.
+
+Product Order Management
+`;
+
+  return sendMailFromManagerToCustomer({
+    to: customer.email,
+    subject,
+    text
+  });
+}
+
+/* =========================
+   ORDER SUBMITTED MAIL
+   MANAGER NOTIFICATION
+========================= */
+async function sendOrderSubmittedMailToManager({
+  customer,
+  order,
+  items
+}) {
+  const subject = `New Order Submitted: ${order.order_code || order.id}`;
+
+  const text = `
+A customer submitted a new order.
+
+Customer Information:
+- Name: ${customer.name || "-"} ${customer.surname || ""}
+- Company: ${customer.company_name || customer.companyName || "-"}
+- Email: ${customer.email || "-"}
+- Phone: ${customer.phone || "-"}
+- Username: ${customer.username || "-"}
+
+Order Information:
+- Order Code: ${order.order_code || "-"}
+- Status: ${order.status || "-"}
+- Submission Date: ${order.submission_date || "-"}
+
+Order Items:
+${formatOrderItems(items)}
+
+Please review the order in the manager panel.
+
+Product Order Management
+`;
+
+  return sendMailToManager({
+    subject,
+    text
+  });
+}
+
+/* =========================
+   MANAGER UPDATED CUSTOMER PASSWORD
+   MANAGER → CUSTOMER
+========================= */
+async function sendManagerUpdatedCustomerPasswordMail({
+  customer,
+  newPassword
+}) {
+  const subject = "Your Password Has Been Updated";
+
+  const text = `
+Hello ${customer.name || "Customer"},
+
+Your password has been updated by the manager.
+
+New Password:
+${newPassword}
+
+Please login with your new password.
+
+If you did not expect this change, please contact the manager.
+
+Product Order Management
+`;
+
+  return sendMailFromManagerToCustomer({
+    to: customer.email,
+    subject,
+    text
+  });
+}
+
+/* =========================
+   ORDER HELPERS
+========================= */
+function formatOrderItems(items = []) {
+  if (!items.length) {
+    return "- No order items found.";
+  }
+
+  return items
+    .map((item, index) => {
+      return `
+${index + 1}) ${item.type || "-"} ${item.model || "-"}
+- Material: ${item.material || "-"}
+- Angle: ${item.angle ?? "-"}
+- Nodal Length: ${item.nodal_length ?? "-"} mm
+- Width: ${item.width ?? "-"} mm
+- Number of Teeth: ${item.number_of_teeth ?? "-"}
+- Quantity: ${item.quantity ?? "-"}
+- Unit Price: ${item.unit_price ?? "-"}
+- Total Price: ${item.total_price ?? "-"}
+`;
+    })
+    .join("\n");
+}
+
+
 /* =========================
    HELPERS
 ========================= */
@@ -285,8 +465,15 @@ module.exports = {
   sendMailToManager,
 
   sendNewProductMailToCustomer,
+  sendProductUpdatesMailToCustomer,
+
   sendCustomerUpdatedInfoMailToManager,
   sendCustomerPasswordChangedMailToManager,
   sendManagerUpdatedCustomerInfoMail,
+  sendManagerUpdatedCustomerPasswordMail,
+
+  sendOrderSubmittedMailToCustomer,
+  sendOrderSubmittedMailToManager,
+
   sendVerificationCodeMail,
 };

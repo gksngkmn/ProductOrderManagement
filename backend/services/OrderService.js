@@ -1,5 +1,9 @@
 const pool = require("../db");
-const { sendMailToManager } = require("../utils/mailService");
+const {
+  sendOrderSubmittedMailToCustomer,
+  sendOrderSubmittedMailToManager
+} = require("../utils/mailService");
+
 
 class OrderService {
   static getCountryCode(company) {
@@ -330,7 +334,7 @@ static async deleteOrderItem(user, orderId, itemId) {
   };
 }
 
-  static async completeOrder(user, orderId) {
+    static async completeOrder(user, orderId) {
     const companyId = user.id;
 
     const check = await pool.query(
@@ -362,22 +366,74 @@ static async deleteOrderItem(user, orderId, itemId) {
     const order = result.rows[0];
 
     const companyResult = await pool.query(
-      "SELECT * FROM companies WHERE id = $1",
+      `
+      SELECT
+        id,
+        name,
+        surname,
+        email,
+        phone,
+        company_name,
+        username
+      FROM companies
+      WHERE id = $1
+      `,
       [order.company_id]
     );
 
-    const company = companyResult.rows[0];
+    const customer = companyResult.rows[0];
+
+    const itemsResult = await pool.query(
+      `
+      SELECT 
+        oi.id,
+        oi.order_id,
+        oi.product_id,
+        oi.quantity,
+        oi.unit_price,
+        oi.total_price,
+
+        p.material,
+        p.type,
+        p.model,
+        p.angle,
+        p.nodal_length,
+        p.width,
+        p.number_of_teeth
+
+      FROM order_items oi
+      LEFT JOIN products p ON oi.product_id = p.id
+      WHERE oi.order_id = $1
+      `,
+      [order.id]
+    );
+
+    const items = itemsResult.rows;
 
     try {
-      await sendMailToManager({
-        subject: "New Order Completed",
-        text: `Order ${order.order_code} completed by ${company.company_name}`
+      await sendOrderSubmittedMailToCustomer({
+        customer,
+        order,
+        items
       });
     } catch (mailError) {
-      console.log("Manager notification mail could not be sent:", mailError.message);
+      console.log("Customer order submitted mail could not be sent:", mailError.message);
     }
 
-    return order;
+    try {
+      await sendOrderSubmittedMailToManager({
+        customer,
+        order,
+        items
+      });
+    } catch (mailError) {
+      console.log("Manager order submitted mail could not be sent:", mailError.message);
+    }
+
+    return {
+      ...order,
+      items
+    };
   }
 }
 
