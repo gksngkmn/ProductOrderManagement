@@ -1,14 +1,15 @@
 const ProductService = require("../services/ProductService");
+const { generateProductUpdatesExcel } = require("../utils/productExcelGenerator");
 
 const {
-  sendProductUpdatesMailToCustomer
+  sendProductUpdatesMailToCustomer,
 } = require("../utils/mailService");
 
 function handleError(res, error, logMessage) {
   console.error(logMessage, error);
 
   return res.status(error.statusCode || 500).json({
-    message: error.message || "Server error."
+    message: error.message || "Server error.",
   });
 }
 
@@ -45,12 +46,12 @@ async function sendProductUpdates(req, res) {
       await ProductService.getProductsForUpdateMail({
         period,
         startDate,
-        endDate
+        endDate,
       });
 
     if (!products.length) {
       return res.status(400).json({
-        message: "No products found for selected period."
+        message: "No products found for selected period.",
       });
     }
 
@@ -58,8 +59,22 @@ async function sendProductUpdates(req, res) {
 
     if (!customers.length) {
       return res.status(400).json({
-        message: "No customers found for product update mail."
+        message: "No customers found for product update mail.",
       });
+    }
+
+    let productsExcelBuffer = null;
+
+    try {
+      productsExcelBuffer = await generateProductUpdatesExcel({
+        products,
+        periodLabel,
+      });
+    } catch (excelError) {
+      console.log(
+        "Product updates Excel file could not be generated:",
+        excelError.message
+      );
     }
 
     const results = [];
@@ -69,12 +84,13 @@ async function sendProductUpdates(req, res) {
         customerEmail: customer.email,
         customerName: `${customer.name || ""} ${customer.surname || ""}`.trim(),
         products,
-        periodLabel
+        periodLabel,
+        productsExcelBuffer,
       });
 
       results.push({
         customerEmail: customer.email,
-        success: result
+        success: result,
       });
     }
 
@@ -85,7 +101,8 @@ async function sendProductUpdates(req, res) {
       customerCount: customers.length,
       sentCount: results.filter((item) => item.success).length,
       failedCount: results.filter((item) => !item.success).length,
-      results
+      excelAttached: Boolean(productsExcelBuffer),
+      results,
     });
   } catch (error) {
     return handleError(res, error, "Send product updates error:");
@@ -117,5 +134,5 @@ module.exports = {
   createProduct,
   sendProductUpdates,
   updateProduct,
-  deleteProduct
+  deleteProduct,
 };

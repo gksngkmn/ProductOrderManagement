@@ -2,12 +2,11 @@ const bcrypt = require("bcryptjs");
 const pool = require("../db");
 const VerificationService = require("./VerificationService");
 
-
 const {
   sendCustomerUpdatedInfoMailToManager,
   sendManagerUpdatedCustomerInfoMail,
-  sendCustomerPasswordChangedMailToManager,
-  sendManagerUpdatedCustomerPasswordMail
+  sendManagerUpdatedCustomerPasswordMail,
+  sendNewCustomerAccountMail,
 } = require("../utils/mailService");
 
 class CompanyService {
@@ -25,7 +24,7 @@ class CompanyService {
       companyPhone: company.company_phone,
       username: company.username,
       role: company.role,
-      createdAt: company.created_at
+      createdAt: company.created_at,
     };
   }
 
@@ -64,7 +63,7 @@ class CompanyService {
       city,
       companyPhone,
       username,
-      password
+      password,
     } = companyData;
 
     if (
@@ -133,11 +132,25 @@ class CompanyService {
           companyPhone,
           username,
           hashedPassword,
-          "customer"
+          "customer",
         ]
       );
 
-      return this.formatCompany(result.rows[0]);
+      const createdCustomer = this.formatCompany(result.rows[0]);
+
+      try {
+        await sendNewCustomerAccountMail({
+          customer: createdCustomer,
+          plainPassword: password,
+        });
+      } catch (mailError) {
+        console.log(
+          "New customer account mail could not be sent:",
+          mailError.message
+        );
+      }
+
+      return createdCustomer;
     } catch (error) {
       if (error.code === "23505") {
         const conflictError = new Error("Username already exists.");
@@ -184,29 +197,32 @@ class CompanyService {
   static getUpdatedFields(oldCompany, newData) {
     const fields = [];
 
-    if (oldCompany.name !== newData.name) {
-      fields.push("Name");
-    }
+    const addIfChanged = (label, oldValue, newValue) => {
+      const oldText = String(oldValue ?? "").trim();
+      const newText = String(newValue ?? "").trim();
 
-    if (oldCompany.surname !== newData.surname) {
-      fields.push("Surname");
-    }
+      if (oldText !== newText) {
+        fields.push({
+          label,
+          oldValue: oldText || "-",
+          newValue: newText || "-",
+        });
+      }
+    };
 
-    if (oldCompany.email !== newData.email) {
-      fields.push("Email");
-    }
-
-    if (oldCompany.phone !== newData.phone) {
-      fields.push("Phone");
-    }
+    addIfChanged("Name", oldCompany.name, newData.name);
+    addIfChanged("Surname", oldCompany.surname, newData.surname);
+    addIfChanged("Email", oldCompany.email, newData.email);
+    addIfChanged("Phone", oldCompany.phone, newData.phone);
 
     return fields;
   }
 
-
-    static async requestCompanyUpdateCode(id, user) {
+  static async requestCompanyUpdateCode(id, user) {
     if (user.role === "customer" && Number(user.id) !== Number(id)) {
-      const error = new Error("You can only request update code for your own profile.");
+      const error = new Error(
+        "You can only request update code for your own profile."
+      );
       error.statusCode = 403;
       throw error;
     }
@@ -220,11 +236,11 @@ class CompanyService {
       phone: formattedCompany.phone,
       name: formattedCompany.name,
       purpose: "info_update",
-      reason: "Information update verification"
+      reason: "Information update verification",
     });
 
     return {
-      message: "Information update verification code sent successfully."
+      message: "Information update verification code sent successfully.",
     };
   }
 
@@ -242,7 +258,7 @@ class CompanyService {
       companyId: formattedCompany.id,
       email: formattedCompany.email,
       purpose: "info_update",
-      code
+      code,
     });
 
     return this.updateCompany(id, user, companyData);
@@ -269,7 +285,7 @@ class CompanyService {
       name,
       surname,
       email,
-      phone
+      phone,
     });
 
     const result = await pool.query(
@@ -308,22 +324,27 @@ class CompanyService {
     const updatedCustomer = result.rows[0];
     const formattedCustomer = this.formatCompany(updatedCustomer);
 
-    try {
-      if (user.role === "customer") {
-        await sendCustomerUpdatedInfoMailToManager({
-          customer: formattedCustomer,
-          updatedFields
-        });
-      }
+    if (updatedFields.length > 0) {
+      try {
+        if (user.role === "customer") {
+          await sendCustomerUpdatedInfoMailToManager({
+            customer: formattedCustomer,
+            updatedFields,
+          });
+        }
 
-      if (user.role === "manager") {
-        await sendManagerUpdatedCustomerInfoMail({
-          customer: formattedCustomer,
-          updatedFields
-        });
+        if (user.role === "manager") {
+          await sendManagerUpdatedCustomerInfoMail({
+            customer: formattedCustomer,
+            updatedFields,
+          });
+        }
+      } catch (mailError) {
+        console.log(
+          "Company update notification mail could not be sent:",
+          mailError.message
+        );
       }
-    } catch (mailError) {
-      console.log("Company update notification mail could not be sent:", mailError.message);
     }
 
     return formattedCustomer;
@@ -377,14 +398,17 @@ class CompanyService {
     try {
       await sendManagerUpdatedCustomerPasswordMail({
         customer: this.formatCompany(result.rows[0] || oldCustomer),
-        newPassword
+        newPassword,
       });
     } catch (mailError) {
-      console.log("Customer password update mail could not be sent:", mailError.message);
+      console.log(
+        "Customer password update mail could not be sent:",
+        mailError.message
+      );
     }
 
     return {
-      message: "Password updated successfully."
+      message: "Password updated successfully.",
     };
   }
 
@@ -405,7 +429,7 @@ class CompanyService {
     }
 
     return {
-      message: "Customer deleted successfully."
+      message: "Customer deleted successfully.",
     };
   }
 }

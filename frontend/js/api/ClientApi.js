@@ -11,14 +11,25 @@ class ClientApi {
       headers: {
         "Content-Type": "application/json",
         ...(token && { Authorization: `Bearer ${token}` }),
-        ...options.headers
-      }
+        ...options.headers,
+      },
     });
 
-    const data = await response.json();
+    const responseText = await response.text();
+
+    let data = null;
+
+    if (responseText) {
+      try {
+        data = JSON.parse(responseText);
+      } catch (error) {
+        console.error("Invalid JSON response from server:", responseText);
+        throw new Error("Server returned an invalid response.");
+      }
+    }
 
     if (!response.ok) {
-      throw new Error(data.message || "API error");
+      throw new Error(data?.message || "API error");
     }
 
     return data;

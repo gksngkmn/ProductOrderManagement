@@ -1,9 +1,13 @@
 /* =========================================================
    MAIL SERVICE
    Current mode: MOCK or REAL
+
    Purpose:
    - Send notification emails between manager and customers
    - Send verification code emails
+   - Send order emails with Excel attachments
+   - Send product update emails with Excel attachments
+   - Send account creation emails
 ========================================================= */
 
 const nodemailer = require("nodemailer");
@@ -27,11 +31,36 @@ const transporter = nodemailer.createTransport({
 /* =========================
    LOW LEVEL MOCK SENDER
 ========================= */
-async function sendMockEmail({ to, subject, text }) {
+async function sendMockEmail({
+  to,
+  subject,
+  text,
+  html,
+  attachments = [],
+}) {
   console.log("\n================ MOCK EMAIL ================");
   console.log("To:", to);
   console.log("Subject:", subject);
-  console.log("Text:\n", text);
+
+  if (text) {
+    console.log("Text:\n", text);
+  }
+
+  if (html) {
+    console.log("HTML: provided");
+  }
+
+  if (attachments.length > 0) {
+    console.log("Attachments:");
+    attachments.forEach((attachment, index) => {
+      console.log(
+        `${index + 1}) ${attachment.filename || "Unnamed attachment"}`
+      );
+    });
+  } else {
+    console.log("Attachments: none");
+  }
+
   console.log("============================================\n");
 
   return true;
@@ -40,7 +69,13 @@ async function sendMockEmail({ to, subject, text }) {
 /* =========================
    LOW LEVEL REAL SENDER
 ========================= */
-async function sendRealEmail({ to, subject, text }) {
+async function sendRealEmail({
+  to,
+  subject,
+  text,
+  html,
+  attachments = [],
+}) {
   if (!to) {
     console.warn("Email address is missing. Mail was not sent.");
     return false;
@@ -59,6 +94,8 @@ async function sendRealEmail({ to, subject, text }) {
       to,
       subject,
       text,
+      html,
+      attachments,
     });
 
     console.log("Email sent:", info.messageId);
@@ -72,18 +109,42 @@ async function sendRealEmail({ to, subject, text }) {
 /* =========================
    GENERAL SENDER
 ========================= */
-async function sendEmail({ to, subject, text }) {
+async function sendEmail({
+  to,
+  subject,
+  text,
+  html,
+  attachments = [],
+}) {
   if (MAIL_MODE === "real") {
-    return sendRealEmail({ to, subject, text });
+    return sendRealEmail({
+      to,
+      subject,
+      text,
+      html,
+      attachments,
+    });
   }
 
-  return sendMockEmail({ to, subject, text });
+  return sendMockEmail({
+    to,
+    subject,
+    text,
+    html,
+    attachments,
+  });
 }
 
 /* =========================
    MANAGER → CUSTOMER
 ========================= */
-async function sendMailFromManagerToCustomer({ to, subject, text }) {
+async function sendMailFromManagerToCustomer({
+  to,
+  subject,
+  text,
+  html,
+  attachments = [],
+}) {
   if (!to) {
     console.warn("Customer email address is missing. Mail was not sent.");
     return false;
@@ -93,22 +154,32 @@ async function sendMailFromManagerToCustomer({ to, subject, text }) {
     to,
     subject,
     text,
+    html,
+    attachments,
   });
 }
 
 /* =========================
    SYSTEM / CUSTOMER → MANAGER
 ========================= */
-async function sendMailToManager({ subject, text }) {
+async function sendMailToManager({
+  subject,
+  text,
+  html,
+  attachments = [],
+}) {
   return sendEmail({
     to: MANAGER_EMAIL,
     subject,
     text,
+    html,
+    attachments,
   });
 }
 
 /* =========================
    NEW PRODUCT MARKETING MAIL
+   Single product notification
 ========================= */
 async function sendNewProductMailToCustomer({
   customerEmail,
@@ -135,7 +206,7 @@ Product Information:
     product.number_of_teeth ?? product.numberOfTeeth ?? "-"
   }
 - Unit Price: ${product.unit_price ?? product.unitPrice ?? "-"}
-  
+
 You can login to your customer panel to create an order.
 
 Product Order Management
@@ -145,6 +216,47 @@ Product Order Management
     to: customerEmail,
     subject,
     text,
+  });
+}
+
+/* =========================
+   PRODUCT UPDATES NEWSLETTER
+   MANAGER → CUSTOMERS
+   WITH EXCEL ATTACHMENT
+========================= */
+async function sendProductUpdatesMailToCustomer({
+  customerEmail,
+  customerName,
+  products = [],
+  periodLabel,
+  productsExcelBuffer,
+}) {
+  const subject = `Product Updates - ${periodLabel || "New Products"}`;
+
+  const text = `
+Hello ${customerName || "Customer"},
+
+New product updates are available for ${periodLabel || "the selected period"}.
+
+Please find the product update list in the attached Excel file.
+
+Number of products: ${products.length}
+
+You can login to your customer panel to review products and create an order.
+
+Product Order Management
+`;
+
+  const attachments = createProductExcelAttachments({
+    productsExcelBuffer,
+    periodLabel,
+  });
+
+  return sendMailFromManagerToCustomer({
+    to: customerEmail,
+    subject,
+    text,
+    attachments,
   });
 }
 
@@ -159,19 +271,19 @@ async function sendCustomerUpdatedInfoMailToManager({
   const subject = "Customer Information Updated";
 
   const text = `
-A customer updated their information.
+A customer updated their own information.
 
-Customer:
+Customer Information:
 - Name: ${customer.name || "-"} ${customer.surname || ""}
-- Company: ${customer.companyName || customer.company_name || "-"}
+- Company: ${customer.companyName || customer.company_name || customer.company || "-"}
 - Email: ${customer.email || "-"}
 - Phone: ${customer.phone || "-"}
 - Username: ${customer.username || "-"}
 
 Updated Fields:
-${formatUpdatedFields(updatedFields)}
+${formatDetailedUpdatedFields(updatedFields)}
 
-Please review the customer record if needed.
+Please review the customer record in the manager panel if needed.
 
 Product Order Management
 `;
@@ -190,12 +302,13 @@ async function sendCustomerPasswordChangedMailToManager({ customer }) {
   const subject = "Customer Password Changed";
 
   const text = `
-A customer changed their password.
+A customer changed or reset their password.
 
-Customer:
+Customer Information:
 - Name: ${customer.name || "-"} ${customer.surname || ""}
-- Company: ${customer.companyName || customer.company_name || "-"}
+- Company: ${customer.companyName || customer.company_name || customer.company || "-"}
 - Email: ${customer.email || "-"}
+- Phone: ${customer.phone || "-"}
 - Username: ${customer.username || "-"}
 
 Security note:
@@ -223,12 +336,97 @@ async function sendManagerUpdatedCustomerInfoMail({
   const text = `
 Hello ${customer.name || "Customer"},
 
-Your customer/company information has been updated by a manager.
+Your customer information has been updated by the manager.
 
 Updated Fields:
-${formatUpdatedFields(updatedFields)}
+${formatDetailedUpdatedFields(updatedFields)}
+
+Current Customer Information:
+- Name: ${customer.name || "-"} ${customer.surname || ""}
+- Company: ${customer.companyName || customer.company_name || customer.company || "-"}
+- Email: ${customer.email || "-"}
+- Phone: ${customer.phone || "-"}
+- Username: ${customer.username || "-"}
 
 If you did not expect this change, please contact your manager.
+
+Product Order Management
+`;
+
+  return sendMailFromManagerToCustomer({
+    to: customer.email,
+    subject,
+    text,
+  });
+}
+
+/* =========================
+   MANAGER UPDATED CUSTOMER PASSWORD
+   MANAGER → CUSTOMER
+========================= */
+async function sendManagerUpdatedCustomerPasswordMail({
+  customer,
+  newPassword,
+}) {
+  const subject = "Your Password Has Been Updated";
+
+  const text = `
+Hello ${customer.name || "Customer"},
+
+Your password has been updated by the manager.
+
+Login Information:
+- Username: ${customer.username || "-"}
+- New Password: ${newPassword || "-"}
+
+Please login with your new password.
+
+For security, we recommend changing your password after login.
+
+If you did not expect this change, please contact the manager.
+
+Product Order Management
+`;
+
+  return sendMailFromManagerToCustomer({
+    to: customer.email,
+    subject,
+    text,
+  });
+}
+
+/* =========================
+   NEW CUSTOMER ACCOUNT CREATED
+   MANAGER → CUSTOMER
+========================= */
+async function sendNewCustomerAccountMail({
+  customer,
+  plainPassword,
+}) {
+  const subject = "Your Customer Account Has Been Created";
+
+  const text = `
+Hello ${customer.name || "Customer"},
+
+Your customer account has been created by the manager.
+
+Login Information:
+- Username: ${customer.username || "-"}
+- Password: ${plainPassword || "-"}
+
+Customer Information:
+- Name: ${customer.name || "-"} ${customer.surname || ""}
+- Company: ${customer.companyName || customer.company_name || customer.company || "-"}
+- Email: ${customer.email || "-"}
+- Phone: ${customer.phone || "-"}
+- Address: ${customer.address || "-"}
+- Country: ${customer.country || "-"}
+- City: ${customer.city || "-"}
+- Company Phone: ${customer.companyPhone || customer.company_phone || "-"}
+
+Please login with the information above.
+
+For security, we recommend changing your password after your first login.
 
 Product Order Management
 `;
@@ -269,62 +467,19 @@ Product Order Management
   });
 }
 
-
-/* =========================
-   PRODUCT UPDATES NEWSLETTER
-   MANAGER → CUSTOMERS
-========================= */
-async function sendProductUpdatesMailToCustomer({
-  customerEmail,
-  customerName,
-  products,
-  periodLabel
-}) {
-  const subject = `Product Updates - ${periodLabel || "New Products"}`;
-
-  const productListText = products
-    .map((product, index) => {
-      return `
-${index + 1}) ${product.type || "-"} ${product.model || "-"}
-- Material: ${product.material || "-"}
-- Angle: ${product.angle ?? "-"}
-- Nodal Length: ${product.nodal_length ?? product.nodalLength ?? "-"} mm
-- Width: ${product.width ?? "-"} mm
-- Number of Teeth: ${product.number_of_teeth ?? product.numberOfTeeth ?? "-"}
-- Unit Price: ${product.unit_price ?? product.unitPrice ?? "-"}
-`;
-    })
-    .join("\n");
-
-  const text = `
-Hello ${customerName || "Customer"},
-
-Here are the new product updates for ${periodLabel || "the selected period"}.
-
-${productListText}
-
-You can login to your customer panel to create an order.
-
-Product Order Management
-`;
-
-  return sendMailFromManagerToCustomer({
-    to: customerEmail,
-    subject,
-    text
-  });
-}
-
 /* =========================
    ORDER SUBMITTED MAIL
    CUSTOMER CONFIRMATION
+   WITH EXCEL ATTACHMENT
 ========================= */
 async function sendOrderSubmittedMailToCustomer({
   customer,
   order,
-  items
+  excelBuffer,
 }) {
-  const subject = `Order Submitted: ${order.order_code || order.id}`;
+  const orderCode = order.order_code || order.id || "Unknown";
+
+  const subject = `Order Submitted: ${orderCode}`;
 
   const text = `
 Hello ${customer.name || "Customer"},
@@ -332,99 +487,122 @@ Hello ${customer.name || "Customer"},
 Your order has been submitted successfully.
 
 Order Information:
-- Order Code: ${order.order_code || "-"}
+- Order Code: ${orderCode}
 - Status: ${order.status || "-"}
-- Submission Date: ${order.submission_date || "-"}
+- Submission Date: ${formatDateForMail(order.submission_date)}
 
-Order Items:
-${formatOrderItems(items)}
+Please find your order details in the attached Excel file.
 
 Thank you for your order.
 
 Product Order Management
 `;
 
+  const attachments = createOrderExcelAttachments({
+    order,
+    excelBuffer,
+  });
+
   return sendMailFromManagerToCustomer({
     to: customer.email,
     subject,
-    text
+    text,
+    attachments,
   });
 }
 
 /* =========================
    ORDER SUBMITTED MAIL
    MANAGER NOTIFICATION
+   WITH EXCEL ATTACHMENT
 ========================= */
 async function sendOrderSubmittedMailToManager({
   customer,
   order,
-  items
+  excelBuffer,
 }) {
-  const subject = `New Order Submitted: ${order.order_code || order.id}`;
+  const orderCode = order.order_code || order.id || "Unknown";
+
+  const subject = `New Order Submitted: ${orderCode}`;
 
   const text = `
 A customer submitted a new order.
 
 Customer Information:
 - Name: ${customer.name || "-"} ${customer.surname || ""}
-- Company: ${customer.company_name || customer.companyName || "-"}
+- Company: ${customer.company_name || customer.companyName || customer.company || "-"}
 - Email: ${customer.email || "-"}
 - Phone: ${customer.phone || "-"}
 - Username: ${customer.username || "-"}
 
 Order Information:
-- Order Code: ${order.order_code || "-"}
+- Order Code: ${orderCode}
 - Status: ${order.status || "-"}
-- Submission Date: ${order.submission_date || "-"}
+- Submission Date: ${formatDateForMail(order.submission_date)}
 
-Order Items:
-${formatOrderItems(items)}
-
-Please review the order in the manager panel.
+Please find the full order details in the attached Excel file.
 
 Product Order Management
 `;
+
+  const attachments = createOrderExcelAttachments({
+    order,
+    excelBuffer,
+  });
 
   return sendMailToManager({
     subject,
-    text
+    text,
+    attachments,
   });
 }
 
 /* =========================
-   MANAGER UPDATED CUSTOMER PASSWORD
-   MANAGER → CUSTOMER
+   ORDER EXCEL ATTACHMENT HELPER
 ========================= */
-async function sendManagerUpdatedCustomerPasswordMail({
-  customer,
-  newPassword
-}) {
-  const subject = "Your Password Has Been Updated";
+function createOrderExcelAttachments({ order, excelBuffer }) {
+  if (!excelBuffer) {
+    console.warn("Excel buffer is missing. Email will be sent without attachment.");
+    return [];
+  }
 
-  const text = `
-Hello ${customer.name || "Customer"},
+  const orderCode = order.order_code || order.id || "order";
 
-Your password has been updated by the manager.
-
-New Password:
-${newPassword}
-
-Please login with your new password.
-
-If you did not expect this change, please contact the manager.
-
-Product Order Management
-`;
-
-  return sendMailFromManagerToCustomer({
-    to: customer.email,
-    subject,
-    text
-  });
+  return [
+    {
+      filename: `Order_${sanitizeFileName(orderCode)}.xlsx`,
+      content: excelBuffer,
+      contentType:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    },
+  ];
 }
 
 /* =========================
-   ORDER HELPERS
+   PRODUCT EXCEL ATTACHMENT HELPER
+========================= */
+function createProductExcelAttachments({ productsExcelBuffer, periodLabel }) {
+  if (!productsExcelBuffer) {
+    console.warn("Products Excel buffer is missing. Email will be sent without attachment.");
+    return [];
+  }
+
+  const safePeriod = sanitizeFileName(periodLabel || "Product_Updates");
+
+  return [
+    {
+      filename: `Product_Updates_${safePeriod}.xlsx`,
+      content: productsExcelBuffer,
+      contentType:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    },
+  ];
+}
+
+/* =========================
+   ORDER HELPER
+   Kept for backward compatibility.
+   New order emails should use Excel attachment instead.
 ========================= */
 function formatOrderItems(items = []) {
   if (!items.length) {
@@ -448,9 +626,8 @@ ${index + 1}) ${item.type || "-"} ${item.model || "-"}
     .join("\n");
 }
 
-
 /* =========================
-   HELPERS
+   GENERAL HELPERS
 ========================= */
 function formatUpdatedFields(updatedFields = []) {
   if (!updatedFields.length) {
@@ -460,7 +637,53 @@ function formatUpdatedFields(updatedFields = []) {
   return updatedFields.map((field) => `- ${field}`).join("\n");
 }
 
+function formatDetailedUpdatedFields(updatedFields = []) {
+  if (!updatedFields.length) {
+    return "- No field details provided.";
+  }
+
+  return updatedFields
+    .map((field) => {
+      if (typeof field === "string") {
+        return `- ${field}`;
+      }
+
+      return `- ${field.label}: ${field.oldValue || "-"} → ${
+        field.newValue || "-"
+      }`;
+    })
+    .join("\n");
+}
+
+function formatDateForMail(value) {
+  if (!value) {
+    return "-";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return date.toLocaleString("en-GB", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function sanitizeFileName(value) {
+  return String(value || "file")
+    .replace(/[^a-zA-Z0-9-_]/g, "_")
+    .replace(/_+/g, "_");
+}
+
 module.exports = {
+  sendEmail,
+
   sendMailFromManagerToCustomer,
   sendMailToManager,
 
@@ -469,8 +692,11 @@ module.exports = {
 
   sendCustomerUpdatedInfoMailToManager,
   sendCustomerPasswordChangedMailToManager,
+
   sendManagerUpdatedCustomerInfoMail,
   sendManagerUpdatedCustomerPasswordMail,
+
+  sendNewCustomerAccountMail,
 
   sendOrderSubmittedMailToCustomer,
   sendOrderSubmittedMailToManager,

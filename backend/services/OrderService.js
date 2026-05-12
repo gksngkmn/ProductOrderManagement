@@ -4,6 +4,8 @@ const {
   sendOrderSubmittedMailToManager
 } = require("../utils/mailService");
 
+const { generateOrderExcel } = require("../utils/orderExcelGenerator");
+
 
 class OrderService {
   static getCountryCode(company) {
@@ -116,7 +118,7 @@ class OrderService {
   }
 
   return orders;
-}
+  }
 
   static async createOrder(user) {
     if (user.role !== "customer") {
@@ -294,7 +296,7 @@ class OrderService {
   );
 
   return updated.rows[0];
-}
+  }
 
 static async deleteOrderItem(user, orderId, itemId) {
   const companyId = user.id;
@@ -332,9 +334,9 @@ static async deleteOrderItem(user, orderId, itemId) {
   return {
     message: "Order item deleted successfully."
   };
-}
+  }
 
-    static async completeOrder(user, orderId) {
+  static async completeOrder(user, orderId) {
     const companyId = user.id;
 
     const check = await pool.query(
@@ -409,32 +411,53 @@ static async deleteOrderItem(user, orderId, itemId) {
     );
 
     const items = itemsResult.rows;
+    
+    if (!items.length) {
+      const error = new Error("You cannot complete an empty order.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+
+    let excelBuffer = null;
+
+    try {
+      excelBuffer = await generateOrderExcel({
+        customer,
+        order,
+        items,
+      });
+    } catch (excelError) {
+      console.log("Order Excel file could not be generated:", excelError.message);
+    }
 
     try {
       await sendOrderSubmittedMailToCustomer({
         customer,
         order,
-        items
+        excelBuffer,
       });
     } catch (mailError) {
-      console.log("Customer order submitted mail could not be sent:", mailError.message);
+      console.log(
+        "Customer order submitted mail could not be sent:",
+        mailError.message
+      );
     }
 
     try {
       await sendOrderSubmittedMailToManager({
         customer,
         order,
-        items
+        excelBuffer,
       });
     } catch (mailError) {
-      console.log("Manager order submitted mail could not be sent:", mailError.message);
+      console.log(
+        "Manager order submitted mail could not be sent:",
+        mailError.message
+      );
     }
-
-    return {
-      ...order,
-      items
-    };
   }
 }
+
 
 module.exports = OrderService;

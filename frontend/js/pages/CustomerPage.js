@@ -449,7 +449,7 @@ async function loadMyOrders() {
     currentOrderInfo.innerText =
       `Current Order: ${currentOrder.order_code} • ${currentOrder.status}`;
 
-    completeOrderBtn.disabled = false;
+    // scompleteOrderBtn.disabled = false;
 
     renderCurrentOrderItems(currentOrder);
   } catch (error) {
@@ -465,6 +465,8 @@ function renderCurrentOrderItems(order) {
     currentOrderItems.innerHTML = DomHelper.emptyMessage("No items in current order.");
     return;
   }
+
+  completeOrderBtn.disabled = false;
 
   const total = order.items.reduce(
     (sum, item) => sum + Number(item.total_price || 0),
@@ -760,24 +762,36 @@ completeOrderBtn.addEventListener("click", async () => {
     return;
   }
 
+  if (!currentOrder.items || currentOrder.items.length === 0) {
+    alert("You cannot complete an empty order.");
+    completeOrderBtn.disabled = true;
+    return;
+  }
+
   const confirmed = confirm("Complete this order?");
 
   if (!confirmed) return;
 
   try {
-    const completedOrder = await OrderApi.completeOrder(currentOrder.id);
+  const completedOrder = await OrderApi.completeOrder(currentOrder.id);
 
-    alert(`Order completed: ${completedOrder.order_code}`);
+  const completedOrderCode =
+    completedOrder?.order_code ||
+    currentOrder?.order_code ||
+    currentOrder?.id ||
+    "Order";
 
-    currentOrder = null;
-    currentOrderInfo.innerText = "No active order loaded.";
-    currentOrderItems.innerHTML = DomHelper.emptyMessage("No current order items.");
-    completeOrderBtn.disabled = true;
+  alert(`Order completed: ${completedOrderCode}`);
 
-    await loadMyOrders();
-  } catch (error) {
-    alert(error.message);
-  }
+  currentOrder = null;
+  currentOrderInfo.innerText = "No active order loaded.";
+  currentOrderItems.innerHTML = DomHelper.emptyMessage("No current order items.");
+  completeOrderBtn.disabled = true;
+
+  await loadMyOrders();
+} catch (error) {
+  alert(error.message);
+}
 });
 
 /* =========================
