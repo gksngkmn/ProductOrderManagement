@@ -47,9 +47,10 @@ class VerificationService {
       AND (
         company_id = $2
         OR email = $3
+        OR phone = $4
       )
       `,
-      [purpose, companyId || null, email || null]
+      [purpose, companyId || null, email || null, phone || null]
     );
 
     await pool.query(

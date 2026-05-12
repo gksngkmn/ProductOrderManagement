@@ -118,13 +118,15 @@ async function sendSms({ to, message }) {
    VERIFICATION SMS
 ========================= */
 async function sendVerificationCodeSms({ to, code, reason }) {
-  const message = `Your verification code is: ${code}. Reason: ${
+  const prefix = SMS_MODE === "mock" ? "[TEST SMS] " : "";
+
+  const message = `${prefix}Your verification code is: ${code}. Reason: ${
     reason || "Account verification"
   }. Product Order Management`;
 
   return sendSms({
     to,
-    message
+    message,
   });
 }
 

@@ -194,6 +194,17 @@ class CompanyService {
     return result.rows[0];
   }
 
+
+  static async getCompanyByIdForUser(id, user) {
+    if (user.role === "customer" && Number(user.id) !== Number(id)) {
+      const error = new Error("You can only view your own profile.");
+      error.statusCode = 403;
+      throw error;
+    }
+    const company = await this.getCompanyById(id);
+    return this.formatCompany(company);
+  }
+
   static getUpdatedFields(oldCompany, newData) {
     const fields = [];
 
@@ -214,6 +225,11 @@ class CompanyService {
     addIfChanged("Surname", oldCompany.surname, newData.surname);
     addIfChanged("Email", oldCompany.email, newData.email);
     addIfChanged("Phone", oldCompany.phone, newData.phone);
+    addIfChanged("Company Name", oldCompany.company_name, newData.companyName);
+    addIfChanged("Address", oldCompany.address, newData.address);
+    addIfChanged("Country", oldCompany.country, newData.country);
+    addIfChanged("City", oldCompany.city, newData.city);
+    addIfChanged("Company Phone", oldCompany.company_phone, newData.companyPhone);
 
     return fields;
   }
@@ -237,6 +253,7 @@ class CompanyService {
       name: formattedCompany.name,
       purpose: "info_update",
       reason: "Information update verification",
+      deliveryMethod: "email",
     });
 
     return {
@@ -265,10 +282,30 @@ class CompanyService {
   }
 
   static async updateCompany(id, user, companyData) {
-    const { name, surname, email, phone } = companyData;
+    const {
+      name,
+      surname,
+      email,
+      phone,
+      companyName,
+      address,
+      country,
+      city,
+      companyPhone,
+    } = companyData;
 
-    if (!name || !surname || !email || !phone) {
-      const error = new Error("Name, surname, email and phone are required.");
+    if (
+      !name ||
+      !surname ||
+      !email ||
+      !phone ||
+      !companyName ||
+      !address ||
+      !country ||
+      !city ||
+      !companyPhone
+    ) {
+      const error = new Error("All customer fields are required.");
       error.statusCode = 400;
       throw error;
     }
@@ -286,6 +323,11 @@ class CompanyService {
       surname,
       email,
       phone,
+      companyName,
+      address,
+      country,
+      city,
+      companyPhone,
     });
 
     const result = await pool.query(
@@ -295,8 +337,13 @@ class CompanyService {
         name = $1,
         surname = $2,
         email = $3,
-        phone = $4
-      WHERE id = $5
+        phone = $4,
+        company_name = $5,
+        address = $6,
+        country = $7,
+        city = $8,
+        company_phone = $9
+      WHERE id = $10
       RETURNING
         id,
         name,
@@ -312,7 +359,18 @@ class CompanyService {
         role,
         created_at
       `,
-      [name, surname, email, phone, id]
+      [
+        name,
+        surname,
+        email,
+        phone,
+        companyName,
+        address,
+        country,
+        city,
+        companyPhone,
+        id,
+      ]
     );
 
     if (result.rows.length === 0) {
@@ -348,6 +406,65 @@ class CompanyService {
     }
 
     return formattedCustomer;
+  }
+
+    static async requestCustomerPasswordUpdateCode(id, user) {
+    if (user.role !== "manager") {
+      const error = new Error(
+        "Only managers can request customer password update code."
+      );
+      error.statusCode = 403;
+      throw error;
+    }
+
+    const customer = await this.getCompanyById(id);
+    const formattedCustomer = this.formatCompany(customer);
+
+    await VerificationService.createCode({
+      companyId: formattedCustomer.id,
+      email: formattedCustomer.email,
+      phone: formattedCustomer.phone,
+      name: formattedCustomer.name,
+      purpose: "manager_password_update",
+      reason: "Manager password update verification",
+      deliveryMethod: "email",
+    });
+
+    return {
+      message: "Password update verification code sent to customer email.",
+    };
+  }
+
+  static async verifyAndUpdateCustomerPassword(id, user, code, newPassword) {
+    if (user.role !== "manager") {
+      const error = new Error("Only managers can update customer password.");
+      error.statusCode = 403;
+      throw error;
+    }
+
+    if (!code) {
+      const error = new Error("Verification code is required.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (!newPassword) {
+      const error = new Error("New password is required.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const customer = await this.getCompanyById(id);
+    const formattedCustomer = this.formatCompany(customer);
+
+    await VerificationService.verifyCode({
+      companyId: formattedCustomer.id,
+      email: formattedCustomer.email,
+      purpose: "manager_password_update",
+      code,
+    });
+
+    return this.updateCustomerPassword(id, newPassword);
   }
 
   static async updateCustomerPassword(id, newPassword) {

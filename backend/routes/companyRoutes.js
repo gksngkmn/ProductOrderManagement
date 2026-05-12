@@ -6,21 +6,31 @@ const requireRole = require("../middleware/roleMiddleware");
 
 const {
   getCompanies,
+  getCompanyById,
   createCompany,
   updateCompany,
   requestCompanyUpdateCode,
   verifyAndUpdateCompany,
+  requestCustomerPasswordUpdateCode,
+  verifyAndUpdateCustomerPassword,
   updateCustomerPassword,
   deleteCompany
 } = require("../controllers/companyController");
 
 router.get("/", authMiddleware, requireRole("manager"), getCompanies);
 
+router.get(
+  "/:id",
+  authMiddleware,
+  getCompanyById
+);
+
 router.post("/", authMiddleware, requireRole("manager"), createCompany);
 
 /* =========================
    INFO UPDATE VERIFICATION
 ========================= */
+
 router.post(
   "/:id/request-update-code",
   authMiddleware,
@@ -44,6 +54,20 @@ router.put(
   updateCompany
 );
 
+router.post(
+  "/:id/request-password-code",
+  authMiddleware,
+  requireRole("manager"),
+  requestCustomerPasswordUpdateCode
+);
+
+router.put(
+  "/:id/verify-password",
+  authMiddleware,
+  requireRole("manager"),
+  verifyAndUpdateCustomerPassword
+);
+
 router.put(
   "/:id/password",
   authMiddleware,
@@ -57,5 +81,6 @@ router.delete(
   requireRole("manager"),
   deleteCompany
 );
+
 
 module.exports = router;

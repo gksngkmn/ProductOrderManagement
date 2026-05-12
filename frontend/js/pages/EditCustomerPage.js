@@ -1,6 +1,7 @@
 import PageGuard from "../core/PageGuard.js";
 import AuthManager from "../core/AuthManager.js";
 import CompanyApi from "../api/CompanyApi.js";
+import AuthApi from "../api/AuthApi.js";
 
 PageGuard.requireRole("customer");
 
@@ -51,8 +52,8 @@ const passwordVerificationMessage = document.getElementById("passwordVerificatio
    STATE
 ========================= */
 let customer = null;
-let detailsVerificationCode = null;
-let passwordVerificationCode = null;
+let isDetailsCodeRequested = false;
+let isPasswordCodeRequested = false;
 
 /* =========================
    INIT
@@ -152,7 +153,7 @@ function fillForm() {
 
 /* =========================
    VERIFICATION HELPERS
-========================= */
+========================= 
 function getSelectedVerificationMethod(name) {
   return document.querySelector(`input[name="${name}"]:checked`)?.value || "email";
 }
@@ -161,13 +162,15 @@ function createFrontendVerificationCode() {
   return String(Math.floor(100000 + Math.random() * 900000));
 }
 
+function validateCode(inputCode, realCode) {
+  return String(inputCode || "").trim() === String(realCode || "").trim();
+}
+
+*/
+
 function showMessage(element, message, type = "success") {
   element.innerText = message;
   element.className = `edit-message ${type}`;
-}
-
-function validateCode(inputCode, realCode) {
-  return String(inputCode || "").trim() === String(realCode || "").trim();
 }
 
 function updateLocalSession(updatedData) {
@@ -187,19 +190,31 @@ function updateLocalSession(updatedData) {
 /* =========================
    DETAILS VERIFICATION
 ========================= */
-requestDetailsCodeBtn.addEventListener("click", () => {
-  const method = getSelectedVerificationMethod("detailsVerificationMethod");
+requestDetailsCodeBtn.addEventListener("click", async () => {
+  try {
+    if (!customer || !customer.id) {
+      throw new Error("Customer information could not be loaded.");
+    }
 
-  detailsVerificationCode = createFrontendVerificationCode();
+    requestDetailsCodeBtn.disabled = true;
+    showMessage(detailsVerificationMessage, "Sending verification code...", "success");
 
-  detailsVerificationArea.classList.remove("hidden");
-  saveDetailsBtn.disabled = false;
+    await CompanyApi.requestCompanyUpdateCode(customer.id);
 
-  showMessage(
-    detailsVerificationMessage,
-    `Frontend demo: verification code sent by ${method.toUpperCase()}. Test code: ${detailsVerificationCode}`,
-    "success"
-  );
+    isDetailsCodeRequested = true;
+    detailsVerificationArea.classList.remove("hidden");
+    saveDetailsBtn.disabled = false;
+
+    showMessage(
+      detailsVerificationMessage,
+      "Verification code has been sent to your email.",
+      "success"
+    );
+  } catch (error) {
+    showMessage(detailsVerificationMessage, error.message, "error");
+  } finally {
+    requestDetailsCodeBtn.disabled = false;
+  }
 });
 
 /* =========================
@@ -208,13 +223,15 @@ requestDetailsCodeBtn.addEventListener("click", () => {
 editCustomerForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  if (!detailsVerificationCode) {
+  if (!isDetailsCodeRequested) {
     showMessage(detailsVerificationMessage, "Please request a verification code first.", "error");
     return;
   }
 
-  if (!validateCode(detailsVerificationCodeInput.value, detailsVerificationCode)) {
-    showMessage(detailsVerificationMessage, "Invalid verification code.", "error");
+  const detailsCode = detailsVerificationCodeInput.value.trim();
+
+  if (!detailsCode) {
+    showMessage(detailsVerificationMessage, "Verification code is required.", "error");
     return;
   }
 
@@ -233,9 +250,13 @@ editCustomerForm.addEventListener("submit", async (event) => {
   try {
     let backendResponse = {};
 
-    if (customer.id && CompanyApi.updateCompany) {
-      backendResponse = await CompanyApi.updateCompany(customer.id, updatedData);
-    }
+    if (customer.id && CompanyApi.verifyAndUpdateCompany) {
+      backendResponse = await CompanyApi.verifyAndUpdateCompany(
+        customer.id,
+        updatedData,
+        detailsCode
+      );
+  }
 
     customer = normalizeCustomer({
       ...customer,
@@ -248,7 +269,7 @@ editCustomerForm.addEventListener("submit", async (event) => {
     renderCustomer();
     fillForm();
 
-    detailsVerificationCode = null;
+    isDetailsCodeRequested = false;
     detailsVerificationCodeInput.value = "";
     saveDetailsBtn.disabled = true;
 
@@ -261,19 +282,27 @@ editCustomerForm.addEventListener("submit", async (event) => {
 /* =========================
    PASSWORD VERIFICATION
 ========================= */
-requestPasswordCodeBtn.addEventListener("click", () => {
-  const method = getSelectedVerificationMethod("passwordVerificationMethod");
+requestPasswordCodeBtn.addEventListener("click", async () => {
+  try {
+    requestPasswordCodeBtn.disabled = true;
+    showMessage(passwordVerificationMessage, "Sending verification code...", "success");
 
-  passwordVerificationCode = createFrontendVerificationCode();
+    await AuthApi.requestPasswordCode();
 
-  passwordVerificationArea.classList.remove("hidden");
-  savePasswordBtn.disabled = false;
+    isPasswordCodeRequested = true;
+    passwordVerificationArea.classList.remove("hidden");
+    savePasswordBtn.disabled = false;
 
-  showMessage(
-    passwordVerificationMessage,
-    `Frontend demo: verification code sent by ${method.toUpperCase()}. Test code: ${passwordVerificationCode}`,
-    "success"
-  );
+    showMessage(
+      passwordVerificationMessage,
+      "Verification code has been sent to your email.",
+      "success"
+    );
+  } catch (error) {
+    showMessage(passwordVerificationMessage, error.message, "error");
+  } finally {
+    requestPasswordCodeBtn.disabled = false;
+  }
 });
 
 /* =========================
@@ -300,22 +329,23 @@ passwordForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  if (!passwordVerificationCode) {
+  if (!isPasswordCodeRequested) {
     showMessage(passwordVerificationMessage, "Please request a verification code first.", "error");
     return;
   }
 
-  if (!validateCode(passwordVerificationCodeInput.value, passwordVerificationCode)) {
-    showMessage(passwordVerificationMessage, "Invalid verification code.", "error");
+  const passwordCode = passwordVerificationCodeInput.value.trim(); 
+
+
+  if (!passwordCode) {
+    showMessage(passwordVerificationMessage, "Verification code is required.", "error");
     return;
   }
 
   try {
-    if (customer.id && CompanyApi.updateCustomerPassword) {
-      await CompanyApi.updateCustomerPassword(customer.id, newPassword);
-    }
+    await AuthApi.resetPassword(passwordCode, newPassword);
 
-    passwordVerificationCode = null;
+    isPasswordCodeRequested = false;
     passwordVerificationCodeInput.value = "";
     newPasswordInput.value = "";
     confirmPasswordInput.value = "";

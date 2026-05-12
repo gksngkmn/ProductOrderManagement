@@ -269,8 +269,13 @@ function applyProductFilters() {
     `.toLowerCase();
 
     const matchesSearch = !search || combined.includes(search);
-    const matchesMaterial = !material || productMaterial.includes(material);
-    const matchesType = !type || productType.includes(type);
+    const matchesMaterial =
+      !material ||
+      productMaterial === material;
+
+    const matchesType =
+      !type ||
+      productType === type;
 
     return matchesSearch && matchesMaterial && matchesType;
   });

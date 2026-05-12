@@ -204,7 +204,8 @@ class AuthService {
       phone: company.phone,
       name: company.name,
       purpose: "password_change",
-      reason: "Password change verification"
+      reason: "Password change verification",
+      deliveryMethod: "email",
     });
 
     return {

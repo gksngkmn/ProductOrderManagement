@@ -1,5 +1,6 @@
 import PageGuard from "../core/PageGuard.js";
 import AuthManager from "../core/AuthManager.js";
+import ManagerApi from "../api/ManagerApi.js";
 
 PageGuard.requireRole("manager");
 
@@ -44,8 +45,8 @@ const passwordVerificationMessage = document.getElementById("passwordVerificatio
    STATE
 ========================= */
 let manager = null;
-let managerVerificationCode = null;
-let passwordVerificationCode = null;
+let isManagerCodeRequested = false;
+let isPasswordCodeRequested = false;
 
 /* =========================
    INIT
@@ -116,17 +117,6 @@ function fillForm() {
 /* =========================
    VERIFICATION HELPERS
 ========================= */
-function getSelectedVerificationMethod(name) {
-  return document.querySelector(`input[name="${name}"]:checked`)?.value || "email";
-}
-
-function createFrontendVerificationCode() {
-  return String(Math.floor(100000 + Math.random() * 900000));
-}
-
-function validateCode(inputCode, realCode) {
-  return String(inputCode || "").trim() === String(realCode || "").trim();
-}
 
 function showMessage(element, message, type = "success") {
   element.innerText = message;
@@ -150,34 +140,49 @@ function updateLocalSession(updatedData) {
 /* =========================
    MANAGER DETAILS VERIFICATION
 ========================= */
-requestManagerCodeBtn.addEventListener("click", () => {
-  const method = getSelectedVerificationMethod("managerVerificationMethod");
+requestManagerCodeBtn.addEventListener("click", async (event) => {
+  event.preventDefault();
 
-  managerVerificationCode = createFrontendVerificationCode();
+  try {
+    requestManagerCodeBtn.disabled = true;
+    showMessage(managerVerificationMessage, "Sending verification code...", "success");
 
-  managerVerificationArea.classList.remove("hidden");
-  saveManagerBtn.disabled = false;
+    await ManagerApi.requestManagerUpdateCode();
 
-  showMessage(
-    managerVerificationMessage,
-    `Frontend demo: verification code sent by ${method.toUpperCase()}. Test code: ${managerVerificationCode}`,
-    "success"
-  );
+    isManagerCodeRequested = true;
+
+    managerVerificationArea.classList.remove("hidden");
+    managerVerificationArea.style.display = "block";
+
+    saveManagerBtn.disabled = false;
+
+    showMessage(
+      managerVerificationMessage,
+      "Verification code has been sent to your email.",
+      "success"
+    );
+  } catch (error) {
+    showMessage(managerVerificationMessage, error.message, "error");
+  } finally {
+    requestManagerCodeBtn.disabled = false;
+  }
 });
 
 /* =========================
    SAVE MANAGER DETAILS
 ========================= */
-editManagerForm.addEventListener("submit", (event) => {
+editManagerForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  if (!managerVerificationCode) {
+  if (!isManagerCodeRequested) {
     showMessage(managerVerificationMessage, "Please request a verification code first.", "error");
     return;
   }
 
-  if (!validateCode(managerVerificationCodeInput.value, managerVerificationCode)) {
-    showMessage(managerVerificationMessage, "Invalid verification code.", "error");
+  const code = managerVerificationCodeInput.value.trim();
+
+  if (!code) {
+    showMessage(managerVerificationMessage, "Verification code is required.", "error");
     return;
   }
 
@@ -185,52 +190,75 @@ editManagerForm.addEventListener("submit", (event) => {
     name: nameInput.value.trim(),
     surname: surnameInput.value.trim(),
     email: emailInput.value.trim(),
-    phone: phoneInput.value.trim()
+    phone: phoneInput.value.trim(),
   };
 
-  manager = normalizeManager({
-    ...manager,
-    ...updatedData
-  });
+  try {
+    const updatedManager = await ManagerApi.verifyAndUpdateManager(
+      updatedData,
+      code
+    );
 
-  updateLocalSession(updatedData);
+    manager = normalizeManager({
+      ...manager,
+      ...updatedManager,
+    });
 
-  renderManager();
-  fillForm();
+    updateLocalSession(updatedManager);
 
-  managerVerificationCode = null;
-  managerVerificationCodeInput.value = "";
-  saveManagerBtn.disabled = true;
+    renderManager();
+    fillForm();
 
-  showMessage(managerVerificationMessage, "Manager details updated successfully.", "success");
+    isManagerCodeRequested = false;
+    managerVerificationCodeInput.value = "";
+    saveManagerBtn.disabled = true;
+
+    showMessage(managerVerificationMessage, "Manager details updated successfully.", "success");
+  } catch (error) {
+    showMessage(managerVerificationMessage, error.message, "error");
+  }
 });
 
 /* =========================
    PASSWORD VERIFICATION
 ========================= */
-requestPasswordCodeBtn.addEventListener("click", () => {
-  const method = getSelectedVerificationMethod("passwordVerificationMethod");
+requestPasswordCodeBtn.addEventListener("click", async (event) => {
+  event.preventDefault();
 
-  passwordVerificationCode = createFrontendVerificationCode();
+  try {
+    requestPasswordCodeBtn.disabled = true;
+    showMessage(passwordVerificationMessage, "Sending verification code...", "success");
 
-  passwordVerificationArea.classList.remove("hidden");
-  savePasswordBtn.disabled = false;
+    await ManagerApi.requestManagerPasswordCode();
 
-  showMessage(
-    passwordVerificationMessage,
-    `Frontend demo: verification code sent by ${method.toUpperCase()}. Test code: ${passwordVerificationCode}`,
-    "success"
-  );
+    isPasswordCodeRequested = true;
+
+    passwordVerificationArea.classList.remove("hidden");
+    passwordVerificationArea.style.display = "block";
+
+    savePasswordBtn.disabled = false;
+
+    showMessage(
+      passwordVerificationMessage,
+      "Verification code has been sent to your email.",
+      "success"
+    );
+  } catch (error) {
+    showMessage(passwordVerificationMessage, error.message, "error");
+  } finally {
+    requestPasswordCodeBtn.disabled = false;
+  }
 });
 
 /* =========================
    SAVE PASSWORD
 ========================= */
-passwordForm.addEventListener("submit", (event) => {
+passwordForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const newPassword = newPasswordInput.value.trim();
   const confirmPassword = confirmPasswordInput.value.trim();
+  const code = passwordVerificationCodeInput.value.trim();
 
   if (!newPassword || !confirmPassword) {
     showMessage(passwordVerificationMessage, "Password fields are required.", "error");
@@ -247,26 +275,27 @@ passwordForm.addEventListener("submit", (event) => {
     return;
   }
 
-  if (!passwordVerificationCode) {
+  if (!isPasswordCodeRequested) {
     showMessage(passwordVerificationMessage, "Please request a verification code first.", "error");
     return;
   }
 
-  if (!validateCode(passwordVerificationCodeInput.value, passwordVerificationCode)) {
-    showMessage(passwordVerificationMessage, "Invalid verification code.", "error");
+  if (!code) {
+    showMessage(passwordVerificationMessage, "Verification code is required.", "error");
     return;
   }
 
-  /*
-    Backend integration will be added later.
-    For now, this is frontend-only verification demo.
-  */
+  try {
+    await ManagerApi.verifyAndUpdateManagerPassword(code, newPassword);
 
-  passwordVerificationCode = null;
-  passwordVerificationCodeInput.value = "";
-  newPasswordInput.value = "";
-  confirmPasswordInput.value = "";
-  savePasswordBtn.disabled = true;
+    isPasswordCodeRequested = false;
+    passwordVerificationCodeInput.value = "";
+    newPasswordInput.value = "";
+    confirmPasswordInput.value = "";
+    savePasswordBtn.disabled = true;
 
-  showMessage(passwordVerificationMessage, "Password changed successfully.", "success");
+    showMessage(passwordVerificationMessage, "Password changed successfully.", "success");
+  } catch (error) {
+    showMessage(passwordVerificationMessage, error.message, "error");
+  }
 });

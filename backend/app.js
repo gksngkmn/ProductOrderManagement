@@ -7,11 +7,13 @@ const authRoutes = require("./routes/authRoutes");
 const companyRoutes = require("./routes/companyRoutes");
 const productRoutes = require("./routes/productRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const managerRoutes = require("./routes/managerRoutes");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
 
 /* =========================
    API ROUTES
@@ -20,6 +22,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/companies", companyRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/manager", managerRoutes);
 
 /* =========================
    FRONTEND STATIC FILES

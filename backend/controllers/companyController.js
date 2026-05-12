@@ -78,6 +78,47 @@ async function verifyAndUpdateCompany(req, res) {
   }
 }
 
+async function requestCustomerPasswordUpdateCode(req, res) {
+  try {
+    const { id } = req.params;
+
+    const result = await CompanyService.requestCustomerPasswordUpdateCode(
+      id,
+      req.user
+    );
+
+    return res.json(result);
+  } catch (error) {
+    return handleError(
+      res,
+      error,
+      "Request customer password update code error:"
+    );
+  }
+}
+
+async function verifyAndUpdateCustomerPassword(req, res) {
+  try {
+    const { id } = req.params;
+    const { code, newPassword } = req.body;
+
+    const result = await CompanyService.verifyAndUpdateCustomerPassword(
+      id,
+      req.user,
+      code,
+      newPassword
+    );
+
+    return res.json(result);
+  } catch (error) {
+    return handleError(
+      res,
+      error,
+      "Verify and update customer password error:"
+    );
+  }
+}
+
 async function updateCustomerPassword(req, res) {
   try {
     const { id } = req.params;
@@ -101,13 +142,32 @@ async function deleteCompany(req, res) {
   }
 }
 
+
+async function getCompanyById(req, res) {
+  try {
+    const { id } = req.params;
+
+    const company = await CompanyService.getCompanyByIdForUser(
+      id,
+      req.user
+    );
+
+    return res.json(company);
+  } catch (error) {
+    return handleError(res, error, "Get company by id error:");
+  }
+}
+
 module.exports = {
   getCompanies,
   createCompany,
   updateCompany,
+  getCompanyById,
 
   requestCompanyUpdateCode,
   verifyAndUpdateCompany,
+  requestCustomerPasswordUpdateCode,
+  verifyAndUpdateCustomerPassword,
 
   updateCustomerPassword,
   deleteCompany
