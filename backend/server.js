@@ -9,10 +9,11 @@ const pool = require("./db");
 const runMigrations = require("./utils/migrationRunner");
 
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || "0.0.0.0";
 
 const ready = runMigrations(pool).then(() => {
-  return app.listen(PORT, "127.0.0.1", () => {
-    console.log(`Server running on http://127.0.0.1:${PORT}`);
+  return app.listen(PORT, HOST, () => {
+    console.log(`Server running on ${HOST}:${PORT}`);
   });
 });
 

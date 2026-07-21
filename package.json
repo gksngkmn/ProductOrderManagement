@@ -4,7 +4,8 @@
   "description": "Web-based product and order management application",
   "scripts": {
     "start": "node backend/server.js",
-    "dev": "node backend/server.js"
+    "dev": "node backend/server.js",
+    "postinstall": "npm ci --prefix backend --omit=dev"
   },
   "keywords": [],
   "author": "Göksun Gökmen",
@@ -12,5 +13,8 @@
   "type": "commonjs",
   "dependencies": {
     "exceljs": "^4.4.0"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
   }
 }
