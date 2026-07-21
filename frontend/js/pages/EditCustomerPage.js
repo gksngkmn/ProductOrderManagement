@@ -141,32 +141,15 @@ function fillForm() {
   nameInput.value = customer.name || "";
   surnameInput.value = customer.surname || "";
   emailInput.value = customer.email || "";
-  phoneInput.value = customer.phone || "";
+  PhoneInput.setValue(phoneInput, customer.phone || "");
   usernameInput.value = customer.username || "";
 
   companyNameInput.value = customer.companyName || "";
-  companyPhoneInput.value = customer.companyPhone || "";
+  PhoneInput.setValue(companyPhoneInput, customer.companyPhone || "");
   addressInput.value = customer.address || "";
   countryInput.value = customer.country || "";
   cityInput.value = customer.city || "";
 }
-
-/* =========================
-   VERIFICATION HELPERS
-========================= 
-function getSelectedVerificationMethod(name) {
-  return document.querySelector(`input[name="${name}"]:checked`)?.value || "email";
-}
-
-function createFrontendVerificationCode() {
-  return String(Math.floor(100000 + Math.random() * 900000));
-}
-
-function validateCode(inputCode, realCode) {
-  return String(inputCode || "").trim() === String(realCode || "").trim();
-}
-
-*/
 
 function showMessage(element, message, type = "success") {
   element.innerText = message;
@@ -239,9 +222,9 @@ editCustomerForm.addEventListener("submit", async (event) => {
     name: nameInput.value.trim(),
     surname: surnameInput.value.trim(),
     email: emailInput.value.trim(),
-    phone: phoneInput.value.trim(),
+    phone: PhoneInput.getValue(phoneInput),
     companyName: companyNameInput.value.trim(),
-    companyPhone: companyPhoneInput.value.trim(),
+    companyPhone: PhoneInput.getValue(companyPhoneInput),
     address: addressInput.value.trim(),
     country: countryInput.value.trim(),
     city: cityInput.value.trim()
@@ -324,8 +307,8 @@ passwordForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  if (newPassword.length < 4) {
-    showMessage(passwordVerificationMessage, "Password must be at least 4 characters.", "error");
+  if (newPassword.length < 12) {
+    showMessage(passwordVerificationMessage, "Password must be at least 12 characters.", "error");
     return;
   }
 

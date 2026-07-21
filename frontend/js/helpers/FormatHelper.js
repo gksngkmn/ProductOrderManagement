@@ -25,7 +25,7 @@ class FormatHelper {
     return numberValue.toLocaleString();
   }
 
-  static money(value) {
+  static money(value, currency = "USD") {
     if (value === null || value === undefined || value === "") {
       return "-";
     }
@@ -36,10 +36,10 @@ class FormatHelper {
       return value;
     }
 
-    return numberValue.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: currency === "CNY" ? "CNY" : "USD"
+    }).format(numberValue);
   }
 
   static dash(value) {

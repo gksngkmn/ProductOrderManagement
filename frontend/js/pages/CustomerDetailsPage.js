@@ -113,11 +113,11 @@ function fillForm() {
   nameInput.value = customer.name || "";
   surnameInput.value = customer.surname || "";
   emailInput.value = customer.email || "";
-  phoneInput.value = customer.phone || "";
+  PhoneInput.setValue(phoneInput, customer.phone || "");
   usernameInput.value = customer.username || "";
 
   companyNameInput.value = customer.companyName || "";
-  companyPhoneInput.value = customer.companyPhone || "";
+  PhoneInput.setValue(companyPhoneInput, customer.companyPhone || "");
   addressInput.value = customer.address || "";
   countryInput.value = customer.country || "";
   cityInput.value = customer.city || "";
@@ -188,9 +188,9 @@ customerDetailsForm.addEventListener("submit", async (event) => {
     name: nameInput.value.trim(),
     surname: surnameInput.value.trim(),
     email: emailInput.value.trim(),
-    phone: phoneInput.value.trim(),
+    phone: PhoneInput.getValue(phoneInput),
     companyName: companyNameInput.value.trim(),
-    companyPhone: companyPhoneInput.value.trim(),
+    companyPhone: PhoneInput.getValue(companyPhoneInput),
     address: addressInput.value.trim(),
     country: countryInput.value.trim(),
     city: cityInput.value.trim(),
@@ -282,10 +282,10 @@ passwordForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  if (newPassword.length < 4) {
+  if (newPassword.length < 12) {
     showMessage(
       passwordVerificationMessage,
-      "Password must be at least 4 characters.",
+      "Password must be at least 12 characters.",
       "error"
     );
     return;

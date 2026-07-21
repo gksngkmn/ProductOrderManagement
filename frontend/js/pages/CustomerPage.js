@@ -426,7 +426,7 @@ function updateSelectedProductInfo(product, message = "", type = "success") {
     Nodal Length: ${FormatHelper.dash(product.nodalLength)} |
     Width: ${FormatHelper.dash(product.width)} |
     Teeth: ${FormatHelper.dash(product.numberOfTeeth)}<br>
-    Unit Price: ${FormatHelper.money(product.unitPrice)}
+    Unit Price: ${FormatHelper.money(product.unitPrice, product.currency)}
   `;
 
   selectedProductInfo.className = "selected-product-info success";
@@ -468,10 +468,14 @@ function renderCurrentOrderItems(order) {
 
   completeOrderBtn.disabled = false;
 
-  const total = order.items.reduce(
-    (sum, item) => sum + Number(item.total_price || 0),
-    0
-  );
+  const totals = new Map();
+  for (const item of order.items) {
+    const currency = item.currency || "USD";
+    totals.set(currency, (totals.get(currency) || 0) + Number(item.total_price || 0));
+  }
+  const total = [...totals.entries()]
+    .map(([currency, value]) => FormatHelper.money(value, currency))
+    .join(" + ");
 
   currentOrderItems.innerHTML = `
     <h3>Order Items</h3>
@@ -507,8 +511,8 @@ function renderCurrentOrderItems(order) {
                   <td>${FormatHelper.dash(item.width)}</td>
                   <td>${FormatHelper.dash(item.number_of_teeth)}</td>
                   <td>${FormatHelper.dash(item.quantity)}</td>
-                  <td>${FormatHelper.money(item.unit_price)}</td>
-                  <td>${FormatHelper.money(item.total_price)}</td>
+                  <td>${FormatHelper.money(item.unit_price, item.currency)}</td>
+                  <td>${FormatHelper.money(item.total_price, item.currency)}</td>
                   <td class="order-actions-cell">
                     <div class="order-actions-wrapper">
                       <button
@@ -538,7 +542,7 @@ function renderCurrentOrderItems(order) {
     </div>
 
     <div class="order-total-box">
-      Total Price: ${FormatHelper.money(total)}
+      Total Price: ${total}
     </div>
   `;
 }
@@ -605,7 +609,7 @@ function openEditOrderItemModal(item) {
   editOrderNodalLength.innerText = FormatHelper.dash(item.nodal_length);
   editOrderWidth.innerText = FormatHelper.dash(item.width);
   editOrderTeeth.innerText = FormatHelper.dash(item.number_of_teeth);
-  editOrderUnitPrice.innerText = FormatHelper.money(item.unit_price);
+  editOrderUnitPrice.innerText = FormatHelper.money(item.unit_price, item.currency);
 
   editOrderQuantityInput.value = item.quantity || 1;
 
@@ -638,7 +642,7 @@ function updateEditOrderTotalPrice() {
   const quantity = Number(editOrderQuantityInput.value || 0);
   const total = unitPrice * quantity;
 
-  editOrderTotalPrice.innerText = FormatHelper.money(total);
+  editOrderTotalPrice.innerText = FormatHelper.money(total, selectedOrderItem.currency);
 }
 
 function showEditOrderItemMessage(message, type = "success") {

@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const pool = require("../db");
 const VerificationService = require("./VerificationService");
+const { validatePassword } = require("../utils/passwordPolicy");
 
 class ManagerService {
   static formatManager(manager) {
@@ -140,11 +141,7 @@ class ManagerService {
       throw error;
     }
 
-    if (newPassword.length < 4) {
-      const error = new Error("New password must be at least 4 characters.");
-      error.statusCode = 400;
-      throw error;
-    }
+    validatePassword(newPassword);
 
     const manager = await this.getManagerById(user.id);
 

@@ -94,7 +94,7 @@
 
             <div class="filter-group">
               <label for="phoneInput">Phone</label>
-              <input type="text" id="phoneInput" />
+              <input type="tel" id="phoneInput" data-international-phone="true" />
             </div>
 
             <div class="filter-group">
@@ -184,6 +184,8 @@
     </section>
   </main>
 
+  <script src="./js/core/PhoneInputManager.js"></script>
   <script type="module" src="./js/pages/EditManagerPage.js"></script>
+  <script src="./js/core/I18nManager.js"></script>
 </body>
 </html>

@@ -181,12 +181,12 @@ addCustomerForm.addEventListener("submit", async (event) => {
     name: addNameInput.value.trim(),
     surname: addSurnameInput.value.trim(),
     email: addEmailInput.value.trim(),
-    phone: addPhoneInput.value.trim(),
+    phone: PhoneInput.getValue(addPhoneInput),
     username: addUsernameInput.value.trim(),
     password: addPasswordInput.value.trim(),
 
     companyName: addCompanyNameInput.value.trim(),
-    companyPhone: addCompanyPhoneInput.value.trim(),
+    companyPhone: PhoneInput.getValue(addCompanyPhoneInput),
     address: addAddressInput.value.trim(),
     country: addCountryInput.value.trim(),
     city: addCityInput.value.trim(),
@@ -201,6 +201,14 @@ addCustomerForm.addEventListener("submit", async (event) => {
 
   if (!customerData.username || !customerData.password) {
     showAddCustomerMessage("Username and password are required.", "error");
+    return;
+  }
+
+  if (customerData.password.length < 12) {
+    showAddCustomerMessage(
+      "Password must be at least 12 characters.",
+      "error"
+    );
     return;
   }
 

@@ -30,6 +30,11 @@ const productCountInfo = document.getElementById("productCountInfo");
 const typeSort = document.getElementById("typeSort");
 
 const exportProductsBtn = document.getElementById("exportProductsBtn");
+const importProductsBtn = document.getElementById("importProductsBtn");
+const importProductsInput = document.getElementById("importProductsInput");
+const importProductsResult = document.getElementById("importProductsResult");
+const importProductsSummary = document.getElementById("importProductsSummary");
+const downloadImportReportBtn = document.getElementById("downloadImportReportBtn");
 
 const sendProductUpdatesBtn = document.getElementById("sendProductUpdatesBtn");
 const sendProductUpdatesModal = document.getElementById("sendProductUpdatesModal");
@@ -48,7 +53,6 @@ const materialFilter = document.getElementById("materialFilter");
 const typeFilter = document.getElementById("typeFilter");
 const materialFilterOptions = document.getElementById("materialFilterOptions");
 const typeFilterOptions = document.getElementById("typeFilterOptions");
-const applyProductFiltersBtn = document.getElementById("applyProductFiltersBtn");
 const clearProductFiltersBtn = document.getElementById("clearProductFiltersBtn");
 
 const productForm = document.getElementById("productForm");
@@ -61,6 +65,7 @@ const nodalLengthInput = document.getElementById("nodalLength");
 const widthInput = document.getElementById("width");
 const numberOfTeethInput = document.getElementById("numberOfTeeth");
 const unitPriceInput = document.getElementById("unitPrice");
+const currencyInput = document.getElementById("currency");
 
 const editProductModal = document.getElementById("editProductModal");
 const closeEditProductModalBtn = document.getElementById("closeEditProductModalBtn");
@@ -77,15 +82,96 @@ const editNodalLength = document.getElementById("editNodalLength");
 const editWidth = document.getElementById("editWidth");
 const editNumberOfTeeth = document.getElementById("editNumberOfTeeth");
 const editUnitPrice = document.getElementById("editUnitPrice");
+const editCurrency = document.getElementById("editCurrency");
 /* =========================
    STATE
 ========================= */
 let allProducts = [];
 let filteredProducts = [];
 let allCustomers = [];
+let lastImportReport = null;
 
 let currentPage = 1;
 const PRODUCTS_PER_PAGE = 25;
+
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.addEventListener("load", () => resolve(String(reader.result).split(",")[1] || ""));
+    reader.addEventListener("error", () => reject(new Error("Excel file could not be read.")));
+    reader.readAsDataURL(file);
+  });
+}
+
+function safeCsvCell(value) {
+  let text = String(value ?? "");
+  if (/^[=+\-@]/.test(text)) text = `'${text}`;
+  return `"${text.replaceAll('"', '""')}"`;
+}
+
+function downloadImportReport(report) {
+  const headers = [
+    "Row", "Status", "Message", "Material", "Type", "Model", "Angle",
+    "Nodal Length", "Width", "Number of Teeth", "Unit Price", "Currency"
+  ];
+  const rows = report.results.map((item) => [
+    item.rowNumber, item.status, item.message, item.product.material,
+    item.product.type, item.product.model, item.product.angle,
+    item.product.nodalLength, item.product.width, item.product.numberOfTeeth,
+    item.product.unitPrice, item.product.currency
+  ]);
+  const csv = `\uFEFF${[headers, ...rows].map((row) => row.map(safeCsvCell).join(",")).join("\r\n")}`;
+  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `product-import-report-${new Date().toISOString().slice(0, 10)}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+importProductsBtn.addEventListener("click", () => importProductsInput.click());
+downloadImportReportBtn.addEventListener("click", () => {
+  if (lastImportReport) downloadImportReport(lastImportReport);
+});
+
+importProductsInput.addEventListener("change", async () => {
+  const file = importProductsInput.files?.[0];
+  importProductsInput.value = "";
+  if (!file) return;
+  if (!/\.xlsx$/i.test(file.name)) {
+    alert("Only .xlsx files can be imported.");
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    alert("Excel file must be smaller than 10 MB.");
+    return;
+  }
+  if (!confirm(`Import products from ${file.name}?`)) return;
+
+  importProductsBtn.disabled = true;
+  importProductsBtn.innerText = "Importing...";
+  importProductsResult.classList.remove("hidden", "error");
+  importProductsSummary.innerText = "Reading and validating Excel rows...";
+  downloadImportReportBtn.classList.add("hidden");
+
+  try {
+    const dataBase64 = await readFileAsBase64(file);
+    lastImportReport = await ProductApi.importProducts(file.name, dataBase64);
+    importProductsSummary.innerText =
+      `${lastImportReport.totalRows} rows processed: ` +
+      `${lastImportReport.importedCount} imported, ${lastImportReport.failedCount} failed.`;
+    if (lastImportReport.failedCount) importProductsResult.classList.add("error");
+    downloadImportReportBtn.classList.remove("hidden");
+    await loadProducts();
+  } catch (error) {
+    lastImportReport = null;
+    importProductsResult.classList.add("error");
+    importProductsSummary.innerText = error.message;
+  } finally {
+    importProductsBtn.disabled = false;
+    importProductsBtn.innerText = "Import Excel";
+  }
+});
 
 /* =========================
    INIT
@@ -227,8 +313,6 @@ paginationContainer.addEventListener("click", (event) => {
 /* =========================
    FILTERS
 ========================= */
-applyProductFiltersBtn.addEventListener("click", applyProductFilters);
-
 clearProductFiltersBtn.addEventListener("click", () => {
   productSearchInput.value = "";
   materialFilter.value = "";
@@ -371,7 +455,8 @@ function getProductFormData() {
     nodalLength: Number(nodalLengthInput.value),
     width: Number(widthInput.value),
     numberOfTeeth: Number(numberOfTeethInput.value),
-    unitPrice: Number(unitPriceInput.value)
+    unitPrice: Number(unitPriceInput.value),
+    currency: currencyInput.value
   };
 }
 
@@ -390,6 +475,7 @@ function openEditProductModal(product) {
   editWidth.value = product.width ?? "";
   editNumberOfTeeth.value = product.numberOfTeeth ?? "";
   editUnitPrice.value = product.unitPrice ?? "";
+  editCurrency.value = product.currency || "USD";
 
   editProductMessage.innerText = "";
   editProductMessage.className = "edit-product-message";
@@ -465,7 +551,8 @@ function getEditProductFormData() {
     nodalLength: Number(editNodalLength.value),
     width: Number(editWidth.value),
     numberOfTeeth: Number(editNumberOfTeeth.value),
-    unitPrice: Number(editUnitPrice.value)
+    unitPrice: Number(editUnitPrice.value),
+    currency: editCurrency.value
   };
 }
 

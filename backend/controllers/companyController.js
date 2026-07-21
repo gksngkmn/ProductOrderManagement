@@ -10,7 +10,7 @@ function handleError(res, error, logMessage) {
 
 async function getCompanies(req, res) {
   try {
-    const companies = await CompanyService.getCompanies();
+    const companies = await CompanyService.getCompanies(req.user);
     return res.json(companies);
   } catch (error) {
     return handleError(res, error, "Get companies error:");
@@ -19,7 +19,7 @@ async function getCompanies(req, res) {
 
 async function createCompany(req, res) {
   try {
-    const company = await CompanyService.createCompany(req.body);
+    const company = await CompanyService.createCompany(req.user, req.body);
     return res.status(201).json(company);
   } catch (error) {
     return handleError(res, error, "Create company error:");
@@ -119,23 +119,11 @@ async function verifyAndUpdateCustomerPassword(req, res) {
   }
 }
 
-async function updateCustomerPassword(req, res) {
-  try {
-    const { id } = req.params;
-    const { newPassword } = req.body;
-
-    const result = await CompanyService.updateCustomerPassword(id, newPassword);
-    return res.json(result);
-  } catch (error) {
-    return handleError(res, error, "Update customer password error:");
-  }
-}
-
 async function deleteCompany(req, res) {
   try {
     const { id } = req.params;
 
-    const result = await CompanyService.deleteCompany(id);
+    const result = await CompanyService.deleteCompany(id, req.user);
     return res.json(result);
   } catch (error) {
     return handleError(res, error, "Delete company error:");
@@ -169,6 +157,5 @@ module.exports = {
   requestCustomerPasswordUpdateCode,
   verifyAndUpdateCustomerPassword,
 
-  updateCustomerPassword,
   deleteCompany
 };

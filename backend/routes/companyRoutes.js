@@ -3,6 +3,10 @@ const router = express.Router();
 
 const authMiddleware = require("../middleware/authMiddleware");
 const requireRole = require("../middleware/roleMiddleware");
+const {
+  verificationRequestRateLimiter,
+  verificationAttemptRateLimiter
+} = require("../middleware/rateLimitMiddleware");
 
 const {
   getCompanies,
@@ -13,7 +17,6 @@ const {
   verifyAndUpdateCompany,
   requestCustomerPasswordUpdateCode,
   verifyAndUpdateCustomerPassword,
-  updateCustomerPassword,
   deleteCompany
 } = require("../controllers/companyController");
 
@@ -34,12 +37,14 @@ router.post("/", authMiddleware, requireRole("manager"), createCompany);
 router.post(
   "/:id/request-update-code",
   authMiddleware,
+  verificationRequestRateLimiter,
   requestCompanyUpdateCode
 );
 
 router.put(
   "/:id/verify-update",
   authMiddleware,
+  verificationAttemptRateLimiter,
   verifyAndUpdateCompany
 );
 
@@ -58,6 +63,7 @@ router.post(
   "/:id/request-password-code",
   authMiddleware,
   requireRole("manager"),
+  verificationRequestRateLimiter,
   requestCustomerPasswordUpdateCode
 );
 
@@ -65,14 +71,8 @@ router.put(
   "/:id/verify-password",
   authMiddleware,
   requireRole("manager"),
+  verificationAttemptRateLimiter,
   verifyAndUpdateCustomerPassword
-);
-
-router.put(
-  "/:id/password",
-  authMiddleware,
-  requireRole("manager"),
-  updateCustomerPassword
 );
 
 router.delete(

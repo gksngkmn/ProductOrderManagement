@@ -12,6 +12,13 @@ class ProductApi {
     });
   }
 
+  static importProducts(fileName, dataBase64) {
+    return ClientApi.request("/products/import", {
+      method: "POST",
+      body: JSON.stringify({ fileName, dataBase64 })
+    });
+  }
+
   static updateProduct(id, productData) {
     return ClientApi.request(`/products/${id}`, {
       method: "PUT",

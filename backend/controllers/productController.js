@@ -15,7 +15,7 @@ function handleError(res, error, logMessage) {
 
 async function getProducts(req, res) {
   try {
-    const products = await ProductService.getProducts();
+    const products = await ProductService.getProducts(req.user);
     return res.json(products);
   } catch (error) {
     return handleError(res, error, "Get products error:");
@@ -24,7 +24,7 @@ async function getProducts(req, res) {
 
 async function createProduct(req, res) {
   try {
-    const product = await ProductService.createProduct(req.body);
+    const product = await ProductService.createProduct(req.user, req.body);
 
     /*
       Product creation does NOT send automatic emails anymore.
@@ -38,12 +38,21 @@ async function createProduct(req, res) {
   }
 }
 
+async function importProducts(req, res) {
+  try {
+    const report = await ProductService.importProducts(req.user, req.body);
+    return res.json(report);
+  } catch (error) {
+    return handleError(res, error, "Import products error:");
+  }
+}
+
 async function sendProductUpdates(req, res) {
   try {
     const { period, startDate, endDate } = req.body;
 
     const { products, periodLabel } =
-      await ProductService.getProductsForUpdateMail({
+      await ProductService.getProductsForUpdateMail(req.user, {
         period,
         startDate,
         endDate,
@@ -55,7 +64,7 @@ async function sendProductUpdates(req, res) {
       });
     }
 
-    const customers = await ProductService.getCustomersForProductMail();
+    const customers = await ProductService.getCustomersForProductMail(req.user);
 
     if (!customers.length) {
       return res.status(400).json({
@@ -112,7 +121,7 @@ async function sendProductUpdates(req, res) {
 async function updateProduct(req, res) {
   try {
     const { id } = req.params;
-    const product = await ProductService.updateProduct(id, req.body);
+    const product = await ProductService.updateProduct(req.user, id, req.body);
     return res.json(product);
   } catch (error) {
     return handleError(res, error, "Update product error:");
@@ -122,7 +131,7 @@ async function updateProduct(req, res) {
 async function deleteProduct(req, res) {
   try {
     const { id } = req.params;
-    const result = await ProductService.deleteProduct(id);
+    const result = await ProductService.deleteProduct(req.user, id);
     return res.json(result);
   } catch (error) {
     return handleError(res, error, "Delete product error:");
@@ -132,6 +141,7 @@ async function deleteProduct(req, res) {
 module.exports = {
   getProducts,
   createProduct,
+  importProducts,
   sendProductUpdates,
   updateProduct,
   deleteProduct,

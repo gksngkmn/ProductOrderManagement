@@ -2,13 +2,16 @@ import DomHelper from "../helpers/DomHelper.js";
 import FormatHelper from "../helpers/FormatHelper.js";
 
 class OrderTable {
-  static calculateOrderTotal(order) {
-    if (!order.items?.length) return 0;
-
-    return order.items.reduce(
-      (sum, item) => sum + Number(item.total_price || 0),
-      0
-    );
+  static formatOrderTotal(order) {
+    if (!order.items?.length) return FormatHelper.money(0, "USD");
+    const totals = new Map();
+    for (const item of order.items) {
+      const currency = item.currency || "USD";
+      totals.set(currency, (totals.get(currency) || 0) + Number(item.total_price || 0));
+    }
+    return [...totals.entries()]
+      .map(([currency, total]) => FormatHelper.money(total, currency))
+      .join(" + ");
   }
 
   static getDisplayStatus(status) {
@@ -26,7 +29,7 @@ class OrderTable {
 
     return orders
       .map((order) => {
-        const total = this.calculateOrderTotal(order);
+        const total = this.formatOrderTotal(order);
         const itemCount = order.items?.length || 0;
         const isSelected = String(order.id) === String(selectedOrderId);
 
@@ -42,7 +45,7 @@ class OrderTable {
             <td>${DomHelper.escapeHtml(this.getDisplayStatus(order.status))}</td>
             <td>${FormatHelper.date(order.submission_date)}</td>
             <td>${itemCount}</td>
-            <td>${FormatHelper.money(total)}</td>
+            <td>${total}</td>
           </tr>
         `;
       })
@@ -54,7 +57,7 @@ class OrderTable {
       return DomHelper.emptyMessage("No order selected.");
     }
 
-    const total = this.calculateOrderTotal(order);
+    const total = this.formatOrderTotal(order);
 
     const itemsHtml = order.items?.length
       ? `
@@ -88,8 +91,8 @@ class OrderTable {
                     <td>${FormatHelper.dash(item.width)}</td>
                     <td>${FormatHelper.dash(item.number_of_teeth)}</td>
                     <td>${FormatHelper.dash(item.quantity)}</td>
-                    <td>${FormatHelper.money(item.unit_price)}</td>
-                    <td>${FormatHelper.money(item.total_price)}</td>
+                    <td>${FormatHelper.money(item.unit_price, item.currency)}</td>
+                    <td>${FormatHelper.money(item.total_price, item.currency)}</td>
                   </tr>
                 `
                 )
@@ -106,13 +109,13 @@ class OrderTable {
         <p><strong>Status:</strong> ${DomHelper.escapeHtml(this.getDisplayStatus(order.status))}</p>
         <p><strong>Submission Date:</strong> ${FormatHelper.date(order.submission_date)}</p>
         <p><strong>Items:</strong> ${order.items?.length || 0}</p>
-        <p><strong>Total:</strong> ${FormatHelper.money(total)}</p>
+        <p><strong>Total:</strong> ${total}</p>
       </div>
 
       ${itemsHtml}
 
       <div class="order-total-box">
-        Total Price: ${FormatHelper.money(total)}
+        Total Price: ${total}
       </div>
     `;
   }
@@ -124,7 +127,7 @@ class OrderTable {
 
     return orders
       .map((order) => {
-        const total = this.calculateOrderTotal(order);
+        const total = this.formatOrderTotal(order);
         const statusClass =
           order.status === "Submitted" ? "badge success" : "badge warning";
 
@@ -136,8 +139,8 @@ class OrderTable {
                   <p><strong>${DomHelper.escapeHtml(item.model)}</strong></p>
                   <p>${DomHelper.escapeHtml(item.material)}</p>
                   <p>Qty: ${FormatHelper.dash(item.quantity)}</p>
-                  <p>Unit: ${FormatHelper.money(item.unit_price)}</p>
-                  <p>Total: ${FormatHelper.money(item.total_price)}</p>
+                  <p>Unit: ${FormatHelper.money(item.unit_price, item.currency)}</p>
+                  <p>Total: ${FormatHelper.money(item.total_price, item.currency)}</p>
                 </div>
               `
               )
@@ -169,7 +172,7 @@ class OrderTable {
             </div>
 
             <div class="order-total-box">
-              Total Price: ${FormatHelper.money(total)}
+              Total Price: ${total}
             </div>
           </article>
         `;

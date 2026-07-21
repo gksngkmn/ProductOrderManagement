@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Süper Yönetici Paneli</title>
+    <link rel="stylesheet" href="./css/base.css" />
+    <link rel="stylesheet" href="./css/layout.css" />
+    <link rel="stylesheet" href="./css/components.css" />
+    <style>
+        /* Süper Admin Özel Stilleri */
+        html { display: none; } /* Güvenlik parlamasını önlemek için */
+        .sa-layout { display: flex; height: 100vh; background: #f4f6f9; }
+        .sa-sidebar { width: 350px; background: #fff; border-right: 1px solid #ddd; overflow-y: auto; padding: 20px; }
+        .sa-main { flex: 1; padding: 30px; overflow-y: auto; }
+        .manager-card { padding: 15px; border: 1px solid #eee; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .manager-card:hover { background: #e0f2fe; border-color: #bae6fd; }
+        .manager-card h4 { margin: 0 0 5px 0; color: #0f172a; }
+        .manager-card p { margin: 0; font-size: 13px; color: #64748b; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .customer-row { background: #fff; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px; display: grid; grid-template-columns: 1fr 1fr 1fr auto; align-items: center; }
+        .god-mode-badge { display: inline-block; background: #dc2626; color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-bottom: 15px; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <header class="manager-topbar">
+        <div class="manager-title-area">
+            <h1>Süper Yönetici Paneli</h1>
+            <p>Hoş geldin, <span id="adminName">Admin</span></p>
+        </div>
+        <div class="manager-top-actions">
+            <button id="btnLogout" class="secondary" type="button">Sistemden Çık</button>
+        </div>
+    </header>
+
+    <div class="sa-layout">
+        <aside class="sa-sidebar">
+            <h2>Yöneticiler (Managers)</h2>
+            <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Düzenlemek için bir yönetici seçin.</p>
+            <button id="btnShowManagerCreate" type="button" style="margin-bottom: 15px; width: 100%;">Yeni Manager Oluştur</button>
+            <div id="managerListContainer">
+                Yükleniyor...
+            </div>
+        </aside>
+
+        <main class="sa-main">
+            <div id="welcomeMessage">
+                <h2>Yönetici Detayları</h2>
+                <p>İşlem yapmak için sol menüden bir yönetici (Manager) seçin.</p>
+
+                <form id="managerCreateForm" class="card hidden" style="margin-top: 25px;">
+                    <h3>Yeni Manager Oluştur</h3>
+                    <div class="form-grid">
+                        <div class="filter-group"><label>Kullanıcı Adı</label><input id="new_m_username" required></div>
+                        <div class="filter-group"><label>Parola (min. 12)</label><input id="new_m_password" type="password" minlength="12" required></div>
+                        <div class="filter-group"><label>Ad</label><input id="new_m_name" required></div>
+                        <div class="filter-group"><label>Soyad</label><input id="new_m_surname" required></div>
+                        <div class="filter-group"><label>Email</label><input id="new_m_email" type="email" required></div>
+                        <div class="filter-group"><label>Telefon</label><input type="tel" id="new_m_phone" data-international-phone="true" required></div>
+                    </div>
+                    <button type="submit">Manager Oluştur</button>
+                </form>
+            </div>
+
+            <div id="managerDetailPanel" class="hidden">
+                <span class="god-mode-badge"><i class="fas fa-bolt"></i> GOD MODE AKTİF</span>
+                <h2 style="margin-bottom: 20px;" id="selectedManagerTitle">-</h2>
+
+                <form id="managerEditForm" class="card" style="margin-bottom: 30px;">
+                    <input type="hidden" id="editManagerId">
+                    <div class="form-grid">
+                        <div class="filter-group"><label>Kullanıcı Adı</label><input type="text" id="m_username" required></div>
+                        <div class="filter-group"><label>Email</label><input type="email" id="m_email"></div>
+                        <div class="filter-group"><label>Ad</label><input type="text" id="m_name"></div>
+                        <div class="filter-group"><label>Soyad</label><input type="text" id="m_surname"></div>
+                        <div class="filter-group"><label>Telefon</label><input type="tel" id="m_phone" data-international-phone="true"></div>
+                    </div>
+                    <button type="submit">Yöneticiyi Sınırsız Güncelle</button>
+                </form>
+
+                <form id="managerDeleteForm" class="card" style="margin-bottom: 30px; border-color: #dc2626;">
+                    <h3>Manager Silme / Veri Transferi</h3>
+                    <p>Bağlı customer veya ürün varsa silmeden önce başka bir manager seçilmelidir.</p>
+                    <div class="filter-group">
+                        <label>Customer ve ürünlerin aktarılacağı manager (opsiyonel)</label>
+                        <select id="transferManagerId">
+                            <option value="">Transfer yok</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="danger" style="margin-top: 12px;">Manager'ı Sil</button>
+                </form>
+
+                <button id="btnShowCustomerCreate" type="button" style="margin-bottom: 15px;">Yeni Customer Ekle</button>
+                <form id="customerCreateForm" class="card hidden" style="margin-bottom: 30px;">
+                    <h3>Bu Manager'a Customer Ekle</h3>
+                    <div class="form-grid">
+                        <div class="filter-group"><label>Kullanıcı Adı</label><input id="new_c_username" required></div>
+                        <div class="filter-group"><label>Parola (min. 12)</label><input id="new_c_password" type="password" minlength="12" required></div>
+                        <div class="filter-group"><label>Ad</label><input id="new_c_name" required></div>
+                        <div class="filter-group"><label>Soyad</label><input id="new_c_surname" required></div>
+                        <div class="filter-group"><label>Email</label><input id="new_c_email" type="email" required></div>
+                        <div class="filter-group"><label>Telefon</label><input type="tel" id="new_c_phone" data-international-phone="true" required></div>
+                        <div class="filter-group"><label>Şirket</label><input id="new_c_company" required></div>
+                        <div class="filter-group"><label>Şirket Telefonu</label><input type="tel" id="new_c_company_phone" data-international-phone="true" required></div>
+                        <div class="filter-group"><label>Adres</label><input id="new_c_address" required></div>
+                        <div class="filter-group"><label>Ülke</label><input id="new_c_country" required></div>
+                        <div class="filter-group"><label>Şehir</label><input id="new_c_city" required></div>
+                    </div>
+                    <button type="submit">Customer Oluştur</button>
+                    <button id="btnCancelCustomerCreate" type="button" class="secondary">İptal</button>
+                </form>
+
+                <h3>Bu Yöneticiye Bağlı Müşteriler</h3>
+                <div id="customerListContainer" style="margin-top: 15px;">
+                    </div>
+            </div>
+
+            <div id="customerEditPanel" class="card hidden" style="margin-top: 30px; border: 2px solid #3b82f6;">
+                <h3>Müşteri Sınırsız Düzenleme (ID: <span id="c_id_label"></span>)</h3>
+                <form id="customerEditForm">
+                    <input type="hidden" id="editCustomerId">
+                    <div class="form-grid">
+                        <div class="filter-group"><label>Şirket Adı</label><input type="text" id="c_company" required></div>
+                        <div class="filter-group"><label>Email</label><input type="email" id="c_email"></div>
+                        <div class="filter-group"><label>Yetkili Ad</label><input type="text" id="c_name"></div>
+                        <div class="filter-group"><label>Yetkili Soyad</label><input type="text" id="c_surname"></div>
+                        <div class="filter-group"><label>Ülke</label><input type="text" id="c_country"></div>
+                        <div class="filter-group"><label>Şehir</label><input type="text" id="c_city"></div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit">Müşteriyi Ez ve Kaydet</button>
+                        <button type="button" class="secondary" id="btnCancelCustomerEdit">İptal</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script src="./js/core/PhoneInputManager.js"></script>
+    <script type="module" src="./js/pages/SuperadminPage.js"></script>
+    <script src="./js/core/I18nManager.js"></script>
+</body>
+</html>

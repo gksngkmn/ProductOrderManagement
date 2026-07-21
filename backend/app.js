@@ -8,11 +8,31 @@ const companyRoutes = require("./routes/companyRoutes");
 const productRoutes = require("./routes/productRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const managerRoutes = require("./routes/managerRoutes");
+const superadminRoutes = require("./routes/superadminRoutes");
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+const allowedOrigins = new Set(
+  (process.env.CORS_ORIGINS || "http://localhost:3000,http://127.0.0.1:3000,http://localhost:5500,http://127.0.0.1:5500")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+);
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.has(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Origin is not allowed by CORS."));
+  }
+}));
+app.use(express.json({ limit: "15mb" }));
+
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
+});
 
 
 /* =========================
@@ -23,6 +43,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/companies", companyRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/manager", managerRoutes);
+app.use("/api/superadmin", superadminRoutes);
 
 /* =========================
    FRONTEND STATIC FILES
@@ -53,6 +74,14 @@ app.get("/:page", (req, res, next) => {
   }
 
   return next();
+});
+
+app.use((error, req, res, next) => {
+  if (error.message === "Origin is not allowed by CORS.") {
+    return res.status(403).json({ message: "Origin is not allowed." });
+  }
+
+  return next(error);
 });
 
 module.exports = app;

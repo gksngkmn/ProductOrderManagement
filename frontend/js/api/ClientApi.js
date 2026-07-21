@@ -1,7 +1,7 @@
 import AuthManager from "../core/AuthManager.js";
 
 class ClientApi {
-  static BASE_URL = "http://localhost:3000/api";
+  static BASE_URL = "/api";
 
   static async request(endpoint, options = {}) {
     const token = AuthManager.getToken();

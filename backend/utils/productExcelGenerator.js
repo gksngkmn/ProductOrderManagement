@@ -35,6 +35,7 @@ async function generateProductUpdatesExcel({ products = [], periodLabel }) {
     "Width",
     "Number of Teeth",
     "Unit Price",
+    "Currency",
   ]);
 
   headerRow.font = {
@@ -65,6 +66,7 @@ async function generateProductUpdatesExcel({ products = [], periodLabel }) {
         safeValue(product.width),
         safeValue(product.number_of_teeth ?? product.numberOfTeeth),
         safeValue(product.unit_price ?? product.unitPrice),
+        safeValue(product.currency || "USD"),
       ]);
     });
   }

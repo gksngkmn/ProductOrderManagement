@@ -3,12 +3,24 @@ const jwt = require("jsonwebtoken");
 const pool = require("../db");
 
 const VerificationService = require("./VerificationService");
+const { validatePassword } = require("../utils/passwordPolicy");
 
 const {
   sendCustomerPasswordChangedMailToManager
 } = require("../utils/mailService");
 
 class AuthService {
+  static async getManagerEmailForCustomer(customer) {
+    if (!customer?.manager_id) return null;
+
+    const result = await pool.query(
+      "SELECT email FROM manager_users WHERE id = $1",
+      [customer.manager_id]
+    );
+
+    return result.rows[0]?.email || null;
+  }
+
   static generateToken(payload) {
     return jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "1d"
@@ -237,11 +249,7 @@ class AuthService {
       throw error;
     }
 
-    if (newPassword.length < 4) {
-      const error = new Error("New password must be at least 4 characters.");
-      error.statusCode = 400;
-      throw error;
-    }
+    validatePassword(newPassword);
 
     const company = await this.getCompanyById(companyId);
 
@@ -276,8 +284,10 @@ class AuthService {
     );
 
     try {
+      const managerEmail = await this.getManagerEmailForCustomer(company);
       await sendCustomerPasswordChangedMailToManager({
-        customer: this.formatCustomer(company)
+        customer: this.formatCustomer(company),
+        managerEmail
       });
     } catch (mailError) {
       console.log("Password change notification mail could not be sent:", mailError.message);
@@ -292,17 +302,25 @@ class AuthService {
      FORGOT PASSWORD
      PUBLIC ROUTES
   ========================= */
-  static async findCustomerByIdentifier(identifier) {
+  static async findAccountByIdentifier(identifier, accountType = "customer") {
     if (!identifier) {
       const error = new Error("Email or username is required.");
       error.statusCode = 400;
       throw error;
     }
 
+    if (!['manager', 'customer'].includes(accountType)) {
+      const error = new Error("Account type must be manager or customer.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const table = accountType === "manager" ? "manager_users" : "companies";
+
     const result = await pool.query(
       `
       SELECT *
-      FROM companies
+      FROM ${table}
       WHERE email = $1
       OR username = $1
       `,
@@ -310,15 +328,19 @@ class AuthService {
     );
 
     if (result.rows.length === 0) {
-      const error = new Error("Customer not found.");
+      const error = new Error("Account not found.");
       error.statusCode = 404;
       throw error;
     }
 
-    return result.rows[0];
+    return { ...result.rows[0], accountType };
   }
 
-  static async requestForgotPasswordCode(identifier, deliveryMethod = "email") {
+  static async requestForgotPasswordCode(
+    identifier,
+    deliveryMethod = "email",
+    accountType = "customer"
+  ) {
     const allowedMethods = ["email", "sms"];
 
     if (!allowedMethods.includes(deliveryMethod)) {
@@ -327,60 +349,79 @@ class AuthService {
       throw error;
     }
 
-    const company = await this.findCustomerByIdentifier(identifier);
+    let account;
 
-    if (deliveryMethod === "email" && !company.email) {
-      const error = new Error("Customer email address is missing.");
-      error.statusCode = 400;
+    try {
+      account = await this.findAccountByIdentifier(identifier, accountType);
+    } catch (error) {
+      if (error.statusCode === 404) {
+        return {
+          message: "If the account exists, a verification code has been sent."
+        };
+      }
       throw error;
     }
 
-    if (deliveryMethod === "sms" && !company.phone) {
-      const error = new Error("Customer phone number is missing.");
-      error.statusCode = 400;
-      throw error;
+    if (deliveryMethod === "email" && !account.email) {
+      return { message: "If the account exists, a verification code has been sent." };
+    }
+
+    if (deliveryMethod === "sms" && !account.phone) {
+      return { message: "If the account exists, a verification code has been sent." };
     }
 
     await VerificationService.createCode({
-      companyId: company.id,
-      email: company.email,
-      phone: company.phone,
-      name: company.name,
-      purpose: "forgot_password",
+      companyId: accountType === "customer" ? account.id : null,
+      email: account.email,
+      phone: account.phone,
+      name: account.name || account.username,
+      purpose: `forgot_password_${accountType}`,
       reason: "Forgot password verification",
       deliveryMethod
     });
 
     return {
-      message: `Forgot password verification code sent by ${deliveryMethod}.`
+      message: "If the account exists, a verification code has been sent."
     };
   }
 
-  static async resetForgotPassword(identifier, code, newPassword) {
+  static async resetForgotPassword(
+    identifier,
+    code,
+    newPassword,
+    accountType = "customer"
+  ) {
     if (!identifier || !code || !newPassword) {
       const error = new Error("Identifier, code and new password are required.");
       error.statusCode = 400;
       throw error;
     }
 
-    if (newPassword.length < 4) {
-      const error = new Error("New password must be at least 4 characters.");
-      error.statusCode = 400;
+    validatePassword(newPassword);
+
+    let account;
+
+    try {
+      account = await this.findAccountByIdentifier(identifier, accountType);
+    } catch (error) {
+      if (error.statusCode === 404) {
+        const invalidCodeError = new Error("Invalid or expired verification code.");
+        invalidCodeError.statusCode = 400;
+        throw invalidCodeError;
+      }
       throw error;
     }
 
-    const company = await this.findCustomerByIdentifier(identifier);
-
     await VerificationService.verifyCode({
-      companyId: company.id,
-      email: company.email,
-      purpose: "forgot_password",
+      companyId: accountType === "customer" ? account.id : null,
+      email: account.email,
+      purpose: `forgot_password_${accountType}`,
       code
     });
 
     const isSamePassword = await bcrypt.compare(
       newPassword,
-      company.password_hash
+      account.password_hash
     );
 
     if (isSamePassword) {
@@ -391,23 +432,34 @@ class AuthService {
 
     const newPasswordHash = await bcrypt.hash(newPassword, 10);
 
-    await pool.query(
-      `
-      UPDATE companies
-      SET password_hash = $1,
-          reset_code_hash = NULL,
-          reset_code_expires = NULL
-      WHERE id = $2
-      `,
-      [newPasswordHash, company.id]
-    );
+    if (accountType === "manager") {
+      await pool.query(
+        "UPDATE manager_users SET password_hash = $1 WHERE id = $2",
+        [newPasswordHash, account.id]
+      );
+    } else {
+      await pool.query(
+        `
+        UPDATE companies
+        SET password_hash = $1,
+            reset_code_hash = NULL,
+            reset_code_expires = NULL
+        WHERE id = $2
+        `,
+        [newPasswordHash, account.id]
+      );
+    }
 
-    try {
-      await sendCustomerPasswordChangedMailToManager({
-        customer: this.formatCustomer(company)
-      });
-    } catch (mailError) {
-      console.log("Forgot password notification mail could not be sent:", mailError.message);
+    if (accountType === "customer") {
+      try {
+        const managerEmail = await this.getManagerEmailForCustomer(account);
+        await sendCustomerPasswordChangedMailToManager({
+          customer: this.formatCustomer(account),
+          managerEmail
+        });
+      } catch (mailError) {
+        console.log("Forgot password notification mail could not be sent:", mailError.message);
+      }
     }
 
     return {

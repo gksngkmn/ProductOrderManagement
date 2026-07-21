@@ -130,7 +130,7 @@
 
         <div class="filter-group">
           <label for="addPhoneInput">Phone</label>
-          <input type="text" id="addPhoneInput" required />
+          <input type="tel" id="addPhoneInput" data-international-phone="true" required />
         </div>
 
         <div class="filter-group">
@@ -154,7 +154,7 @@
 
         <div class="filter-group">
           <label for="addCompanyPhoneInput">Company Phone</label>
-          <input type="text" id="addCompanyPhoneInput" />
+          <input type="tel" id="addCompanyPhoneInput" data-international-phone="true" />
         </div>
 
         <div class="filter-group full-width">
@@ -198,6 +198,8 @@
 </div>
   </main>
 
+  <script src="./js/core/PhoneInputManager.js"></script>
   <script type="module" src="./js/pages/CustomerListPage.js?v=62"></script>
+  <script src="./js/core/I18nManager.js"></script>
 </body>
 </html>

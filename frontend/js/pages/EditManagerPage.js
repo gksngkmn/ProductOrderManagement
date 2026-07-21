@@ -110,7 +110,7 @@ function fillForm() {
   surnameInput.value = manager.surname || "";
   usernameInput.value = manager.username || "";
   emailInput.value = manager.email || "";
-  phoneInput.value = manager.phone || "";
+  PhoneInput.setValue(phoneInput, manager.phone || "");
   roleInput.value = manager.role || "manager";
 }
 
@@ -190,7 +190,7 @@ editManagerForm.addEventListener("submit", async (event) => {
     name: nameInput.value.trim(),
     surname: surnameInput.value.trim(),
     email: emailInput.value.trim(),
-    phone: phoneInput.value.trim(),
+    phone: PhoneInput.getValue(phoneInput),
   };
 
   try {
@@ -270,8 +270,8 @@ passwordForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  if (newPassword.length < 4) {
-    showMessage(passwordVerificationMessage, "Password must be at least 4 characters.", "error");
+  if (newPassword.length < 12) {
+    showMessage(passwordVerificationMessage, "Password must be at least 12 characters.", "error");
     return;
   }
 

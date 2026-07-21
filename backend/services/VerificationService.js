@@ -1,4 +1,5 @@
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 const pool = require("../db");
 
 const {
@@ -11,7 +12,7 @@ const {
 
 class VerificationService {
   static generateCode() {
-    return String(Math.floor(100000 + Math.random() * 900000));
+    return String(crypto.randomInt(100000, 1000000));
   }
 
   static async createCode({
@@ -127,7 +128,7 @@ class VerificationService {
     );
 
     if (result.rows.length === 0) {
-      const error = new Error("No active verification code found.");
+      const error = new Error("Invalid or expired verification code.");
       error.statusCode = 400;
       throw error;
     }
@@ -138,7 +139,7 @@ class VerificationService {
     const expiresAt = new Date(verification.expires_at);
 
     if (now > expiresAt) {
-      const error = new Error("Verification code expired.");
+      const error = new Error("Invalid or expired verification code.");
       error.statusCode = 400;
       throw error;
     }
@@ -146,7 +147,7 @@ class VerificationService {
     const isCorrect = await bcrypt.compare(code, verification.code_hash);
 
     if (!isCorrect) {
-      const error = new Error("Verification code is incorrect.");
+      const error = new Error("Invalid or expired verification code.");
       error.statusCode = 400;
       throw error;
     }
@@ -185,7 +186,7 @@ class VerificationService {
     );
 
     if (result.rows.length === 0) {
-      const error = new Error("No active verification code found.");
+      const error = new Error("Invalid or expired verification code.");
       error.statusCode = 400;
       throw error;
     }
@@ -196,7 +197,7 @@ class VerificationService {
     const expiresAt = new Date(verification.expires_at);
 
     if (now > expiresAt) {
-      const error = new Error("Verification code expired.");
+      const error = new Error("Invalid or expired verification code.");
       error.statusCode = 400;
       throw error;
     }
@@ -204,7 +205,7 @@ class VerificationService {
     const isCorrect = await bcrypt.compare(code, verification.code_hash);
 
     if (!isCorrect) {
-      const error = new Error("Verification code is incorrect.");
+      const error = new Error("Invalid or expired verification code.");
       error.statusCode = 400;
       throw error;
     }

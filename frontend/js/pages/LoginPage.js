@@ -93,7 +93,6 @@ if (
    STATE
 ========================= */
 let mode = "manager";
-let frontendResetCode = null;
 
 /* =========================
    TAB UI
@@ -150,7 +149,20 @@ form.addEventListener("submit", async (e) => {
     loginBtn.disabled = true;
     loginBtn.innerText = "Logging in...";
 
+    // Backend API'sine giriş isteği gönderiliyor
     const data = await AuthApi.login(username, password);
+
+    if (!data?.token || !data?.user) {
+      throw new Error("Invalid server response. Token missing.");
+    }
+
+    if (data.user && data.user.role === "superadmin") {
+      AuthManager.saveSession(data.token, data.user);
+      loginMessage.innerText = "Login successful. Redirecting...";
+      loginMessage.className = "login-message success";
+      window.location.href = "/superadmin.html";
+      return; // Fonksiyonu burada bitir, aşağıdaki manager/customer kontrollerine hiç girmesin.
+    }
 
     if (mode === "manager" && data.user.role !== "manager") {
       throw new Error("Please use customer login.");
@@ -162,18 +174,26 @@ form.addEventListener("submit", async (e) => {
 
     AuthManager.saveSession(data.token, data.user);
 
+    // 4. ADIM: Normal kullanıcıların başarı mesajı ve sayfa yönlendirmeleri
     loginMessage.innerText = "Login successful.";
     loginMessage.className = "login-message success";
 
     if (data.user.role === "manager") {
       window.location.href = "/manager.html";
-    } else {
+    } else if (data.user.role === "customer") {
       window.location.href = "/customer.html";
+    } else {
+      if (loginMessage) {
+        loginMessage.innerText = "Unknown role. Cannot redirect.";
+        loginMessage.className = "login-message error";
+      }
     }
   } catch (error) {
+    // throw edilen veya API'den dönen tüm hatalar buraya düşer
     loginMessage.innerText = error.message;
     loginMessage.className = "login-message error";
   } finally {
+    // İşlem başarılı da olsa başarısız da olsa butonu eski haline getir
     loginBtn.disabled = false;
     loginBtn.innerText = "Login";
   }
@@ -199,7 +219,6 @@ forgotPasswordModal.addEventListener("click", (event) => {
 function openForgotPasswordModal() {
   forgotPasswordModal.classList.remove("hidden");
 
-  frontendResetCode = null;
   forgotPasswordForm.reset();
   resetPasswordArea.classList.add("hidden");
 
@@ -210,7 +229,6 @@ function openForgotPasswordModal() {
 function closeForgotPasswordModal() {
   forgotPasswordModal.classList.add("hidden");
 
-  frontendResetCode = null;
   forgotPasswordForm.reset();
   resetPasswordArea.classList.add("hidden");
 
@@ -220,10 +238,6 @@ function closeForgotPasswordModal() {
 
 function getResetMethod() {
   return document.querySelector('input[name="resetMethod"]:checked')?.value || "email";
-}
-
-function createFrontendVerificationCode() {
-  return String(Math.floor(100000 + Math.random() * 900000));
 }
 
 function showForgotPasswordMessage(message, type = "success") {
@@ -247,16 +261,11 @@ requestResetCodeBtn.addEventListener("click", async () => {
     requestResetCodeBtn.disabled = true;
     requestResetCodeBtn.innerText = "Requesting...";
 
-    /*
-      Backend integration later:
-      await AuthApi.requestPasswordReset(identifier, method);
-    */
-
-    frontendResetCode = createFrontendVerificationCode();
+    await AuthApi.requestForgotPasswordCode(identifier, method, mode);
     resetPasswordArea.classList.remove("hidden");
 
     showForgotPasswordMessage(
-      `Frontend demo: verification code sent by ${method.toUpperCase()}. Test code: ${frontendResetCode}`,
+      "If the account exists, a verification code has been sent.",
       "success"
     );
   } catch (error) {
@@ -278,13 +287,8 @@ forgotPasswordForm.addEventListener("submit", async (event) => {
   const newPassword = newResetPasswordInput.value.trim();
   const confirmPassword = confirmResetPasswordInput.value.trim();
 
-  if (!frontendResetCode) {
-    showForgotPasswordMessage("Please request a verification code first.", "error");
-    return;
-  }
-
-  if (!code || code !== frontendResetCode) {
-    showForgotPasswordMessage("Invalid verification code.", "error");
+  if (!code) {
+    showForgotPasswordMessage("Verification code is required.", "error");
     return;
   }
 
@@ -298,16 +302,13 @@ forgotPasswordForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  if (newPassword.length < 4) {
-    showForgotPasswordMessage("Password must be at least 4 characters.", "error");
+  if (newPassword.length < 12) {
+    showForgotPasswordMessage("Password must be at least 12 characters.", "error");
     return;
   }
 
   try {
-    /*
-      Backend integration later:
-      await AuthApi.resetPassword(identifier, code, newPassword);
-    */
+    await AuthApi.resetForgotPassword(identifier, code, newPassword, mode);
 
     showForgotPasswordMessage(
       "Password reset successfully. You can now login with your new password.",

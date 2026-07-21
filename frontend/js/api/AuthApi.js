@@ -30,17 +30,17 @@ class AuthApi {
   }
 
   // Public forgot password
-  static requestForgotPasswordCode(identifier, deliveryMethod = "email") {
+  static requestForgotPasswordCode(identifier, deliveryMethod = "email", accountType = "customer") {
     return ClientApi.request("/auth/forgot-password/request-code", {
       method: "POST",
-      body: JSON.stringify({ identifier, deliveryMethod }),
+      body: JSON.stringify({ identifier, deliveryMethod, accountType }),
     });
   }
 
-  static resetForgotPassword(identifier, code, newPassword) {
+  static resetForgotPassword(identifier, code, newPassword, accountType = "customer") {
     return ClientApi.request("/auth/forgot-password/reset", {
       method: "POST",
-      body: JSON.stringify({ identifier, code, newPassword }),
+      body: JSON.stringify({ identifier, code, newPassword, accountType }),
     });
   }
 }

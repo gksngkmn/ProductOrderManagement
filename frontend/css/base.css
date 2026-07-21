@@ -121,3 +121,49 @@ strong {
 .text-success {
   color: var(--color-success);
 }
+ .language-selector {
+  padding: 6px 9px;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #334155;
+  font-size: 12px;
+ }
+
+ .language-selector.standalone {
+  position: fixed;
+  top: 10px;
+  right: 12px;
+  z-index: 10000;
+ }
+
+ .logout-language-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+ }
+
+ .language-selector select {
+  width: auto;
+  min-width: 85px;
+  margin-left: 4px;
+  padding: 4px 6px;
+ }
+
+.international-phone-input {
+  display: grid;
+  grid-template-columns: minmax(105px, 0.42fr) minmax(150px, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+
+.international-phone-input .phone-country-code,
+.international-phone-input input {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 520px) {
+  .international-phone-input { grid-template-columns: 1fr; }
+}

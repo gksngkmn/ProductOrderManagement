@@ -7,6 +7,7 @@ const requireRole = require("../middleware/roleMiddleware");
 const {
   getProducts,
   createProduct,
+  importProducts,
   sendProductUpdates,
   updateProduct,
   deleteProduct
@@ -15,6 +16,8 @@ const {
 router.get("/", authMiddleware, getProducts);
 
 router.post("/", authMiddleware, requireRole("manager"), createProduct);
+
+router.post("/import", authMiddleware, requireRole("manager"), importProducts);
 
 /* =========================
    SEND PRODUCT UPDATES

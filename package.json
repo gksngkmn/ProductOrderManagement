@@ -1,66 +1,16 @@
 {
   "name": "productordermanagement",
   "version": "1.0.0",
-  "description": "Product Order Management desktop app",
-  "main": "electron/main.js",
+  "description": "Web-based product and order management application",
   "scripts": {
-    "dev": "concurrently \"cd backend && node server.js\" \"cd frontend && python3 -m http.server 5500\"",
-    "electron": "electron .",
-    "dist:win": "electron-builder --win",
-    "dist:win-portable": "electron-builder --win portable"
+    "start": "node backend/server.js",
+    "dev": "node backend/server.js"
   },
   "keywords": [],
   "author": "Göksun Gökmen",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "concurrently": "^9.2.1",
     "exceljs": "^4.4.0"
-  },
-  "devDependencies": {
-    "electron": "33.0.0",
-    "electron-builder": "25.1.8",
-    "wait-on": "8.0.1"
-  },
-  "build": {
-    "appId": "com.goksungokmen.productordermanagement",
-    "productName": "Product Order Management",
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "electron/**/*",
-      "package.json"
-    ],
-    "extraResources": [
-      {
-        "from": "backend",
-        "to": "backend",
-        "filter": [
-          "**/*",
-          "!node_modules/.cache/**/*"
-        ]
-      },
-      {
-        "from": "frontend",
-        "to": "frontend",
-        "filter": [
-          "**/*"
-        ]
-      }
-    ],
-    "win": {
-      "target": [
-        "nsis",
-        "portable"
-      ],
-      "artifactName": "ProductOrderManagement-${version}-${arch}.${ext}"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
-    }
   }
 }

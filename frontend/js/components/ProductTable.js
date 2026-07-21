@@ -22,7 +22,7 @@ class ProductTable {
             <td>${FormatHelper.dash(product.nodalLength)}</td>
             <td>${FormatHelper.dash(product.width)}</td>
             <td>${FormatHelper.dash(product.numberOfTeeth)}</td>
-            <td>${FormatHelper.money(product.unitPrice)}</td>
+            <td>${FormatHelper.money(product.unitPrice, product.currency)}</td>
             <td class="actions-cell">
               <button
                 class="editProductBtn secondary"
@@ -66,7 +66,7 @@ class ProductTable {
             <td>${FormatHelper.dash(product.nodalLength)}</td>
             <td>${FormatHelper.dash(product.width)}</td>
             <td>${FormatHelper.dash(product.numberOfTeeth)}</td>
-            <td>${FormatHelper.money(product.unitPrice)}</td>
+            <td>${FormatHelper.money(product.unitPrice, product.currency)}</td>
             <td>
               <input
                 class="quantity-input"

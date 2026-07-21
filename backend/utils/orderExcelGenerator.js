@@ -96,6 +96,7 @@ async function generateOrderExcel({ customer, order, items }) {
     "Quantity",
     "Unit Price",
     "Total Price",
+    "Currency",
   ]);
 
   headerRow.font = {
@@ -145,6 +146,7 @@ async function generateOrderExcel({ customer, order, items }) {
         safeValue(item.quantity),
         safeValue(item.unit_price),
         safeValue(item.total_price),
+        safeValue(item.currency || "USD"),
       ]);
     });
   }

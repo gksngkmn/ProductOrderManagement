@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const pool = require("../db");
 const VerificationService = require("./VerificationService");
+const { validatePassword } = require("../utils/passwordPolicy");
 
 const {
   sendCustomerUpdatedInfoMailToManager,
@@ -10,6 +11,17 @@ const {
 } = require("../utils/mailService");
 
 class CompanyService {
+  static async getManagerEmail(managerId) {
+    if (!managerId) return null;
+
+    const result = await pool.query(
+      "SELECT email FROM manager_users WHERE id = $1",
+      [managerId]
+    );
+
+    return result.rows[0]?.email || null;
+  }
+
   static formatCompany(company) {
     return {
       id: company.id,
@@ -28,8 +40,9 @@ class CompanyService {
     };
   }
 
-  static async getCompanies() {
-    const result = await pool.query(`
+  static async getCompanies(user) {
+    const result = await pool.query(
+      `
       SELECT 
         id,
         name,
@@ -43,15 +56,19 @@ class CompanyService {
         company_phone,
         username,
         role,
+        manager_id,
         created_at
       FROM companies
+      WHERE manager_id = $1
       ORDER BY company_name ASC
-    `);
+      `,
+      [user.id]
+    );
 
     return result.rows.map(this.formatCompany);
   }
 
-  static async createCompany(companyData) {
+  static async createCompany(user, companyData) {
     const {
       name,
       surname,
@@ -84,6 +101,8 @@ class CompanyService {
       throw error;
     }
 
+    validatePassword(password);
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     try {
@@ -102,9 +121,10 @@ class CompanyService {
           company_phone,
           username,
           password_hash,
-          role
+          role,
+          manager_id
         )
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
         RETURNING 
           id,
           name,
@@ -133,6 +153,7 @@ class CompanyService {
           username,
           hashedPassword,
           "customer",
+          user.id,
         ]
       );
 
@@ -141,7 +162,6 @@ class CompanyService {
       try {
         await sendNewCustomerAccountMail({
           customer: createdCustomer,
-          plainPassword: password,
         });
       } catch (mailError) {
         console.log(
@@ -178,6 +198,7 @@ class CompanyService {
         company_phone,
         username,
         role,
+        manager_id,
         created_at
       FROM companies
       WHERE id = $1
@@ -202,7 +223,34 @@ class CompanyService {
       throw error;
     }
     const company = await this.getCompanyById(id);
+
+    if (
+      user.role === "manager" &&
+      Number(company.manager_id) !== Number(user.id)
+    ) {
+      const error = new Error("Customer not found.");
+      error.statusCode = 404;
+      throw error;
+    }
+
     return this.formatCompany(company);
+  }
+
+  static async assertManagerOwnsCompany(id, user) {
+    if (user.role !== "manager") {
+      return;
+    }
+
+    const result = await pool.query(
+      "SELECT id FROM companies WHERE id = $1 AND manager_id = $2",
+      [id, user.id]
+    );
+
+    if (result.rows.length === 0) {
+      const error = new Error("Customer not found.");
+      error.statusCode = 404;
+      throw error;
+    }
   }
 
   static getUpdatedFields(oldCompany, newData) {
@@ -243,6 +291,8 @@ class CompanyService {
       throw error;
     }
 
+    await this.assertManagerOwnsCompany(id, user);
+
     const company = await this.getCompanyById(id);
     const formattedCompany = this.formatCompany(company);
 
@@ -267,6 +317,8 @@ class CompanyService {
       error.statusCode = 400;
       throw error;
     }
+
+    await this.assertManagerOwnsCompany(id, user);
 
     const company = await this.getCompanyById(id);
     const formattedCompany = this.formatCompany(company);
@@ -315,6 +367,8 @@ class CompanyService {
       error.statusCode = 403;
       throw error;
     }
+
+    await this.assertManagerOwnsCompany(id, user);
 
     const oldCompany = await this.getCompanyById(id);
 
@@ -385,9 +439,11 @@ class CompanyService {
     if (updatedFields.length > 0) {
       try {
         if (user.role === "customer") {
+          const managerEmail = await this.getManagerEmail(oldCompany.manager_id);
           await sendCustomerUpdatedInfoMailToManager({
             customer: formattedCustomer,
             updatedFields,
+            managerEmail,
           });
         }
 
@@ -408,7 +464,7 @@ class CompanyService {
     return formattedCustomer;
   }
 
-    static async requestCustomerPasswordUpdateCode(id, user) {
+  static async requestCustomerPasswordUpdateCode(id, user) {
     if (user.role !== "manager") {
       const error = new Error(
         "Only managers can request customer password update code."
@@ -416,6 +472,8 @@ class CompanyService {
       error.statusCode = 403;
       throw error;
     }
+
+    await this.assertManagerOwnsCompany(id, user);
 
     const customer = await this.getCompanyById(id);
     const formattedCustomer = this.formatCompany(customer);
@@ -442,6 +500,8 @@ class CompanyService {
       throw error;
     }
 
+    await this.assertManagerOwnsCompany(id, user);
+
     if (!code) {
       const error = new Error("Verification code is required.");
       error.statusCode = 400;
@@ -464,21 +524,19 @@ class CompanyService {
       code,
     });
 
-    return this.updateCustomerPassword(id, newPassword);
+    return this.updateCustomerPassword(id, user, newPassword);
   }
 
-  static async updateCustomerPassword(id, newPassword) {
+  static async updateCustomerPassword(id, user, newPassword) {
     if (!newPassword) {
       const error = new Error("New password is required.");
       error.statusCode = 400;
       throw error;
     }
 
-    if (newPassword.length < 4) {
-      const error = new Error("New password must be at least 4 characters.");
-      error.statusCode = 400;
-      throw error;
-    }
+    validatePassword(newPassword);
+
+    await this.assertManagerOwnsCompany(id, user);
 
     const oldCustomer = await this.getCompanyById(id);
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -515,7 +573,6 @@ class CompanyService {
     try {
       await sendManagerUpdatedCustomerPasswordMail({
         customer: this.formatCompany(result.rows[0] || oldCustomer),
-        newPassword,
       });
     } catch (mailError) {
       console.log(
@@ -529,7 +586,9 @@ class CompanyService {
     };
   }
 
-  static async deleteCompany(id) {
+  static async deleteCompany(id, user) {
+    await this.assertManagerOwnsCompany(id, user);
+
     const result = await pool.query(
       `
       DELETE FROM companies

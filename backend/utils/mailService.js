@@ -163,13 +163,14 @@ async function sendMailFromManagerToCustomer({
    SYSTEM / CUSTOMER → MANAGER
 ========================= */
 async function sendMailToManager({
+  managerEmail,
   subject,
   text,
   html,
   attachments = [],
 }) {
   return sendEmail({
-    to: MANAGER_EMAIL,
+    to: managerEmail || MANAGER_EMAIL,
     subject,
     text,
     html,
@@ -206,6 +207,7 @@ Product Information:
     product.number_of_teeth ?? product.numberOfTeeth ?? "-"
   }
 - Unit Price: ${product.unit_price ?? product.unitPrice ?? "-"}
+- Currency: ${product.currency || "USD"}
 
 You can login to your customer panel to create an order.
 
@@ -267,6 +269,7 @@ Product Order Management
 async function sendCustomerUpdatedInfoMailToManager({
   customer,
   updatedFields,
+  managerEmail,
 }) {
   const subject = "Customer Information Updated";
 
@@ -289,6 +292,7 @@ Product Order Management
 `;
 
   return sendMailToManager({
+    managerEmail,
     subject,
     text,
   });
@@ -298,7 +302,7 @@ Product Order Management
    CUSTOMER PASSWORD CHANGED
    CUSTOMER → MANAGER
 ========================= */
-async function sendCustomerPasswordChangedMailToManager({ customer }) {
+async function sendCustomerPasswordChangedMailToManager({ customer, managerEmail }) {
   const subject = "Customer Password Changed";
 
   const text = `
@@ -318,6 +322,7 @@ Product Order Management
 `;
 
   return sendMailToManager({
+    managerEmail,
     subject,
     text,
   });
@@ -366,7 +371,6 @@ Product Order Management
 ========================= */
 async function sendManagerUpdatedCustomerPasswordMail({
   customer,
-  newPassword,
 }) {
   const subject = "Your Password Has Been Updated";
 
@@ -377,11 +381,8 @@ Your password has been updated by the manager.
 
 Login Information:
 - Username: ${customer.username || "-"}
-- New Password: ${newPassword || "-"}
 
-Please login with your new password.
-
-For security, we recommend changing your password after login.
+For security, the new password is not included in this email.
 
 If you did not expect this change, please contact the manager.
 
@@ -401,7 +402,6 @@ Product Order Management
 ========================= */
 async function sendNewCustomerAccountMail({
   customer,
-  plainPassword,
 }) {
   const subject = "Your Customer Account Has Been Created";
 
@@ -412,7 +412,6 @@ Your customer account has been created by the manager.
 
 Login Information:
 - Username: ${customer.username || "-"}
-- Password: ${plainPassword || "-"}
 
 Customer Information:
 - Name: ${customer.name || "-"} ${customer.surname || ""}
@@ -424,9 +423,8 @@ Customer Information:
 - City: ${customer.city || "-"}
 - Company Phone: ${customer.companyPhone || customer.company_phone || "-"}
 
-Please login with the information above.
-
-For security, we recommend changing your password after your first login.
+For security, passwords are never sent by email. Obtain your initial password
+through the secure channel agreed with your manager, or use password reset.
 
 Product Order Management
 `;
@@ -460,11 +458,21 @@ This code should not be shared with anyone.
 Product Order Management
 `;
 
-  return sendEmail({
+  const sent = await sendEmail({
     to,
     subject,
     text,
   });
+
+  if (!sent) {
+    const error = new Error(
+      "Verification email could not be sent. Check the recipient address and SMTP logs."
+    );
+    error.statusCode = 502;
+    throw error;
+  }
+
+  return true;
 }
 
 /* =========================
@@ -520,6 +528,7 @@ async function sendOrderSubmittedMailToManager({
   customer,
   order,
   excelBuffer,
+  managerEmail,
 }) {
   const orderCode = order.order_code || order.id || "Unknown";
 
@@ -550,7 +559,8 @@ Product Order Management
     excelBuffer,
   });
 
-  return sendMailToManager({
+  return sendEmail({
+    to: managerEmail || MANAGER_EMAIL,
     subject,
     text,
     attachments,
@@ -621,6 +631,7 @@ ${index + 1}) ${item.type || "-"} ${item.model || "-"}
 - Quantity: ${item.quantity ?? "-"}
 - Unit Price: ${item.unit_price ?? "-"}
 - Total Price: ${item.total_price ?? "-"}
+- Currency: ${item.currency || "USD"}
 `;
     })
     .join("\n");
