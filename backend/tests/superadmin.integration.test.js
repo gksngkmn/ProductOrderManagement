@@ -163,4 +163,47 @@ test("product Excel import reports valid, invalid and duplicate rows", {
   }
 });
 
+test("manager deletion without transfer removes its unreferenced products", {
+  skip: process.env.RUN_DB_TESTS !== "true"
+}, async () => {
+  const suffix = crypto.randomUUID().slice(0, 8);
+  let manager;
+  let product;
+
+  try {
+    manager = await SuperadminService.createManager({
+      username: `delete_${suffix}`, password: "Valid-Test-Password-123",
+      name: "Delete", surname: "Test", email: `delete_${suffix}@example.test`,
+      phone: "10000000006"
+    });
+    product = await ProductService.createProduct(
+      { id: manager.id, role: "manager" },
+      {
+        material: "Test Steel", type: "Delete Type", model: `Delete ${suffix}`,
+        angle: 10, nodalLength: 20, width: 30, numberOfTeeth: 40,
+        unitPrice: 0, currency: "USD"
+      }
+    );
+
+    const result = await SuperadminService.deleteManager(manager.id);
+    assert.match(result.message, /product\(s\) deleted/);
+
+    const deletedManager = await pool.query(
+      "SELECT id FROM manager_users WHERE id = $1",
+      [manager.id]
+    );
+    const deletedProduct = await pool.query(
+      "SELECT id FROM products WHERE id = $1",
+      [product.id]
+    );
+    assert.equal(deletedManager.rowCount, 0);
+    assert.equal(deletedProduct.rowCount, 0);
+    manager = null;
+    product = null;
+  } finally {
+    if (product) await pool.query("DELETE FROM products WHERE id = $1", [product.id]);
+    if (manager) await pool.query("DELETE FROM manager_users WHERE id = $1", [manager.id]);
+  }
+});
+
 test.after(() => pool.end());

@@ -172,9 +172,9 @@ class SuperadminService {
       );
       const productCount = products.rows[0].count;
 
-      if ((customerCount > 0 || productCount > 0) && !transferToManagerId) {
+      if (customerCount > 0 && !transferToManagerId) {
         const error = new Error(
-          `Manager has ${customerCount} customer(s) and ${productCount} product(s). Select a transfer manager first.`
+          `Manager has ${customerCount} customer(s). Transfer the customers before deleting the manager.`
         );
         error.statusCode = 409;
         throw error;
@@ -203,14 +203,33 @@ class SuperadminService {
           "UPDATE products SET manager_id = $1 WHERE manager_id = $2",
           [transferToManagerId, id]
         );
+      } else if (productCount > 0) {
+        const referencedProducts = await client.query(
+          `SELECT COUNT(DISTINCT p.id)::int AS count
+           FROM products p
+           JOIN order_items oi ON oi.product_id = p.id
+           WHERE p.manager_id = $1`,
+          [id]
+        );
+        if (referencedProducts.rows[0].count > 0) {
+          const error = new Error(
+            "Manager products are used by historical orders. Select a transfer manager before deleting."
+          );
+          error.statusCode = 409;
+          throw error;
+        }
+
+        await client.query("DELETE FROM products WHERE manager_id = $1", [id]);
       }
 
       await client.query("DELETE FROM manager_users WHERE id = $1", [id]);
       await client.query("COMMIT");
       return {
-        message: customerCount || productCount
+        message: transferToManagerId
           ? `Manager deleted; ${customerCount} customer(s) and ${productCount} product(s) transferred.`
-          : "Manager deleted successfully."
+          : productCount
+            ? `Manager and ${productCount} product(s) deleted successfully.`
+            : "Manager deleted successfully."
       };
     } catch (error) {
       await client.query("ROLLBACK");
