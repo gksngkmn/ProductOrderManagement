@@ -333,12 +333,11 @@ addCustomerForm.addEventListener("submit", async (event) => {
   try {
     createCustomerBtn.disabled = true;
     addCustomerModal.classList.add("hidden");
-    showCustomerPageNotice("Creating customer...", "success", false);
 
     await CompanyApi.createCompany(customerData);
     addCustomerForm.reset();
+    showCustomerPageNotice("Customer created. Please reload the page.", "success");
     await loadCustomers();
-    showCustomerPageNotice("Customer created successfully.", "success");
   } catch (error) {
     showCustomerPageNotice(error.message, "error");
     addCustomerModal.classList.remove("hidden");
