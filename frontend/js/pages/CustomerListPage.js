@@ -37,6 +37,8 @@ const cancelAddCustomerBtn = document.getElementById("cancelAddCustomerBtn");
 
 const addCustomerForm = document.getElementById("addCustomerForm");
 const addCustomerMessage = document.getElementById("addCustomerMessage");
+const customerPageNotice = document.getElementById("customerPageNotice");
+const createCustomerBtn = document.getElementById("createCustomerBtn");
 
 const addNameInput = document.getElementById("addNameInput");
 const addSurnameInput = document.getElementById("addSurnameInput");
@@ -50,6 +52,64 @@ const addCompanyPhoneInput = document.getElementById("addCompanyPhoneInput");
 const addAddressInput = document.getElementById("addAddressInput");
 const addCountryInput = document.getElementById("addCountryInput");
 const addCityInput = document.getElementById("addCityInput");
+const countrySuggestions = document.getElementById("countrySuggestions");
+const citySuggestions = document.getElementById("citySuggestions");
+
+const COUNTRY_CITY_SUGGESTIONS = {
+  Turkey: ["Istanbul", "Ankara", "Izmir", "Bursa", "Antalya"],
+  China: ["Beijing", "Shanghai", "Guangzhou", "Shenzhen", "Dongguan", "Ningbo", "Suzhou", "Hangzhou"],
+  "United States": ["New York", "Los Angeles", "Chicago", "Houston", "San Francisco"],
+  Canada: ["Toronto", "Vancouver", "Montreal"],
+  "United Kingdom": ["London", "Manchester", "Birmingham"],
+  Germany: ["Berlin", "Hamburg", "Munich", "Frankfurt"],
+  France: ["Paris", "Lyon", "Marseille"],
+  Italy: ["Milan", "Rome", "Turin"],
+  Spain: ["Madrid", "Barcelona", "Valencia"],
+  Netherlands: ["Amsterdam", "Rotterdam"],
+  Belgium: ["Brussels", "Antwerp"],
+  Switzerland: ["Zurich", "Geneva"],
+  Austria: ["Vienna", "Graz"],
+  Poland: ["Warsaw", "Krakow"],
+  Portugal: ["Lisbon", "Porto"],
+  Sweden: ["Stockholm", "Gothenburg"],
+  Norway: ["Oslo", "Bergen"],
+  Denmark: ["Copenhagen", "Aarhus"],
+  Finland: ["Helsinki", "Tampere"],
+  Greece: ["Athens", "Thessaloniki"],
+  Romania: ["Bucharest", "Cluj-Napoca"],
+  Bulgaria: ["Sofia", "Plovdiv"],
+  Ukraine: ["Kyiv", "Lviv"],
+  Russia: ["Moscow", "Saint Petersburg"],
+  Kazakhstan: ["Almaty", "Astana"],
+  Georgia: ["Tbilisi", "Batumi"],
+  Azerbaijan: ["Baku", "Ganja"],
+  "United Arab Emirates": ["Dubai", "Abu Dhabi", "Sharjah"],
+  "Saudi Arabia": ["Riyadh", "Jeddah"],
+  Qatar: ["Doha"],
+  Kuwait: ["Kuwait City"],
+  Egypt: ["Cairo", "Alexandria"],
+  "South Africa": ["Johannesburg", "Cape Town"],
+  India: ["Mumbai", "Delhi", "Bengaluru", "Chennai"],
+  Pakistan: ["Karachi", "Lahore", "Islamabad"],
+  Japan: ["Tokyo", "Osaka", "Nagoya"],
+  "South Korea": ["Seoul", "Busan"],
+  "Hong Kong": ["Hong Kong"],
+  Taiwan: ["Taipei", "Kaohsiung"],
+  Singapore: ["Singapore"],
+  Malaysia: ["Kuala Lumpur", "Johor Bahru"],
+  Indonesia: ["Jakarta", "Surabaya"],
+  Thailand: ["Bangkok", "Chiang Mai"],
+  Vietnam: ["Ho Chi Minh City", "Hanoi"],
+  Philippines: ["Manila", "Cebu"],
+  Australia: ["Sydney", "Melbourne", "Brisbane"],
+  "New Zealand": ["Auckland", "Wellington"],
+  Mexico: ["Mexico City", "Monterrey"],
+  Brazil: ["São Paulo", "Rio de Janeiro"],
+  Argentina: ["Buenos Aires", "Córdoba"],
+  Chile: ["Santiago", "Valparaíso"],
+  Colombia: ["Bogotá", "Medellín"],
+  Peru: ["Lima", "Arequipa"]
+};
 /* =========================
    STATE
 ========================= */
@@ -58,6 +118,7 @@ let filteredCustomers = [];
 
 let currentPage = 1;
 const CUSTOMERS_PER_PAGE = 25;
+let pageNoticeTimer;
 
 /* =========================
    INIT
@@ -122,6 +183,56 @@ function showAddCustomerMessage(message, type = "success") {
   addCustomerMessage.className = `add-customer-message ${type}`;
 }
 
+function showCustomerPageNotice(message, type = "success", autoHide = true) {
+  clearTimeout(pageNoticeTimer);
+  customerPageNotice.innerText = message;
+  customerPageNotice.className = `customer-page-notice ${type}`;
+  if (autoHide) {
+    pageNoticeTimer = setTimeout(() => {
+      customerPageNotice.classList.add("hidden");
+    }, 5000);
+  }
+}
+
+function setSuggestionOptions(datalist, values) {
+  datalist.replaceChildren(
+    ...[...new Set(values.filter(Boolean))]
+      .sort((left, right) => left.localeCompare(right))
+      .map((value) => {
+        const option = document.createElement("option");
+        option.value = value;
+        return option;
+      })
+  );
+}
+
+function populateCountrySuggestions() {
+  setSuggestionOptions(countrySuggestions, [
+    ...Object.keys(COUNTRY_CITY_SUGGESTIONS),
+    ...allCustomers.map((customer) => customer.country)
+  ]);
+}
+
+function populateCitySuggestions() {
+  const selectedCountry = addCountryInput.value.trim().toLowerCase();
+  const matchedCountry = Object.keys(COUNTRY_CITY_SUGGESTIONS)
+    .find((country) => country.toLowerCase() === selectedCountry);
+  const predefinedCities = matchedCountry
+    ? COUNTRY_CITY_SUGGESTIONS[matchedCountry]
+    : Object.values(COUNTRY_CITY_SUGGESTIONS).flat();
+  const existingCities = allCustomers
+    .filter((customer) =>
+      !selectedCountry ||
+      String(customer.country || "").trim().toLowerCase() === selectedCountry
+    )
+    .map((customer) => customer.city);
+
+  setSuggestionOptions(citySuggestions, [...predefinedCities, ...existingCities]);
+}
+
+addCountryInput.addEventListener("input", populateCitySuggestions);
+addCountryInput.addEventListener("change", populateCitySuggestions);
+
 /* =========================
    LOAD CUSTOMERS
 ========================= */
@@ -134,6 +245,8 @@ async function loadCustomers() {
     currentPage = 1;
 
     populateFilterOptions();
+    populateCountrySuggestions();
+    populateCitySuggestions();
     renderCurrentPage();
   } catch (error) {
     customersTableBody.innerHTML = DomHelper.tableEmpty(error.message, 8);
@@ -218,22 +331,19 @@ addCustomerForm.addEventListener("submit", async (event) => {
   }
 
   try {
-    showAddCustomerMessage("Creating customer...", "success");
+    createCustomerBtn.disabled = true;
+    addCustomerModal.classList.add("hidden");
+    showCustomerPageNotice("Creating customer...", "success", false);
 
     await CompanyApi.createCompany(customerData);
-
-    showAddCustomerMessage(
-      `Customer created successfully. Notification method: ${notificationMethod.toUpperCase()}`,
-      "success"
-    );
-
+    addCustomerForm.reset();
     await loadCustomers();
-
-    setTimeout(() => {
-      closeAddCustomerModal();
-    }, 700);
+    showCustomerPageNotice("Customer created successfully.", "success");
   } catch (error) {
-    showAddCustomerMessage(error.message, "error");
+    showCustomerPageNotice(error.message, "error");
+    addCustomerModal.classList.remove("hidden");
+  } finally {
+    createCustomerBtn.disabled = false;
   }
 });
 

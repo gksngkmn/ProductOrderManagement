@@ -235,6 +235,8 @@
     ,"Product deleted successfully.": ["Product deleted successfully.", "Ürün başarıyla silindi.", "产品删除成功。"]
     ,"Are you sure you want to delete this customer?": ["Are you sure you want to delete this customer?", "Bu müşteriyi silmek istediğinize emin misiniz?", "确定要删除该客户吗？"]
     ,"Customer deleted successfully.": ["Customer deleted successfully.", "Müşteri başarıyla silindi.", "客户删除成功。"]
+    ,"Creating customer...": ["Creating customer...", "Müşteri oluşturuluyor...", "正在创建客户..."]
+    ,"Customer created successfully.": ["Customer created successfully.", "Müşteri oluşturuldu.", "客户创建成功。"]
     ,"Current order could not be loaded.": ["Current order could not be loaded.", "Aktif sipariş yüklenemedi.", "无法加载当前订单。"]
     ,"Order item not found.": ["Order item not found.", "Sipariş kalemi bulunamadı.", "未找到订单项。"]
     ,"Are you sure you want to delete this item?": ["Are you sure you want to delete this item?", "Bu kalemi silmek istediğinize emin misiniz?", "确定要删除该订单项吗？"]

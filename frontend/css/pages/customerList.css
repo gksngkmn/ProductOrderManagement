@@ -350,6 +350,38 @@
   margin-top: 4px;
 }
 
+.customer-page-notice {
+  position: fixed;
+  top: 22px;
+  left: 50%;
+  z-index: 1200;
+  width: min(92%, 520px);
+  padding: 14px 18px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  font-size: 14px;
+  font-weight: 800;
+  text-align: center;
+  transform: translateX(-50%);
+}
+
+.customer-page-notice.success {
+  color: #166534;
+  background: #dcfce7;
+  border-color: #86efac;
+}
+
+.customer-page-notice.error {
+  color: #991b1b;
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+.customer-page-notice.hidden {
+  display: none;
+}
+
 
 /* =========================================================
    9. RESPONSIVE

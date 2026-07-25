@@ -98,6 +98,8 @@
       <div id="paginationContainer" class="pagination"></div>
     </section>
 
+    <div id="customerPageNotice" class="customer-page-notice hidden" role="status" aria-live="polite"></div>
+
     <div id="addCustomerModal" class="modal-overlay hidden">
   <div class="add-customer-modal">
     <div class="modal-header">
@@ -164,12 +166,14 @@
 
         <div class="filter-group">
           <label for="addCountryInput">Country</label>
-          <input type="text" id="addCountryInput" required />
+          <input type="text" id="addCountryInput" list="countrySuggestions" autocomplete="country-name" required />
+          <datalist id="countrySuggestions"></datalist>
         </div>
 
         <div class="filter-group">
           <label for="addCityInput">City</label>
-          <input type="text" id="addCityInput" required />
+          <input type="text" id="addCityInput" list="citySuggestions" autocomplete="address-level2" required />
+          <datalist id="citySuggestions"></datalist>
         </div>
       </div>
 
@@ -199,7 +203,7 @@
   </main>
 
   <script src="./js/core/PhoneInputManager.js"></script>
-  <script type="module" src="./js/pages/CustomerListPage.js?v=62"></script>
+  <script type="module" src="./js/pages/CustomerListPage.js?v=63"></script>
   <script src="./js/core/I18nManager.js"></script>
 </body>
 </html>
