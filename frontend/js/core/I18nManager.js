@@ -42,7 +42,6 @@
     "Create": ["Create", "Oluştur", "创建"],
     "Add": ["Add", "Ekle", "添加"],
     "Details": ["Details", "Detaylar", "详情"],
-    "Transfer": ["Transfer", "Transfer", "转移"],
     "Search": ["Search", "Ara", "搜索"],
     "Filter": ["Filter", "Filtrele", "筛选"],
     "Status": ["Status", "Durum", "状态"],
@@ -181,10 +180,10 @@
     ,"Düzenlemek için bir yönetici seçin.": ["Select a manager to edit.", "Düzenlemek için bir yönetici seçin.", "请选择要编辑的经理。"]
     ,"İşlem yapmak için sol menüden bir yönetici (Manager) seçin.": ["Select a manager from the left menu.", "İşlem yapmak için sol menüden bir yönetici seçin.", "请从左侧菜单选择经理。"]
     ,"Bu Manager'a Customer Ekle": ["Add Customer to This Manager", "Bu Yöneticiye Müşteri Ekle", "为该经理添加客户"]
-    ,"Manager Silme / Customer Transferi": ["Delete Manager / Transfer Customers", "Yönetici Silme / Müşteri Transferi", "删除经理／转移客户"]
     ,"Manager'ı Sil": ["Delete Manager", "Yöneticiyi Sil", "删除经理"]
-    ,"Customer'ları aktarılacak manager (opsiyonel)": ["Manager to receive customers (optional)", "Müşterilerin aktarılacağı yönetici (isteğe bağlı)", "接收客户的经理（可选）"]
-    ,"Transfer yok": ["No transfer", "Transfer yok", "不转移"]
+    ,"Manager Sil": ["Delete Manager", "Manager Sil", "删除经理"]
+    ,"Bu işlem manager'a bağlı tüm customer, sipariş ve ürünleri kalıcı olarak siler.": ["This permanently deletes all customers, orders, and products linked to the manager.", "Bu işlem manager'a bağlı tüm customer, sipariş ve ürünleri kalıcı olarak siler.", "此操作将永久删除与该经理关联的所有客户、订单和产品。"]
+    ,"Manager ve ona bağlı tüm customer, sipariş ve ürünler silinsin mi? Bu işlem geri alınamaz.": ["Delete the manager and all linked customers, orders, and products? This action cannot be undone.", "Manager ve ona bağlı tüm customer, sipariş ve ürünler silinsin mi? Bu işlem geri alınamaz.", "是否删除该经理及其关联的所有客户、订单和产品？此操作无法撤销。"]
     ,"Bağlı customer varsa silmeden önce başka bir manager seçilmelidir.": ["If customers are assigned, select another manager before deletion.", "Bağlı müşteriler varsa silmeden önce başka bir yönetici seçilmelidir.", "如有关联客户，删除前必须选择另一位经理。"]
     ,"Yöneticiyi Sınırsız Güncelle": ["Update Manager (Unrestricted)", "Yöneticiyi Sınırsız Güncelle", "无限制更新经理"]
     ,"Müşteriyi Ez ve Kaydet": ["Overwrite and Save Customer", "Müşteriyi Ez ve Kaydet", "覆盖并保存客户"]
@@ -207,7 +206,6 @@
     ,"Şirket Adı": ["Company Name", "Şirket Adı", "公司名称"]
     ,"Şirket Telefonu": ["Company Phone", "Şirket Telefonu", "公司电话"]
     ,"Kullanıcı Adı": ["Username", "Kullanıcı Adı", "用户名"]
-    ,"Manager seç": ["Select Manager", "Yönetici seç", "选择经理"]
     ,"Email yok": ["No email", "E-posta yok", "无电子邮件"]
     ,"Yöneticiler yüklenemedi.": ["Managers could not be loaded.", "Yöneticiler yüklenemedi.", "无法加载经理。"]
     ,"Bu yöneticiye bağlı müşteri bulunamadı.": ["No customers are assigned to this manager.", "Bu yöneticiye bağlı müşteri bulunamadı.", "该经理没有关联客户。"]
@@ -218,8 +216,6 @@
     ,"Manager silinsin mi? Bu işlem geri alınamaz.": ["Delete this manager? This action cannot be undone.", "Yönetici silinsin mi? Bu işlem geri alınamaz.", "确定删除该经理吗？此操作无法撤销。"]
     ,"Başarıyla güncellendi": ["Updated successfully.", "Başarıyla güncellendi.", "更新成功。"]
     ,"Güncelleme hatası": ["Update failed.", "Güncelleme hatası.", "更新失败。"]
-    ,"Transfer için bir manager seçin.": ["Select a manager for the transfer.", "Transfer için bir yönetici seçin.", "请选择接收转移的经理。"]
-    ,"Customer başarıyla transfer edildi.": ["Customer transferred successfully.", "Müşteri başarıyla transfer edildi.", "客户转移成功。"]
     ,"Müşteri başarıyla güncellendi": ["Customer updated successfully.", "Müşteri başarıyla güncellendi.", "客户更新成功。"]
     ,"Sistemden çıkış yapmak istediğinize emin misiniz?": ["Are you sure you want to log out?", "Sistemden çıkış yapmak istediğinize emin misiniz?", "确定要退出系统吗？"]
     ,"Detailed customer order records": ["Detailed customer order records", "Detaylı müşteri sipariş kayıtları", "详细客户订单记录"]
@@ -277,9 +273,6 @@
     ,"Admin": ["Admin", "Admin", "管理员"]
     ,"Country calling code": ["Country calling code", "Ülke telefon kodu", "国家/地区代码"]
     ,"Phone number": ["Phone number", "Telefon numarası", "电话号码"]
-    ,"Manager Silme / Veri Transferi": ["Delete Manager / Transfer Data", "Yönetici Silme / Veri Transferi", "删除经理／转移数据"]
-    ,"Bağlı customer veya ürün varsa silmeden önce başka bir manager seçilmelidir.": ["If customers or products are assigned, select another manager before deletion.", "Bağlı müşteri veya ürün varsa silmeden önce başka bir yönetici seçilmelidir.", "如有关联客户或产品，删除前必须选择另一位经理。"]
-    ,"Customer ve ürünlerin aktarılacağı manager (opsiyonel)": ["Manager to receive customers and products (optional)", "Müşteri ve ürünlerin aktarılacağı yönetici (isteğe bağlı)", "接收客户和产品的经理（可选）"]
     ,"Verification email could not be sent. Check the recipient address and SMTP logs.": ["Verification email could not be sent. Check the recipient address and SMTP logs.", "Doğrulama e-postası gönderilemedi. Alıcı adresini ve SMTP kayıtlarını kontrol edin.", "无法发送验证邮件。请检查收件人地址和 SMTP 日志。"]
     ,"Import Excel": ["Import Excel", "Excel'den İçe Aktar", "导入 Excel"]
     ,"Importing...": ["Importing...", "İçe aktarılıyor...", "正在导入..."]
@@ -294,7 +287,6 @@
   const patterns = [
     [/^Yönetici: (.+)$/u, ["Manager: $1", "Yönetici: $1", "经理：$1"]],
     [/^(.+) silinsin mi\? Siparişleri de silinir\.$/u, ["Delete $1? Its orders will also be deleted.", "$1 silinsin mi? Siparişleri de silinir.", "确定删除 $1 吗？其订单也会被删除。"]],
-    [/^(.+) seçilen manager'a aktarılsın mı\?$/u, ["Transfer $1 to the selected manager?", "$1 seçilen yöneticiye aktarılsın mı?", "将 $1 转移给所选经理吗？"]],
     [/^Order completed: (.+)$/u, ["Order completed: $1", "Sipariş tamamlandı: $1", "订单已完成：$1"]],
     [/^(\d+) orders found\.$/u, ["$1 orders found.", "$1 sipariş bulundu.", "找到 $1 个订单。"]],
     [/^(\d+) of (\d+) orders shown\.$/u, ["$1 of $2 orders shown.", "$2 siparişin $1 tanesi gösteriliyor.", "显示 $2 个订单中的 $1 个。"]],

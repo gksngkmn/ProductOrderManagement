@@ -10,8 +10,7 @@ const {
     getCustomersByManager,
     createCustomer,
     updateCustomer,
-    deleteCustomer,
-    transferCustomer
+    deleteCustomer
 } = require('../controllers/superadminController');
 
 // Sadece süper adminin bu rotalara girmesini garanti altına alıyoruz
@@ -32,6 +31,5 @@ router.post('/managers/:id/customers', createCustomer);
 // 4. Sınırsız Customer Güncelle (Doğrulama kodu sormaz)
 router.put('/customers/:id', updateCustomer);
 router.delete('/customers/:id', deleteCustomer);
-router.put('/customers/:id/manager', transferCustomer);
 
 module.exports = router;

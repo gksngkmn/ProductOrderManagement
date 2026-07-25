@@ -12,7 +12,7 @@ const pool = require("../db");
 const SuperadminService = require("../services/SuperadminService");
 const ProductService = require("../services/ProductService");
 
-test("superadmin create, delete protection and transfer flow", {
+test("superadmin manager deletion removes only its linked data", {
   skip: process.env.RUN_DB_TESTS !== "true"
 }, async () => {
   const suffix = crypto.randomUUID().slice(0, 8);
@@ -77,36 +77,29 @@ test("superadmin create, delete protection and transfer flow", {
       (error) => error.statusCode === 404
     );
 
-    await SuperadminService.transferCustomer(customer.id, secondManager.id);
-    await SuperadminService.transferCustomer(customer.id, firstManager.id);
-
-    await assert.rejects(
-      () => SuperadminService.deleteManager(firstManager.id),
-      (error) => error.statusCode === 409
-    );
-
-    await SuperadminService.deleteManager(firstManager.id, secondManager.id);
+    await SuperadminService.deleteManager(firstManager.id);
     firstManager = null;
-    const owner = await pool.query(
-      "SELECT manager_id FROM companies WHERE id = $1",
+    const deletedCustomer = await pool.query(
+      "SELECT id FROM companies WHERE id = $1",
       [customer.id]
     );
-    assert.equal(owner.rows[0].manager_id, secondManager.id);
-    const transferredProduct = await pool.query(
-      "SELECT manager_id FROM products WHERE id = $1",
+    const deletedProduct = await pool.query(
+      "SELECT id FROM products WHERE id = $1",
       [firstProduct.id]
     );
-    assert.equal(transferredProduct.rows[0].manager_id, secondManager.id);
-
-    await SuperadminService.deleteCustomer(customer.id);
+    const retainedProduct = await pool.query(
+      "SELECT manager_id FROM products WHERE id = $1",
+      [secondProduct.id]
+    );
+    assert.equal(deletedCustomer.rowCount, 0);
+    assert.equal(deletedProduct.rowCount, 0);
+    assert.equal(retainedProduct.rows[0].manager_id, secondManager.id);
     customer = null;
-    await pool.query("DELETE FROM products WHERE id = ANY($1::int[])", [
-      [firstProduct.id, secondProduct.id]
-    ]);
     firstProduct = null;
-    secondProduct = null;
+
     await SuperadminService.deleteManager(secondManager.id);
     secondManager = null;
+    secondProduct = null;
   } finally {
     if (customer) await pool.query("DELETE FROM companies WHERE id = $1", [customer.id]);
     if (firstProduct || secondProduct) {
@@ -163,7 +156,7 @@ test("product Excel import reports valid, invalid and duplicate rows", {
   }
 });
 
-test("manager deletion without transfer removes its unreferenced products", {
+test("manager deletion removes its products when it has no customers", {
   skip: process.env.RUN_DB_TESTS !== "true"
 }, async () => {
   const suffix = crypto.randomUUID().slice(0, 8);

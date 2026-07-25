@@ -45,19 +45,9 @@ async function deleteCustomer(req, res) {
   catch (error) { return handleError(res, error, "Delete customer error"); }
 }
 
-async function transferCustomer(req, res) {
-  try {
-    return res.json(
-      await SuperadminService.transferCustomer(req.params.id, req.body.managerId)
-    );
-  } catch (error) { return handleError(res, error, "Transfer customer error"); }
-}
-
 async function deleteManager(req, res) {
   try {
-    return res.json(
-      await SuperadminService.deleteManager(req.params.id, req.body?.transferToManagerId)
-    );
+    return res.json(await SuperadminService.deleteManager(req.params.id));
   } catch (error) { return handleError(res, error, "Delete manager error"); }
 }
 
@@ -69,6 +59,5 @@ module.exports = {
   getCustomersByManager,
   createCustomer,
   updateCustomer,
-  deleteCustomer,
-  transferCustomer
+  deleteCustomer
 };

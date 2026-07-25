@@ -79,14 +79,8 @@
                 </form>
 
                 <form id="managerDeleteForm" class="card" style="margin-bottom: 30px; border-color: #dc2626;">
-                    <h3>Manager Silme / Veri Transferi</h3>
-                    <p>Bağlı customer veya ürün varsa silmeden önce başka bir manager seçilmelidir.</p>
-                    <div class="filter-group">
-                        <label>Customer ve ürünlerin aktarılacağı manager (opsiyonel)</label>
-                        <select id="transferManagerId">
-                            <option value="">Transfer yok</option>
-                        </select>
-                    </div>
+                    <h3>Manager Sil</h3>
+                    <p>Bu işlem manager'a bağlı tüm customer, sipariş ve ürünleri kalıcı olarak siler.</p>
                     <button type="submit" class="danger" style="margin-top: 12px;">Manager'ı Sil</button>
                 </form>
 
@@ -137,7 +131,7 @@
     </div>
 
     <script src="./js/core/PhoneInputManager.js"></script>
-    <script type="module" src="./js/pages/SuperadminPage.js"></script>
+    <script type="module" src="./js/pages/SuperadminPage.js?v=2"></script>
     <script src="./js/core/I18nManager.js"></script>
 </body>
 </html>

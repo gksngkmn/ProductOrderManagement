@@ -25,8 +25,6 @@ const welcomeMessage = document.getElementById("welcomeMessage");
 const managerDetailPanel = document.getElementById("managerDetailPanel");
 const customerEditPanel = document.getElementById("customerEditPanel");
 const customerListContainer = document.getElementById("customerListContainer");
-const transferManagerSelect = document.getElementById("transferManagerId");
-let managerCache = [];
 
 document.getElementById("btnShowManagerCreate").addEventListener("click", () => {
     managerDetailPanel.classList.add("hidden");
@@ -100,51 +98,13 @@ function createCustomerRow(customer) {
     deleteButton.textContent = "Sil";
     deleteButton.addEventListener("click", () => deleteCustomer(customer));
 
-    const transferSelect = document.createElement("select");
-    const transferPlaceholder = document.createElement("option");
-    transferPlaceholder.value = "";
-    transferPlaceholder.textContent = "Manager seç";
-    transferSelect.append(transferPlaceholder);
-    for (const manager of managerCache) {
-        if (String(manager.id) === String(customer.manager_id)) continue;
-        const option = document.createElement("option");
-        option.value = manager.id;
-        option.textContent = manager.username;
-        transferSelect.append(option);
-    }
-
-    const transferButton = document.createElement("button");
-    transferButton.type = "button";
-    transferButton.className = "secondary";
-    transferButton.textContent = "Transfer";
-    transferButton.addEventListener("click", () => {
-        transferCustomer(customer, transferSelect.value);
-    });
-
     const actions = document.createElement("div");
     actions.style.display = "flex";
     actions.style.gap = "8px";
-    actions.append(editButton, deleteButton, transferSelect, transferButton);
+    actions.append(editButton, deleteButton);
 
     row.append(companyCell, nameCell, emailCell, actions);
     return row;
-}
-
-function populateTransferManagers(selectedManagerId) {
-    const emptyOption = document.createElement("option");
-    emptyOption.value = "";
-    emptyOption.textContent = "Transfer yok";
-
-    const options = managerCache
-        .filter((manager) => String(manager.id) !== String(selectedManagerId))
-        .map((manager) => {
-            const option = document.createElement("option");
-            option.value = manager.id;
-            option.textContent = `${manager.username} (#${manager.id})`;
-            return option;
-        });
-
-    transferManagerSelect.replaceChildren(emptyOption, ...options);
 }
 
 // =========================================
@@ -153,7 +113,6 @@ function populateTransferManagers(selectedManagerId) {
 async function loadManagers() {
     try {
         const managers = await ClientApi.request("/superadmin/managers");
-        managerCache = managers;
 
         managerListContainer.replaceChildren(
             ...managers.map(createManagerCard)
@@ -180,7 +139,6 @@ async function openManagerDetails(manager) {
     document.getElementById("m_name").value = manager.name || '';
     document.getElementById("m_surname").value = manager.surname || '';
     PhoneInput.setValue("m_phone", manager.phone || '');
-    populateTransferManagers(manager.id);
 
     // Müşterilerini getir
     loadCustomersOfManager(manager.id);
@@ -214,13 +172,11 @@ document.getElementById("managerCreateForm").addEventListener("submit", async (e
 document.getElementById("managerDeleteForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     const managerId = document.getElementById("editManagerId").value;
-    const transferToManagerId = transferManagerSelect.value || null;
-    if (!confirm("Manager silinsin mi? Bu işlem geri alınamaz.")) return;
+    if (!confirm("Manager ve ona bağlı tüm customer, sipariş ve ürünler silinsin mi? Bu işlem geri alınamaz.")) return;
 
     try {
         const result = await ClientApi.request(`/superadmin/managers/${managerId}`, {
-            method: "DELETE",
-            body: JSON.stringify({ transferToManagerId })
+            method: "DELETE"
         });
         managerDetailPanel.classList.add("hidden");
         customerEditPanel.classList.add("hidden");
@@ -345,29 +301,6 @@ async function deleteCustomer(customer) {
         customerEditPanel.classList.add("hidden");
         await loadCustomersOfManager(managerId);
         alert(result.message);
-    } catch (error) {
-        alert(error.message);
-    }
-}
-
-async function transferCustomer(customer, managerId) {
-    if (!managerId) {
-        alert("Transfer için bir manager seçin.");
-        return;
-    }
-
-    if (!confirm(`${customer.company_name || customer.username} seçilen manager'a aktarılsın mı?`)) {
-        return;
-    }
-
-    try {
-        await ClientApi.request(`/superadmin/customers/${customer.id}/manager`, {
-            method: "PUT",
-            body: JSON.stringify({ managerId })
-        });
-        const currentManagerId = document.getElementById("editManagerId").value;
-        await loadCustomersOfManager(currentManagerId);
-        alert("Customer başarıyla transfer edildi.");
     } catch (error) {
         alert(error.message);
     }
