@@ -63,13 +63,21 @@ const companyId = params.get("companyId");
 ========================= */
 const user = AuthManager.getUser();
 managerInfo.innerText = `${user.username} • ${user.role}`;
+const openedFromSuperadmin =
+  user.role === "superadmin" || params.get("from") === "superadmin";
+
+if (openedFromSuperadmin) {
+  backToCustomerListBtn.innerText = "Back to Superadmin Panel";
+}
 
 logoutBtn.addEventListener("click", () => {
   AuthManager.logout();
 });
 
 backToCustomerListBtn.addEventListener("click", () => {
-  window.location.href = "/customerList.html";
+  window.location.href = openedFromSuperadmin
+    ? "/superadmin.html"
+    : "/customerList.html";
 });
 
 /* =========================
@@ -78,7 +86,9 @@ backToCustomerListBtn.addEventListener("click", () => {
 async function loadCustomer() {
   if (!companyId) {
     alert("No customer selected.");
-    window.location.href = "/customerList.html";
+    window.location.href = openedFromSuperadmin
+      ? "/superadmin.html"
+      : "/customerList.html";
     return;
   }
 
@@ -93,7 +103,9 @@ async function loadCustomer() {
     fillForm();
   } catch (error) {
     alert(error.message);
-    window.location.href = "/customerList.html";
+    window.location.href = openedFromSuperadmin
+      ? "/superadmin.html"
+      : "/customerList.html";
   }
 }
 

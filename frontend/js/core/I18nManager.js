@@ -94,6 +94,7 @@
     ,"Current Order": ["Current Order", "Aktif Sipariş", "当前订单"]
     ,"Customer & Company Information": ["Customer & Company Information", "Müşteri ve Şirket Bilgileri", "客户与公司信息"]
     ,"Customer Details": ["Customer Details", "Müşteri Detayları", "客户详情"]
+    ,"Back to Superadmin Panel": ["Back to Superadmin Panel", "Süper Yönetici Paneline Dön", "返回超级管理员面板"]
     ,"Customer Filters": ["Customer Filters", "Müşteri Filtreleri", "客户筛选"]
     ,"Customer Information": ["Customer Information", "Müşteri Bilgileri", "客户信息"]
     ,"Customer List": ["Customer List", "Müşteri Listesi", "客户列表"]

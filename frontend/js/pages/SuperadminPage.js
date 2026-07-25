@@ -92,6 +92,15 @@ function createCustomerRow(customer) {
     editButton.textContent = "Düzenle";
     editButton.addEventListener("click", () => openCustomerEdit(customer));
 
+    const detailsButton = document.createElement("button");
+    detailsButton.type = "button";
+    detailsButton.className = "light";
+    detailsButton.textContent = "Details";
+    detailsButton.addEventListener("click", () => {
+        window.location.href =
+            `/customerDetails.html?companyId=${encodeURIComponent(customer.id)}&from=superadmin`;
+    });
+
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.className = "danger";
@@ -101,7 +110,7 @@ function createCustomerRow(customer) {
     const actions = document.createElement("div");
     actions.style.display = "flex";
     actions.style.gap = "8px";
-    actions.append(editButton, deleteButton);
+    actions.append(detailsButton, editButton, deleteButton);
 
     row.append(companyCell, nameCell, emailCell, actions);
     return row;
