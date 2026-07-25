@@ -711,11 +711,6 @@ editOrderItemForm.addEventListener("submit", async (event) => {
 addItemForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  if (!currentOrder) {
-    alert("Current order could not be loaded.");
-    return;
-  }
-
   const productId = selectedProductIdInput.value;
   const quantity = Number(quantityInput.value);
 
@@ -734,6 +729,10 @@ addItemForm.addEventListener("submit", async (event) => {
   }
 
   try {
+    if (!currentOrder) {
+      currentOrder = await OrderApi.createOrder();
+    }
+
     await OrderApi.addItemToOrder(currentOrder.id, productId, quantity);
     alert("Product added to order.");
 
@@ -776,26 +775,29 @@ completeOrderBtn.addEventListener("click", async () => {
 
   if (!confirmed) return;
 
-  try {
-  const completedOrder = await OrderApi.completeOrder(currentOrder.id);
-
-  const completedOrderCode =
-    completedOrder?.order_code ||
-    currentOrder?.order_code ||
-    currentOrder?.id ||
-    "Order";
-
-  alert(`Order completed: ${completedOrderCode}`);
-
+  const orderBeingCompleted = currentOrder;
   currentOrder = null;
   currentOrderInfo.innerText = "No active order loaded.";
   currentOrderItems.innerHTML = DomHelper.emptyMessage("No current order items.");
   completeOrderBtn.disabled = true;
+  clearItemForm();
 
-  await loadMyOrders();
-} catch (error) {
-  alert(error.message);
-}
+  try {
+    const completedOrder = await OrderApi.completeOrder(orderBeingCompleted.id);
+    const completedOrderCode =
+      completedOrder?.order_code ||
+      orderBeingCompleted.order_code ||
+      orderBeingCompleted.id ||
+      "Order";
+
+    alert(`Order completed: ${completedOrderCode}`);
+  } catch (error) {
+    currentOrder = orderBeingCompleted;
+    currentOrderInfo.innerText =
+      `Current Order: ${currentOrder.order_code} • ${currentOrder.status}`;
+    renderCurrentOrderItems(currentOrder);
+    alert(error.message);
+  }
 });
 
 /* =========================
