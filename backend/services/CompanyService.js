@@ -92,7 +92,6 @@ class CompanyService {
       !address ||
       !country ||
       !city ||
-      !companyPhone ||
       !username ||
       !password
     ) {
@@ -149,7 +148,7 @@ class CompanyService {
           address,
           country,
           city,
-          companyPhone,
+          companyPhone || null,
           username,
           hashedPassword,
           "customer",
@@ -354,8 +353,7 @@ class CompanyService {
       !companyName ||
       !address ||
       !country ||
-      !city ||
-      !companyPhone
+      !city
     ) {
       const error = new Error("All customer fields are required.");
       error.statusCode = 400;
@@ -381,7 +379,7 @@ class CompanyService {
       address,
       country,
       city,
-      companyPhone,
+      companyPhone: companyPhone || null,
     });
 
     const result = await pool.query(
@@ -422,7 +420,7 @@ class CompanyService {
         address,
         country,
         city,
-        companyPhone,
+        companyPhone || null,
         id,
       ]
     );

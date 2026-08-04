@@ -19,10 +19,15 @@
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .customer-row { background: #fff; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px; display: grid; grid-template-columns: 1fr 1fr 1fr auto; align-items: center; }
         .god-mode-badge { display: inline-block; background: #dc2626; color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-bottom: 15px; }
+        .superadmin-notice { position: fixed; top: 22px; left: 50%; z-index: 1300; width: min(92%, 520px); padding: 14px 18px; border-radius: 10px; box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18); font-weight: 800; text-align: center; transform: translateX(-50%); }
+        .superadmin-notice.success { color: #166534; background: #dcfce7; border: 1px solid #86efac; }
+        .superadmin-notice.error { color: #991b1b; background: #fee2e2; border: 1px solid #fca5a5; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
+    <div id="superadminNotice" class="superadmin-notice hidden" role="status" aria-live="polite"></div>
+
     <header class="manager-topbar">
         <div class="manager-title-area">
             <h1>Süper Yönetici Paneli</h1>
@@ -95,11 +100,38 @@
                         <div class="filter-group"><label>Email</label><input id="new_c_email" type="email" required></div>
                         <div class="filter-group"><label>Telefon</label><input type="tel" id="new_c_phone" data-international-phone="true" required></div>
                         <div class="filter-group"><label>Şirket</label><input id="new_c_company" required></div>
-                        <div class="filter-group"><label>Şirket Telefonu</label><input type="tel" id="new_c_company_phone" data-international-phone="true" required></div>
+                        <div class="filter-group"><label>Şirket Telefonu (Opsiyonel)</label><input type="tel" id="new_c_company_phone" data-international-phone="true"></div>
                         <div class="filter-group"><label>Adres</label><input id="new_c_address" required></div>
-                        <div class="filter-group"><label>Ülke</label><input id="new_c_country" required></div>
-                        <div class="filter-group"><label>Şehir</label><input id="new_c_city" required></div>
+                        <div class="filter-group"><label>Ülke</label><input id="new_c_country" list="superadminCountryOptions" autocomplete="country-name" required></div>
+                        <div class="filter-group"><label>Şehir</label><input id="new_c_city" list="superadminCityOptions" autocomplete="address-level2" required></div>
                     </div>
+                    <datalist id="superadminCountryOptions">
+                        <option value="China"><option value="Turkey"><option value="United States"><option value="Canada">
+                        <option value="United Kingdom"><option value="Germany"><option value="France"><option value="Italy">
+                        <option value="Spain"><option value="Netherlands"><option value="Belgium"><option value="Switzerland">
+                        <option value="Austria"><option value="Poland"><option value="Portugal"><option value="Sweden">
+                        <option value="Norway"><option value="Denmark"><option value="Finland"><option value="Greece">
+                        <option value="Romania"><option value="Bulgaria"><option value="Ukraine"><option value="Russia">
+                        <option value="Kazakhstan"><option value="Georgia"><option value="Azerbaijan"><option value="United Arab Emirates">
+                        <option value="Saudi Arabia"><option value="Qatar"><option value="Kuwait"><option value="Egypt">
+                        <option value="South Africa"><option value="India"><option value="Pakistan"><option value="Japan">
+                        <option value="South Korea"><option value="Hong Kong"><option value="Taiwan"><option value="Singapore">
+                        <option value="Malaysia"><option value="Indonesia"><option value="Thailand"><option value="Vietnam">
+                        <option value="Philippines"><option value="Australia"><option value="New Zealand"><option value="Mexico">
+                        <option value="Brazil"><option value="Argentina"><option value="Chile"><option value="Colombia"><option value="Peru">
+                    </datalist>
+                    <datalist id="superadminCityOptions">
+                        <option value="Beijing"><option value="Shanghai"><option value="Guangzhou"><option value="Shenzhen">
+                        <option value="Dongguan"><option value="Ningbo"><option value="Suzhou"><option value="Hangzhou">
+                        <option value="Istanbul"><option value="Ankara"><option value="Izmir"><option value="Bursa">
+                        <option value="New York"><option value="Los Angeles"><option value="Toronto"><option value="Vancouver">
+                        <option value="London"><option value="Berlin"><option value="Hamburg"><option value="Munich">
+                        <option value="Paris"><option value="Lyon"><option value="Milan"><option value="Rome">
+                        <option value="Madrid"><option value="Barcelona"><option value="Amsterdam"><option value="Rotterdam">
+                        <option value="Dubai"><option value="Abu Dhabi"><option value="Tokyo"><option value="Osaka">
+                        <option value="Seoul"><option value="Hong Kong"><option value="Singapore"><option value="Bangkok">
+                        <option value="Ho Chi Minh City"><option value="Hanoi"><option value="Sydney"><option value="Melbourne">
+                    </datalist>
                     <button type="submit">Customer Oluştur</button>
                     <button id="btnCancelCustomerCreate" type="button" class="secondary">İptal</button>
                 </form>
@@ -131,7 +163,7 @@
     </div>
 
     <script src="./js/core/PhoneInputManager.js"></script>
-    <script type="module" src="./js/pages/SuperadminPage.js?v=4"></script>
+    <script type="module" src="./js/pages/SuperadminPage.js?v=6"></script>
     <script src="./js/core/I18nManager.js"></script>
 </body>
 </html>

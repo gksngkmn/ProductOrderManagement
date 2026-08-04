@@ -214,6 +214,8 @@
     ,"Erişim Engellendi: Bu alana yalnızca Süper Yönetici erişebilir.": ["Access denied: only the superadmin can access this area.", "Erişim engellendi: Bu alana yalnızca Süper Yönetici erişebilir.", "拒绝访问：仅超级管理员可访问此区域。"]
     ,"Manager başarıyla oluşturuldu.": ["Manager created successfully.", "Yönetici başarıyla oluşturuldu.", "经理创建成功。"]
     ,"Customer başarıyla oluşturuldu.": ["Customer created successfully.", "Müşteri başarıyla oluşturuldu.", "客户创建成功。"]
+    ,"Customer created successfully.": ["Customer created successfully.", "Müşteri oluşturuldu.", "客户创建成功。"]
+    ,"Şirket Telefonu (Opsiyonel)": ["Company Phone (Optional)", "Şirket Telefonu (Opsiyonel)", "公司电话（可选）"]
     ,"Manager silinsin mi? Bu işlem geri alınamaz.": ["Delete this manager? This action cannot be undone.", "Yönetici silinsin mi? Bu işlem geri alınamaz.", "确定删除该经理吗？此操作无法撤销。"]
     ,"Başarıyla güncellendi": ["Updated successfully.", "Başarıyla güncellendi.", "更新成功。"]
     ,"Güncelleme hatası": ["Update failed.", "Güncelleme hatası.", "更新失败。"]

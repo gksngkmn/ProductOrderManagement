@@ -25,6 +25,17 @@ const welcomeMessage = document.getElementById("welcomeMessage");
 const managerDetailPanel = document.getElementById("managerDetailPanel");
 const customerEditPanel = document.getElementById("customerEditPanel");
 const customerListContainer = document.getElementById("customerListContainer");
+const superadminNotice = document.getElementById("superadminNotice");
+let superadminNoticeTimer;
+
+function showSuperadminNotice(message, type = "success") {
+    clearTimeout(superadminNoticeTimer);
+    superadminNotice.textContent = message;
+    superadminNotice.className = `superadmin-notice ${type}`;
+    superadminNoticeTimer = setTimeout(() => {
+        superadminNotice.classList.add("hidden");
+    }, 5000);
+}
 
 document.getElementById("btnShowManagerCreate").addEventListener("click", () => {
     managerDetailPanel.classList.add("hidden");
@@ -166,6 +177,7 @@ async function openManagerDetails(manager) {
 
 document.getElementById("managerCreateForm").addEventListener("submit", async (event) => {
     event.preventDefault();
+    const form = event.currentTarget;
     const payload = {
         username: document.getElementById("new_m_username").value.trim(),
         password: document.getElementById("new_m_password").value,
@@ -180,8 +192,8 @@ document.getElementById("managerCreateForm").addEventListener("submit", async (e
             method: "POST",
             body: JSON.stringify(payload)
         });
-        event.currentTarget.reset();
-        event.currentTarget.classList.add("hidden");
+        form.reset();
+        form.classList.add("hidden");
         await loadManagers();
         alert("Manager başarıyla oluşturuldu.");
     } catch (error) {
@@ -210,6 +222,7 @@ document.getElementById("managerDeleteForm").addEventListener("submit", async (e
 
 document.getElementById("customerCreateForm").addEventListener("submit", async (event) => {
     event.preventDefault();
+    const form = event.currentTarget;
     const managerId = document.getElementById("editManagerId").value;
     const payload = {
         username: document.getElementById("new_c_username").value.trim(),
@@ -230,12 +243,12 @@ document.getElementById("customerCreateForm").addEventListener("submit", async (
             method: "POST",
             body: JSON.stringify(payload)
         });
-        event.currentTarget.reset();
-        event.currentTarget.classList.add("hidden");
+        form.reset();
+        form.classList.add("hidden");
+        showSuperadminNotice("Customer created successfully.");
         await loadCustomersOfManager(managerId);
-        alert("Customer başarıyla oluşturuldu.");
     } catch (error) {
-        alert(error.message);
+        showSuperadminNotice(error.message, "error");
     }
 });
 

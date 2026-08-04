@@ -39,9 +39,9 @@ test("superadmin manager deletion removes only its linked data", {
       username: `test_c_${suffix}`, password: "Valid-Test-Password-123",
       name: "Test", surname: "Customer", email: `c_${suffix}@example.test`,
       phone: "10000000003", companyName: `Test Co ${suffix}`,
-      address: "Test", country: "TR", city: "Istanbul",
-      companyPhone: "10000000004"
+      address: "Test", country: "TR", city: "Istanbul"
     });
+    assert.equal(customer.companyPhone, null);
 
     const productData = {
       material: "Test Steel", type: "Test Type", model: `Model ${suffix}`,
