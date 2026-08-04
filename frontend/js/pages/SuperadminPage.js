@@ -25,8 +25,10 @@ const welcomeMessage = document.getElementById("welcomeMessage");
 const managerDetailPanel = document.getElementById("managerDetailPanel");
 const customerEditPanel = document.getElementById("customerEditPanel");
 const customerListContainer = document.getElementById("customerListContainer");
+const customerNameSearchInput = document.getElementById("customerNameSearchInput");
 const superadminNotice = document.getElementById("superadminNotice");
 let superadminNoticeTimer;
+let currentManagerCustomers = [];
 
 function showSuperadminNotice(message, type = "success") {
     clearTimeout(superadminNoticeTimer);
@@ -161,6 +163,7 @@ async function openManagerDetails(manager) {
     welcomeMessage.classList.add("hidden");
     managerDetailPanel.classList.remove("hidden");
     customerEditPanel.classList.add("hidden");
+    customerNameSearchInput.value = "";
 
     // Manager formunu doldur
     document.getElementById("selectedManagerTitle").textContent = `Yönetici: ${manager.username || "-"}`;
@@ -278,25 +281,46 @@ document.getElementById("managerEditForm").addEventListener("submit", async (e) 
 // =========================================
 // 4. CUSTOMER İŞLEMLERİ
 // =========================================
+function renderManagerCustomers() {
+    const query = customerNameSearchInput.value.trim().toLocaleLowerCase();
+
+    if (currentManagerCustomers.length === 0) {
+        setContainerMessage(
+            customerListContainer,
+            "Bu yöneticiye bağlı müşteri bulunamadı."
+        );
+        return;
+    }
+
+    const filteredCustomers = currentManagerCustomers.filter((customer) => {
+        const fullName = [customer.name, customer.surname]
+            .filter(Boolean)
+            .join(" ")
+            .toLocaleLowerCase();
+        return fullName.includes(query);
+    });
+
+    if (filteredCustomers.length === 0) {
+        setContainerMessage(customerListContainer, "No customers match the search.");
+        return;
+    }
+
+    customerListContainer.replaceChildren(
+        ...filteredCustomers.map(createCustomerRow)
+    );
+}
+
+customerNameSearchInput.addEventListener("input", renderManagerCustomers);
+
 async function loadCustomersOfManager(managerId) {
     setContainerMessage(customerListContainer, "Yükleniyor...");
     try {
-        const customers = await ClientApi.request(
+        currentManagerCustomers = await ClientApi.request(
             `/superadmin/managers/${managerId}/customers`
         );
-
-        if (customers.length === 0) {
-            setContainerMessage(
-                customerListContainer,
-                "Bu yöneticiye bağlı müşteri bulunamadı."
-            );
-            return;
-        }
-
-        customerListContainer.replaceChildren(
-            ...customers.map(createCustomerRow)
-        );
+        renderManagerCustomers();
     } catch (err) {
+        currentManagerCustomers = [];
         setContainerMessage(
             customerListContainer,
             "Müşteriler yüklenirken hata oluştu.",

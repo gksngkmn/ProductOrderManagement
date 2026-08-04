@@ -210,6 +210,8 @@
     ,"Email yok": ["No email", "E-posta yok", "无电子邮件"]
     ,"Yöneticiler yüklenemedi.": ["Managers could not be loaded.", "Yöneticiler yüklenemedi.", "无法加载经理。"]
     ,"Bu yöneticiye bağlı müşteri bulunamadı.": ["No customers are assigned to this manager.", "Bu yöneticiye bağlı müşteri bulunamadı.", "该经理没有关联客户。"]
+    ,"Search by name or surname...": ["Search by name or surname...", "Ad veya soyada göre ara...", "按姓名搜索..."]
+    ,"No customers match the search.": ["No customers match the search.", "Aramayla eşleşen müşteri bulunamadı.", "没有符合搜索条件的客户。"]
     ,"Müşteriler yüklenirken hata oluştu.": ["Customers could not be loaded.", "Müşteriler yüklenirken hata oluştu.", "加载客户时出错。"]
     ,"Erişim Engellendi: Bu alana yalnızca Süper Yönetici erişebilir.": ["Access denied: only the superadmin can access this area.", "Erişim engellendi: Bu alana yalnızca Süper Yönetici erişebilir.", "拒绝访问：仅超级管理员可访问此区域。"]
     ,"Manager başarıyla oluşturuldu.": ["Manager created successfully.", "Yönetici başarıyla oluşturuldu.", "经理创建成功。"]

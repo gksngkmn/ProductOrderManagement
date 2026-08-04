@@ -91,7 +91,7 @@
 
 .product-table th,
 .product-table td {
-  padding: 5px 5px;
+  padding: 3px 5px;
   border: 1px solid var(--color-border-strong);
 
   text-align: left;
@@ -202,7 +202,7 @@
 
 .product-table td.actions-cell button {
   min-width: 42px;
-  padding: 4px 5px;
+  padding: 3px 5px;
   font-size: 9px;
   border-radius: 5px;
   margin: 0 2px;
