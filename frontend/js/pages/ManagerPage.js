@@ -245,7 +245,18 @@ async function loadProducts() {
 ========================= */
 function populateProductFilterOptions() {
   populateSelectOptions(materialFilter, allProducts, "material");
-  populateSelectOptions(typeFilter, allProducts, "type");
+  populateTypeFilterOptions();
+}
+
+function populateTypeFilterOptions() {
+  const selectedMaterial = materialFilter.value.toLocaleLowerCase().trim();
+  const matchingProducts = selectedMaterial
+    ? allProducts.filter((product) =>
+        String(product.material || "").toLocaleLowerCase().trim() === selectedMaterial
+      )
+    : allProducts;
+
+  populateSelectOptions(typeFilter, matchingProducts, "type");
 }
 
 function getUniqueProductValues(products, fieldName) {
@@ -330,6 +341,7 @@ clearProductFiltersBtn.addEventListener("click", () => {
   materialFilter.value = "";
   typeFilter.value = "";
   typeSort.value = "";
+  populateTypeFilterOptions();
 
   filteredProducts = [...allProducts];
   currentPage = 1;
@@ -337,10 +349,15 @@ clearProductFiltersBtn.addEventListener("click", () => {
   renderCurrentPage();
 });
 
-[productSearchInput, materialFilter, typeFilter, typeSort].forEach((input) => {
+[productSearchInput, typeFilter, typeSort].forEach((input) => {
   input.addEventListener("input", applyProductFilters);
   input.addEventListener("keyup", applyProductFilters);
   input.addEventListener("change", applyProductFilters);
+});
+
+materialFilter.addEventListener("change", () => {
+  populateTypeFilterOptions();
+  applyProductFilters();
 });
 
 function applyProductFilters() {
