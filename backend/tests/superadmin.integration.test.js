@@ -11,6 +11,7 @@ process.env.SMS_MODE = "mock";
 const pool = require("../db");
 const SuperadminService = require("../services/SuperadminService");
 const ProductService = require("../services/ProductService");
+const OrderService = require("../services/OrderService");
 
 test("superadmin manager deletion removes only its linked data", {
   skip: process.env.RUN_DB_TESTS !== "true"
@@ -21,6 +22,7 @@ test("superadmin manager deletion removes only its linked data", {
   let customer;
   let firstProduct;
   let secondProduct;
+  let order;
 
   try {
     firstManager = await SuperadminService.createManager({
@@ -77,6 +79,23 @@ test("superadmin manager deletion removes only its linked data", {
       (error) => error.statusCode === 404
     );
 
+    order = await OrderService.createOrder({ id: customer.id, role: "customer" });
+    await OrderService.addItemToOrder(
+      { id: customer.id, role: "customer" },
+      order.id,
+      { productId: firstProduct.id, quantity: 2 }
+    );
+    await OrderService.completeOrder(
+      { id: customer.id, role: "customer" },
+      order.id
+    );
+
+    const superadminOrders = await OrderService.getOrdersByCompany(
+      { id: 0, role: "superadmin" },
+      customer.id
+    );
+    assert(superadminOrders.some((customerOrder) => customerOrder.id === order.id));
+
     await SuperadminService.deleteManager(firstManager.id);
     firstManager = null;
     const deletedCustomer = await pool.query(
@@ -91,11 +110,17 @@ test("superadmin manager deletion removes only its linked data", {
       "SELECT manager_id FROM products WHERE id = $1",
       [secondProduct.id]
     );
+    const deletedOrder = await pool.query(
+      "SELECT id FROM orders WHERE id = $1",
+      [order.id]
+    );
     assert.equal(deletedCustomer.rowCount, 0);
     assert.equal(deletedProduct.rowCount, 0);
+    assert.equal(deletedOrder.rowCount, 0);
     assert.equal(retainedProduct.rows[0].manager_id, secondManager.id);
     customer = null;
     firstProduct = null;
+    order = null;
 
     await SuperadminService.deleteManager(secondManager.id);
     secondManager = null;

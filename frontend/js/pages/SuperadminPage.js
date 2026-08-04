@@ -101,6 +101,15 @@ function createCustomerRow(customer) {
             `/customerDetails.html?companyId=${encodeURIComponent(customer.id)}&from=superadmin`;
     });
 
+    const orderHistoryButton = document.createElement("button");
+    orderHistoryButton.type = "button";
+    orderHistoryButton.className = "light";
+    orderHistoryButton.textContent = "Order History";
+    orderHistoryButton.addEventListener("click", () => {
+        window.location.href =
+            `/orderHistory.html?companyId=${encodeURIComponent(customer.id)}&from=superadmin`;
+    });
+
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.className = "danger";
@@ -110,7 +119,9 @@ function createCustomerRow(customer) {
     const actions = document.createElement("div");
     actions.style.display = "flex";
     actions.style.gap = "8px";
-    actions.append(detailsButton, editButton, deleteButton);
+    actions.style.flexWrap = "wrap";
+    actions.style.justifyContent = "flex-end";
+    actions.append(detailsButton, orderHistoryButton, editButton, deleteButton);
 
     row.append(companyCell, nameCell, emailCell, actions);
     return row;

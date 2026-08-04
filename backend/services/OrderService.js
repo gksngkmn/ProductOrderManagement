@@ -60,7 +60,7 @@ class OrderService {
 
   if (user.role === "customer") {
     companyId = user.id;
-  } else if (user.role === "manager") {
+  } else if (user.role === "manager" || user.role === "superadmin") {
     companyId = Number(companyIdParam);
   }
 
@@ -74,6 +74,17 @@ class OrderService {
     const companyResult = await pool.query(
       "SELECT id FROM companies WHERE id = $1 AND manager_id = $2",
       [companyId, user.id]
+    );
+
+    if (companyResult.rows.length === 0) {
+      const error = new Error("Customer not found.");
+      error.statusCode = 404;
+      throw error;
+    }
+  } else if (user.role === "superadmin") {
+    const companyResult = await pool.query(
+      "SELECT id FROM companies WHERE id = $1",
+      [companyId]
     );
 
     if (companyResult.rows.length === 0) {

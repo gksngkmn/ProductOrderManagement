@@ -38,12 +38,21 @@ let selectedOrderId = null;
 
 const params = new URLSearchParams(window.location.search);
 const companyId = params.get("companyId");
+const user = AuthManager.getUser();
+const openedFromSuperadmin =
+  user?.role === "superadmin" || params.get("from") === "superadmin";
+
+if (openedFromSuperadmin) {
+  backBtn.innerText = "Back to Superadmin Panel";
+}
 
 /* =========================
    NAVIGATION / AUTH
 ========================= */
 backBtn.addEventListener("click", () => {
-  window.location.href = "/customerList.html";
+  window.location.href = openedFromSuperadmin
+    ? "/superadmin.html"
+    : "/customerList.html";
 });
 
 logoutBtn.addEventListener("click", () => {
