@@ -51,7 +51,6 @@ const confirmSendProductUpdatesBtn = document.getElementById("confirmSendProduct
 const productSearchInput = document.getElementById("productSearchInput");
 const materialFilter = document.getElementById("materialFilter");
 const typeFilter = document.getElementById("typeFilter");
-const materialFilterOptions = document.getElementById("materialFilterOptions");
 const clearProductFiltersBtn = document.getElementById("clearProductFiltersBtn");
 
 const productForm = document.getElementById("productForm");
@@ -245,7 +244,7 @@ async function loadProducts() {
    PRODUCT FILTER OPTIONS
 ========================= */
 function populateProductFilterOptions() {
-  populateDatalistOptions(materialFilterOptions, allProducts, "material");
+  populateSelectOptions(materialFilter, allProducts, "material");
   populateSelectOptions(typeFilter, allProducts, "type");
 }
 
@@ -259,16 +258,6 @@ function getUniqueProductValues(products, fieldName) {
         .filter(Boolean)
     )
   ].sort((a, b) => a.localeCompare(b));
-}
-
-function populateDatalistOptions(datalistElement, products, fieldName) {
-  if (!datalistElement) return;
-
-  const values = getUniqueProductValues(products, fieldName);
-
-  datalistElement.innerHTML = values
-    .map((value) => `<option value="${DomHelper.escapeHtml(value)}"></option>`)
-    .join("");
 }
 
 function populateSelectOptions(selectElement, products, fieldName) {

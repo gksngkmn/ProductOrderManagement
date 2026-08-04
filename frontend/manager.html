@@ -47,8 +47,9 @@
 
         <div class="filter-group">
           <label for="materialFilter">Material</label>
-          <input type="text" id="materialFilter" list="materialFilterOptions" placeholder="Material" />
-          <datalist id="materialFilterOptions"></datalist>
+          <select id="materialFilter">
+            <option value="">All</option>
+          </select>
         </div>
 
         <div class="filter-group">
@@ -300,7 +301,7 @@
 
   </main>
 
-  <script type="module" src="./js/pages/ManagerPage.js?v=63"></script>
+  <script type="module" src="./js/pages/ManagerPage.js?v=64"></script>
   <script src="./js/core/I18nManager.js"></script>
 </body>
 </html>
