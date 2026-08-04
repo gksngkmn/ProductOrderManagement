@@ -52,7 +52,6 @@ const productSearchInput = document.getElementById("productSearchInput");
 const materialFilter = document.getElementById("materialFilter");
 const typeFilter = document.getElementById("typeFilter");
 const materialFilterOptions = document.getElementById("materialFilterOptions");
-const typeFilterOptions = document.getElementById("typeFilterOptions");
 const clearProductFiltersBtn = document.getElementById("clearProductFiltersBtn");
 
 const productForm = document.getElementById("productForm");
@@ -247,13 +246,11 @@ async function loadProducts() {
 ========================= */
 function populateProductFilterOptions() {
   populateDatalistOptions(materialFilterOptions, allProducts, "material");
-  populateDatalistOptions(typeFilterOptions, allProducts, "type");
+  populateSelectOptions(typeFilter, allProducts, "type");
 }
 
-function populateDatalistOptions(datalistElement, products, fieldName) {
-  if (!datalistElement) return;
-
-  const values = [
+function getUniqueProductValues(products, fieldName) {
+  return [
     ...new Set(
       products
         .map((product) => product[fieldName])
@@ -262,10 +259,36 @@ function populateDatalistOptions(datalistElement, products, fieldName) {
         .filter(Boolean)
     )
   ].sort((a, b) => a.localeCompare(b));
+}
+
+function populateDatalistOptions(datalistElement, products, fieldName) {
+  if (!datalistElement) return;
+
+  const values = getUniqueProductValues(products, fieldName);
 
   datalistElement.innerHTML = values
     .map((value) => `<option value="${DomHelper.escapeHtml(value)}"></option>`)
     .join("");
+}
+
+function populateSelectOptions(selectElement, products, fieldName) {
+  if (!selectElement) return;
+
+  const previousValue = selectElement.value;
+  const values = getUniqueProductValues(products, fieldName);
+  const allOption = document.createElement("option");
+  allOption.value = "";
+  allOption.textContent = "All";
+
+  const valueOptions = values.map((value) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value;
+    return option;
+  });
+
+  selectElement.replaceChildren(allOption, ...valueOptions);
+  selectElement.value = values.includes(previousValue) ? previousValue : "";
 }
 
 
